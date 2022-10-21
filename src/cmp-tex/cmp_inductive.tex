@@ -1,0 +1,95 @@
+\section {Inductive Types}
+
+
+\paragraph{Form of an inductive type:}
+$$
+    [\Gamma \mid T^K \mid C_1, \ldots, C_n] : \Pi \Gamma. K
+$$
+where $\Gamma$ is an optional context of parameters (i.e. it might be empty),
+$K$ is a kind with some arity and some sort and each constructor type
+$C_i$ has the form
+$$
+    \Pi \Delta. T \vec a
+$$
+which is a valid type in the context $\Gamma, T^K$
+and
+where the context $\Delta$ might be empty and $T$ can occur in $\Delta$ only in
+positively i.e. $\Delta$ has the structure
+$$
+    [y_1^{\Pi B_1. R_1}, \ldots, y_n^{\Pi B_m. R_m}]
+$$
+and $T$ can occur only in $R_i$. I.e. the arguments of constructors are
+functions (arity zero included) where $T$ occurs only in the result type and not
+in the argument types.
+
+An inductive type is recursively defined if $T$ occurs is the result type of any
+constructor argument.
+
+
+\paragraph{Example:}
+$$
+    \begin{array}{lll}
+        \text{boolean}
+        &
+        [B^\Any \mid B, B]
+        \\
+        %
+        \text{peano numbers}
+        &
+        [N^\Any \mid N, N\to N]
+        \\
+        %
+        \text{list}
+        &
+        [A^\Any \mid L^\Any \mid L, A \to L\to L]
+        \\
+        %
+        \text{accessibles}
+        &
+        [
+            A^\Any, R^{A \to A \to \Prop}
+            \mid
+            T^{A \to \Prop}
+            \mid
+            \Pi x^A. (\Pi y^A. R y x \to T y) \to T x
+        ]
+    \end{array}
+$$
+
+In peano numbers he first constructor type has no arguments. The second has one
+recursive argument.
+
+
+
+\paragraph{Mutually defined Inductive Types}
+
+It is just an array of inductive types where all inductive types share the same
+parameters.
+$$
+    \left[\Gamma \mid
+    \bracklist{
+        T_1^{K_1} \mid C_{11}, \ldots, C_{1n_1}
+        \\
+        \ldots
+        \\
+        T_m^{K_m} \mid C_{m1}, \ldots, C_{mn_m}
+    }
+    \right]
+$$
+
+All kinds $K_i$ are valid in the context $\Gamma$ and all constructors of the
+$i$th type construct an object of type $I_i \vec a$ but can use any other
+objects of type $I_j \vec a$ as arguments. All constructors are valid types in
+the context $\Gamma, T_1^{K_1}, \ldots , T_m^{K_m}$.
+
+
+
+\paragraph{Construct an object of an inductive type}
+$$
+    \make^I_i \vec p \vec b: I \vec p \vec a
+$$
+where $I$ is the inductive type, $i$ marks the $i$th constructor, $\vec p$ are
+the parameter arguments and $\vec b$ are the constructor arguments, $a$ are the
+index arguments which depend on the constructor arguments.
+
+The peano number $2$ looks like $ \make^N_1 (\make^N_1 \make^N_0) $.

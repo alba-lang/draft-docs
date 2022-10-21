@@ -1,0 +1,34 @@
+\lstdefinelanguage{alba}
+{ basewidth=0.45em,
+  basicstyle=\scriptsize\tt,  % choices: small, footnotesize, scriptsize, tiny
+  mathescape,
+  %columns=flexible,
+  keywords={
+    abstract,all,and,
+    case,
+    do,
+    else,end
+    ghost,
+    if,in,inspect,
+    let,
+    mod,
+    mutual,
+    not,
+    or,
+    record,
+    section,some,
+    then,
+    type,
+    use,
+    where,
+    And,
+    Not,
+    Or
+  },
+  keywordstyle=\color{blue},
+  commentstyle=\color{brown},
+  morecomment=[l]{--},
+  morecomment=[n]{\{-}{-\}}
+}
+
+\lstnewenvironment{alba} {\lstset{language=alba}} {}

@@ -1,0 +1,116 @@
+\section{Pattern Match}
+%----------------------------------------------------------------------
+
+
+\subsection{Basics}
+%----------------------------------------------------------------------
+
+Fully elaborated pattern match expression:
+$$
+\case (f: F)[c_0, c_1, \ldots, c_{n-1}]
+$$
+where each clause $c_i$ has the form
+$$
+\Delta [p_0^{P_0}, \ldots, p_{m-1}^{P_{m-1}}] := e^E
+$$
+where the context $\Delta$ contains all pattern variables, $p_i$ are pattern and
+$P_i$ is the corresponding type of the pattern, $e$ is the body of the clause
+and $E$ its corresponding type. All expressions in a clause are welltyped in the
+context $\Delta$. Each clause defines the function
+$$
+\lambda \Delta. e^E
+$$
+
+A clause of the pattern match expression is welltyped if
+$$
+\begin{array}{lll}
+    P_i &\le& F[p_0,\ldots,p_{i-1} / .]
+    \\
+    E   &\le& F[p_0,\ldots,p_{m-1} / .]
+\end{array}
+$$
+where $ F[p_0,\ldots,p_{i-1} / .]$ is defined in the following way:
+\begin{itemize}
+    \item $F$ is a function type of the form $\Pi x^A y^B \ldots . R$ which has
+    at least $i$ explicit arguments.
+
+    \item $R'$ is the result type of the product $F$ after removing the first
+    $i$ explicit arguments and all implicit arguments up to the $i-1$th explicit
+    arguments.
+
+    \item Then all $i$ explicit arguments in $R'$ are replaced by the
+    corresponding pattern $p_j$ and all implicit arguments are replaced by
+    metavariables which can be instantiated by unification.
+
+    \item The resulting type is valid in the context $\Delta$ (all pattern are
+    valid in that context) and can therefore be unified with $P_i$ or $E$ in
+    case $i=m$.
+\end{itemize}
+
+An application of a pattern match expression (whose type is always a function
+type) has the form
+$$
+(\case \ldots) \vec a
+$$
+where $\vec a = [a_0, \ldots]$ are the arguments to which the pattern match
+function is applied.
+
+The application can be evaluated if it is possible to find a clause of the
+pattern match expression and split the arguments $\vec a$ into subexpressions
+$\vec s$ and evaluate $(\lambda \Delta. e^E) \vec s$.
+
+
+
+
+\subsection{Draft}
+%----------------------------------------------------------------------
+
+Example of a pattern match expression with all implicit arguments explicitly
+stated.
+
+\begin{alba}
+    type Vector (A: Any): Nat -> Any :=
+        nil: Vector zero
+        cons {n: Nat}: A -> Vector n -> Vector (succ n)
+
+    zip {A B: Any}
+    : all {n}: Vector A n -> Vector B n -> Vector (A,B) n
+    := case
+        [{zero}, nil {A}, nil {B}] := nil {(A,B)}
+
+        [{succ n}, cons {A} {n} x xs, cons {B} {n} y xs] :=
+            cons {(A,B)} {n} (x,y) (zip {A} {B} {n} xs ys)
+
+    -- without implicit arguments
+    := case
+        [[], []]           := []
+
+        [x :: xs, y :: ys] := (x, y) :: (zip xs ys)
+
+    -- as case tree
+    case
+        nil :=
+            case nil :=
+                nil
+        x :: xs :=
+            case y :: ys :=
+                (x,y) :: zip xs ys
+\end{alba}
+
+
+\begin{alba}
+    type Nat := [zero, succ: Nat -> Nat]
+
+    (<=?): Nat -> Nat -> Nat := case
+        [zero, _]        :=  true
+        [succ _, zero]   :=  false
+        [succ n, succ m] :=  n <=? m
+
+    -- as case tree:
+    case
+        zero           :=   \ _ := true
+        succ n :=
+            case
+                zero   :=   false
+                succ m :=   n <=? m
+\end{alba}

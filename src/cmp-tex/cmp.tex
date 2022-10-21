@@ -1,0 +1,41 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath,amsthm,amssymb,xcolor,graphicx,tikz,listings}
+%\usepackage{comment}
+\usepackage{cite}
+\usepackage[pdftex]{hyperref}
+\usetikzlibrary{positioning}
+
+\begin{document}
+
+\input{cmp_macros}
+
+\title{
+    Compiling Alba
+}
+
+\author{
+    Helmut Brandl
+    \\
+    \scriptsize (firstname dot lastname at gmx dot net)
+}
+\date{}
+
+\maketitle
+
+
+\abstract{
+    How to compile Alba programs.
+}
+
+
+\tableofcontents
+
+\input {cmp_macros}
+\input {cmp_lmacros}
+
+
+\include {cmp_inductive}
+\include {cmp_pattern_match}
+
+\end{document}
