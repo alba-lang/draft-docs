@@ -2,58 +2,114 @@
 %----------------------------------------------------------------------
 
 
-\subsection{Basics}
+\paragraph{Basics}
 %----------------------------------------------------------------------
 
 Fully elaborated pattern match expression:
 $$
-\case (f: F)[c_0, c_1, \ldots, c_{n-1}]
+\case[ f^F \mid c_1,  \ldots, c_n]
 $$
-where each clause $c_i$ has the form
+%
+where $F$ is a function type of the form
+%
 $$
-\Delta [p_0^{P_0}, \ldots, p_{m-1}^{P_{m-1}}] := e^E
+\Pi x_1^{A_1} \ldots x_k^{A_k}. R
 $$
-where the context $\Delta$ contains all pattern variables, $p_i$ are pattern and
-$P_i$ is the corresponding type of the pattern, $e$ is the body of the clause
-and $E$ its corresponding type. All expressions in a clause are welltyped in the
-context $\Delta$. Each clause defines the function
+%
+and where each clause $c_i$ has the form
+%
 $$
-\lambda \Delta. e^E
+    [\Delta_1. p_1^{P_1}, \ldots, \Delta_m. p_m^{P_m}] := e^E
 $$
+where the context $\Delta_i$ contains all pattern variables introduced in the
+pattern $p_i$
+and $P_i$ is the corresponding type of the pattern, $e$ is the body of the
+clause and $E$ its corresponding type.
+
+Each clause defines the function
+$$
+\lambda \Delta_1 \ldots \Delta_m. e^E
+$$
+
+
+The patterns are terms generated from the grammar
+$$
+    p ::= x \mid x := c \mid x := \make^I_i \vec q p p
+$$
+where $c$ ranges over constants (strings, characters, numbers, etc.), $x$ ranges
+over variables and $p$ ranges over pattern. The expression $\make^I_i \vec q p p
+\ldots$ is the $i$th constructor of the inductive type $I$ applied to its
+parameter arguments and to its arguments.
+
+Patterns are trees. Each node of the tree is labelled by a pattern variable and
+either by a constant or a constructor $\make^I_i \vec q$. A pattern clause has a
+sequence of trees.
+
+
+
+\paragraph{Welltyped}
+%------------------------------------------------------------
 
 A clause of the pattern match expression is welltyped if
 $$
 \begin{array}{lll}
-    P_i &\le& F[p_0,\ldots,p_{i-1} / .]
+    \Delta_1,\ldots,\Delta_i &\vdash& p_i : P_i
     \\
-    E   &\le& F[p_0,\ldots,p_{m-1} / .]
+    \Delta_1,\ldots,\Delta_m &\vdash& e : E
 \end{array}
 $$
-where $ F[p_0,\ldots,p_{i-1} / .]$ is defined in the following way:
-\begin{itemize}
-    \item $F$ is a function type of the form $\Pi x^A y^B \ldots . R$ which has
-    at least $i$ explicit arguments.
+%
+and
+%
+$$
+\begin{array}{lll}
+    P_i &\le& F[p_1,\ldots,p_i / .]
+    \\
+    E   &\le& F[p_1,\ldots,p_m / .]
+\end{array}
+$$
+%
+where
+%
+$$
+    (\Pi x_1^{A_1} \ldots x_i^{A_i} . R)[p_1,\ldots,p_i/.]
+    :=
+    R[p_1,\ldots,p_i / x_1,\ldots,x_i]
+$$
 
-    \item $R'$ is the result type of the product $F$ after removing the first
-    $i$ explicit arguments and all implicit arguments up to the $i-1$th explicit
-    arguments.
 
-    \item Then all $i$ explicit arguments in $R'$ are replaced by the
-    corresponding pattern $p_j$ and all implicit arguments are replaced by
-    metavariables which can be instantiated by unification.
 
-    \item The resulting type is valid in the context $\Delta$ (all pattern are
-    valid in that context) and can therefore be unified with $P_i$ or $E$ in
-    case $i=m$.
-\end{itemize}
+
+\paragraph{Exhaustiveness and Redundancy}
+%------------------------------------------------------------
+
+\emph{Focal point}
+Each pattern in a pattern clause can be regarded as a focal
+point. At the focal point we have either a variable, a constructor pattern or a
+constant. The focal point of two consecutive clauses is the first pattern where
+both clauses have a different pattern (we do not regard $p$ and $x:=p$ as
+different).
+
+If two consecutive clauses don't have a focal point, then the second one is
+redundant which is regarded as an error (the clause is unreachable).
+
+
+
+
+
+
+
+
+\paragraph{Application of a pattern match expression}
 
 An application of a pattern match expression (whose type is always a function
 type) has the form
 $$
 (\case \ldots) \vec a
 $$
-where $\vec a = [a_0, \ldots]$ are the arguments to which the pattern match
-function is applied.
+where $\vec a = [a_1, \ldots, a_n]$ are the arguments to which the pattern match
+function is applied. The maximal number of arguments is determined by the type
+$F$ of the pattern match expression.
 
 The application can be evaluated if it is possible to find a clause of the
 pattern match expression and split the arguments $\vec a$ into subexpressions

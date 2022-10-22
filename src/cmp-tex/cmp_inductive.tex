@@ -22,8 +22,10 @@ and $T$ can occur only in $R_i$. I.e. the arguments of constructors are
 functions (arity zero included) where $T$ occurs only in the result type and not
 in the argument types.
 
-An inductive type is recursively defined if $T$ occurs is the result type of any
+An inductive type is recursively defined if $T$ occurs in the result type of any
 constructor argument.
+
+An inductive type must not contain free variables.
 
 
 \paragraph{Example:}
@@ -44,6 +46,13 @@ $$
         [A^\Any \mid L^\Any \mid L, A \to L\to L]
         \\
         %
+        \text{equality}
+        &
+        [A^\Any
+        \mid E^{A \to A \to \Prop}
+        \mid \Pi x^A. E x x]
+        \\
+        %
         \text{accessibles}
         &
         [
@@ -56,7 +65,7 @@ $$
     \end{array}
 $$
 
-In peano numbers he first constructor type has no arguments. The second has one
+In peano numbers the first constructor type has no arguments. The second has one
 recursive argument.
 
 
@@ -93,3 +102,8 @@ the parameter arguments and $\vec b$ are the constructor arguments, $a$ are the
 index arguments which depend on the constructor arguments.
 
 The peano number $2$ looks like $ \make^N_1 (\make^N_1 \make^N_0) $.
+
+A constructor has the type
+$$
+    \make^I_i : \Pi \Gamma \Delta_i. T {\vec a}_i
+$$
