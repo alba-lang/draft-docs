@@ -10,6 +10,7 @@
 \def\vec#1{{\mathbf #1}}
 
 
+\def\betaeq{{\stackrel \beta \sim}}
 
 
 \def\vertlist#1{
@@ -21,4 +22,20 @@
 \def\bracklist#1{
     \left[ \vertlist{#1} \right]
 }
+
+\def\rulev#1#2{
+    \begin{array}{l}
+        #1
+        \\
+        \hline
+        #2
+    \end{array}
+}
+
+
+
+
+
+% Put description label in italic (and not in bold)
+\renewcommand{\descriptionlabel}[1]{\hspace{\labelsep}\textit{#1}}
 
