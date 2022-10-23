@@ -80,6 +80,68 @@ $$
 
 
 
+\subsection{Case Tree}
+%------------------------------------------------------------
+
+
+Defined by the grammar
+
+$$
+    \begin{array}{lllll}
+        t
+        &::=& e
+        %
+        \\
+        &\mid& [x \mid t]
+        %
+        \\
+        &\mid& [x \mid c_1 t_1, \ldots,  c_n t_n \mid d]
+        %
+        \\
+        &\mid& [x \mid \ell_1 t_1, \ldots, \ell_n t_n \mid d]
+    \end{array}
+$$
+%
+where $n > 0$ and
+%
+\begin{center}
+    \begin{tabular}{l p{8cm}}
+        $t$ & case tree
+        \\
+        $d$ & optional case tree (default or catch all)
+        \\
+        $e$ & expression on the right hand side of a case clause
+        \\
+        $x$ & pattern variable
+        \\
+        $c$ & constant
+        \\
+        $\ell$ & label of a constructor
+    \end{tabular}
+\end{center}
+
+\paragraph{Completeness of inner nodes}
+%
+\begin{center}
+    \begin{tabular}{l p{6cm}}
+        $[x \mid t]$ & always complete
+        %
+        \\
+        $[x \mid c_1 t_1, \ldots, c_n t_n \mid d]$
+        & complete if it has a default tree
+        %
+        \\
+        $[x \mid \ell_1 t_1, \ldots, \ell_n t_n \mid d]$
+        & complete if all constructors labels are present or if it has a
+        default tree
+    \end{tabular}
+\end{center}
+
+
+
+
+
+
 \subsection{Exhaustiveness and Redundancy}
 %------------------------------------------------------------
 
