@@ -34,11 +34,11 @@ $$
 
 The patterns are terms generated from the grammar
 $$
-    p ::= x \mid x := c \mid x := \make^I_i \vec q p p
+    p ::= x \mid x := c \mid x := \make^I_i \vec q \vec p
 $$
 where $c$ ranges over constants (strings, characters, numbers, etc.), $x$ ranges
-over variables and $p$ ranges over pattern. The expression $\make^I_i \vec q p p
-\ldots$ is the $i$th constructor of the inductive type $I$ applied to its
+over variables and $p$ ranges over pattern. The expression $\make^I_i \vec q
+\vec p$ is the $i$th constructor of the inductive type $I$ applied to its
 parameter arguments and to its arguments.
 
 Patterns are trees. Each node of the tree is labelled by a pattern variable and
@@ -143,6 +143,32 @@ i.e. one of $F[x_1, \ldots, x_i/.]$ of the form $I \vec p \vec a$  where $x_j$
 are pattern variables, $\vec p$ are parameter arguments and $\vec a$ are index
 arguments has no constructor $\make^I_\ell \vec p \meta y_1 \ldots$
 which can construct such an object.
+
+
+
+
+
+
+
+\subsection{Case Tree Construction}
+%------------------------------------------------------------
+
+Sequence of elements from a pattern $p$
+
+$$
+\begin{array}{lll}
+    s(x) &:=& x
+    \\
+    s(x:=c) &:=& [x \mid c]
+    \\
+    s(x:= \make^I_\ell \vec q \vec p)
+    &:=&
+    [x \mid \ell] + s(\vec p)
+\end{array}
+$$
+where $s(\vec p)$ is the concatenation of the sequences generated from the
+elements of $\vec p$.
+
 
 
 
