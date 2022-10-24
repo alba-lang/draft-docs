@@ -120,24 +120,29 @@ where $n > 0$ and
     \end{tabular}
 \end{center}
 
-\paragraph{Completeness of inner nodes}
+\paragraph{Exhaustiveness of inner nodes}
 %
 \begin{center}
     \begin{tabular}{l p{6cm}}
-        $[x \mid t]$ & always complete
+        $[x \mid t]$ & always exhaustive
         %
         \\
         $[x \mid c_1 t_1, \ldots, c_n t_n \mid d]$
-        & complete if it has a default tree
+        & exhaustive if it has a default tree
         %
         \\
         $[x \mid \ell_1 t_1, \ldots, \ell_n t_n \mid d]$
-        & complete if all constructors labels are present or if it has a
-        default tree
+        & exhaustive if all constructors labels are present which can construct
+        an object of the type of $x$ or if it has a default tree
     \end{tabular}
 \end{center}
 
 
+An empty case tree is possible if at least one of the types is not inhabited,
+i.e. one of $F[x_1, \ldots, x_i/.]$ of the form $I \vec p \vec a$  where $x_j$
+are pattern variables, $\vec p$ are parameter arguments and $\vec a$ are index
+arguments has no constructor $\make^I_\ell \vec p \meta y_1 \ldots$
+which can construct such an object.
 
 
 
@@ -180,40 +185,40 @@ $\vec s$ and evaluate $(\lambda \Delta. e^E) \vec s$.
 
 
 
-\subsection{Draft}
+\subsection{Code Examples}
 %----------------------------------------------------------------------
 
-Example of a pattern match expression with all implicit arguments explicitly
-stated.
+
+
 
 \begin{alba}
     type Vector (A: Any): Nat -> Any :=
-        nil: Vector zero
-        cons {n: Nat}: A -> Vector n -> Vector (succ n)
+        []:  Vector zero
+        (::) {n: Nat}: A -> Vector n -> Vector (succ n)
 
     zip {A B: Any}
     : all {n}: Vector A n -> Vector B n -> Vector (A,B) n
     := case
-        [{zero}, nil {A}, nil {B}] := nil {(A,B)}
-
-        [{succ n}, cons {A} {n} x xs, cons {B} {n} y xs] :=
-            cons {(A,B)} {n} (x,y) (zip {A} {B} {n} xs ys)
-
-    -- without implicit arguments
-    := case
-        [[], []]           := []
-
-        [x :: xs, y :: ys] := (x, y) :: (zip xs ys)
-
-    -- as case tree
-    case
-        nil :=
-            case nil :=
-                nil
-        x :: xs :=
-            case y :: ys :=
-                (x,y) :: zip xs ys
+        \ nil,     nil     := nil
+        \ x :: xs, y :: ys := (x, y) :: zip xs ys
 \end{alba}
+
+
+
+
+\begin{alba}
+    type (=) (A: Any): A -> A -> Prop :=
+        same {x}: x = x
+
+    zeroNeSucc: all {n: Natural}: zero = succ n -> False :=
+        case
+            -- no case clauses
+\end{alba}
+
+The compile has to verify that no match is possible. The pattern match
+expression is the two argument function with type $\Pi n^N. 0 = 1 + n \to
+\text{False}$.
+
 
 
 \begin{alba}
