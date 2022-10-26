@@ -35,8 +35,15 @@
 \input {cmp_lmacros}
 
 
+
 \include {cmp_elaboration}
+
 \include {cmp_inductive}
-\include {cmp_pattern_match}
+
+{
+    \def\ct{f_\text{ct}}
+
+    \include {cmp_pattern_match}
+}
 
 \end{document}

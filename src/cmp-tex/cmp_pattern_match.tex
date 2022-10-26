@@ -153,17 +153,13 @@ which can construct such an object.
 \subsection{Case Tree Construction}
 %------------------------------------------------------------
 
-{
-    \def\ct{f_\text{ct}}
+First we construct a case tree from a cause clause
+$\Delta \vec p^{\Vec p} := e$.
 
-
-    First we construct a case tree from a cause clause
-    $\Delta \vec p^{\Vec p} := e$.
-
-    $$
-    \ct(p, t)
-    :=
-    \left\{
+$$
+\ct(p, t)
+:=
+\left\{
     \begin{array}{lll}
         \ct(x, t) &:=& [x \mid t]
         \\
@@ -173,21 +169,20 @@ which can construct such an object.
                        &:=&
                        [x \mid \ell\, \ct(\vec p, t) \mid \epsilon ]
     \end{array}
-    \right.
-    $$
-    where $\ct(\vec p, t)$ on a sequence of pattern is threaded from behind
-    $$
-    \ct(p_1 \ldots p_{n-1} p_n, t)
-    :=
-    \ct(p_1, (\ldots \ct(p_{n-1}, \ct(p_n, t))\ldots))
-    $$
+\right.
+$$
+where $\ct(\vec p, t)$ on a sequence of pattern is threaded from behind
+$$
+\ct(p_1 \ldots p_{n-1} p_n, t)
+:=
+\ct(p_1, (\ldots \ct(p_{n-1}, \ct(p_n, t))\ldots))
+$$
 
-    With this function the case tree corresponding to a case clause can be
-    constructed
-    $$
-    \ct(\Delta \vec p^{\vec P} := e) := \ct(\vec p, e)
-    $$
-}
+With this function the case tree corresponding to a case clause can be
+constructed
+$$
+\ct(\Delta \vec p^{\vec P} := e) := \ct(\vec p, e)
+$$
 
 Note that the case tree of a cause clause has no branching and no default trees.
 
