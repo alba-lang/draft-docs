@@ -153,21 +153,45 @@ which can construct such an object.
 \subsection{Case Tree Construction}
 %------------------------------------------------------------
 
-Sequence of elements from a pattern $p$
+{
+    \def\ct{f_\text{ct}}
 
-$$
-\begin{array}{lll}
-    s(x) &:=& x
-    \\
-    s(x:=c) &:=& [x \mid c]
-    \\
-    s(x:= \make^I_\ell \vec q \vec p)
-    &:=&
-    [x \mid \ell] + s(\vec p)
-\end{array}
-$$
-where $s(\vec p)$ is the concatenation of the sequences generated from the
-elements of $\vec p$.
+
+    First we construct a case tree from a cause clause
+    $\Delta \vec p^{\Vec p} := e$.
+
+    $$
+    \ct(p, t)
+    :=
+    \left\{
+    \begin{array}{lll}
+        \ct(x, t) &:=& [x \mid t]
+        \\
+        \ct(x := c, t) &:=& [x \mid c\, t \mid \epsilon ]
+        \\
+        \ct(x := \make^I_\ell \vec q \vec p, t)
+                       &:=&
+                       [x \mid \ell\, \ct(\vec p, t) \mid \epsilon ]
+    \end{array}
+    \right.
+    $$
+    where $\ct(\vec p, t)$ on a sequence of pattern is threaded from behind
+    $$
+    \ct(p_1 \ldots p_{n-1} p_n, t)
+    :=
+    \ct(p_1, (\ldots \ct(p_{n-1}, \ct(p_n, t))\ldots))
+    $$
+
+    With this function the case tree corresponding to a case clause can be
+    constructed
+    $$
+    \ct(\Delta \vec p^{\vec P} := e) := \ct(\vec p, e)
+    $$
+}
+
+Note that the case tree of a cause clause has no branching and no default trees.
+
+
 
 
 
