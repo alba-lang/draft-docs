@@ -5,6 +5,7 @@ source-files = \
 	cmp.tex \
 	cmp_macros.tex \
 	cmp_lmacros.tex \
+	cmp_elaboration.tex \
 	cmp_inductive.tex \
 	cmp_pattern_match.tex
 

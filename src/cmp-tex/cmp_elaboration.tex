@@ -1,0 +1,83 @@
+\section{Elaboration}
+%--------------------------------------------------------------------------------
+
+\subsection{Contexts}
+%--------------------------------------------------------------------------------
+
+
+\subsection{Term Elaboration}
+%--------------------------------------------------------------------------------
+
+
+The parser returns expressions as an abstract syntax tree. The term elaborator
+has to transform the ast into a  term. The elaborator has to elaborate all
+subtrees of the ast. Sometimes the elaboration of an ast term can get stuck e.g.
+\begin{itemize}
+    \item An ambiguous name cannot be resolved because the result type or the
+        type of some arguments are not known.
+
+    \item A unification constraint $\meta m \vec a \sim e$ cannot be resolved
+        because the arguments $\vec a$ for the metavariable $\meta m$ are not
+        only local variables. If the arguments are only variables the constraint
+        has the resolution $\meta m := \lambda \vec x. e$ provided that the term
+        $e$ has not more local variables than $\vec x$.
+
+    \item $\ldots$
+\end{itemize}
+
+The elaboration for a stuck ast term can be resumed as soon as the condition for
+the stuckness has been resolved.
+
+A stuck elaboration can be continued if the elaboration tries to elaborate
+another ast which might resolve the some stuckness condition. The are many terms
+which can be elaborated in different orders.
+
+\begin{itemize}
+    \item The elaboration of an application $f \vec a$ can elaborate the
+        function term and the arguments in any order.
+
+    \item The elaboration of a let expression can elaborate the local
+        definitions and the body in any order.
+
+    \item $\ldots$
+\end{itemize}
+
+An elaboration fails if it has subterms of the ast which are stuck and it has
+exploited all possibilities to elaborate other subterms before the stuck
+subterms.
+
+\paragraph{Algorithm}
+
+\begin{description}
+\item [Elaborate subterms]
+
+    Repeatedly choose any subterm which is not stuck and elaborate it.
+
+    This procedure ends with all subterms elaborated or with some stuck subterms
+    where each stuck subterm has some constraints which have the be resolved
+    before it can resume elaboration and a procedure which can be started on
+    resolved constraints.
+
+\item [Elaborate term]
+    If all subterms are elaborated then elaborate the complete term.
+
+    If the elaboration of some subterms is stuck, then the elaboration of the
+    term is stuck as well. It merges the stuckness conditions of its stuck
+    subterms to its own stuckness conditions and generated a resumption
+    procedure.
+\end{description}
+
+
+
+\paragraph{Stuckness Conditions}
+
+\begin{enumerate}
+    \item
+        An atomic stuckness condition is a constraint.
+
+    \item An resumption point is a nonempty set of constraints and a
+        resumption procedure which can be called if all constraints in the set
+        have been resolved.
+
+    \item A stuckness condition is a nonempty set of resumption points.
+\end{enumerate}
