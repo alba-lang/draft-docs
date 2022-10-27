@@ -9,6 +9,8 @@
 %--------------------------------------------------------------------------------
 
 
+\subsubsection{Basics}
+
 The parser returns expressions as an abstract syntax tree. The term elaborator
 has to transform the ast into a  term. The elaborator has to elaborate all
 subtrees of the ast. Sometimes the elaboration of an ast term can get stuck e.g.
@@ -46,7 +48,8 @@ An elaboration fails if it has subterms of the ast which are stuck and it has
 exploited all possibilities to elaborate other subterms before the stuck
 subterms.
 
-\paragraph{Algorithm}
+
+\subsubsection{Algorithm}
 
 \begin{description}
 \item [Elaborate subterms]
@@ -69,7 +72,7 @@ subterms.
 
 
 
-\paragraph{Stuckness Conditions}
+\subsubsection{Stuckness Conditions}
 
 \begin{enumerate}
     \item

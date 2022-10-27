@@ -95,14 +95,18 @@ $$
         &\mid& [x \mid t]
         %
         \\
-        &\mid& [x \mid c_1 t_1, \ldots,  c_n t_n \mid d]
-        %
-        \\
-        &\mid& [x \mid \ell_1 t_1, \ldots, \ell_n t_n \mid d]
+        &\mid& [
+            x
+            \mid
+            c_1 t_1, \ldots,  c_n t_n,\;
+            \ell_1 t_1, \ldots, \ell_m t_m
+            \mid
+            d
+        ]
     \end{array}
 $$
 %
-where $n > 0$ and
+where $n + m > 0$ and
 %
 \begin{center}
     \begin{tabular}{l p{8cm}}
@@ -120,23 +124,17 @@ where $n > 0$ and
     \end{tabular}
 \end{center}
 
+We can abbreviate the second form of an inner node by $[x \mid \vec c\vec t,\,
+\vec\ell \vec t | d]$ where the corresponding sequences have the same length.
+
+
+
 \paragraph{Exhaustiveness of inner nodes}
 %
-\begin{center}
-    \begin{tabular}{l p{6cm}}
-        $[x \mid t]$ & always exhaustive
-        %
-        \\
-        $[x \mid c_1 t_1, \ldots, c_n t_n \mid d]$
-        & exhaustive if it has a default tree
-        %
-        \\
-        $[x \mid \ell_1 t_1, \ldots, \ell_n t_n \mid d]$
-        & exhaustive if all constructors labels are present which can construct
-        an object of the type of $x$ or if it has a default tree
-    \end{tabular}
-\end{center}
 
+An inner node of the form $[x \mid \vec c \vec t,\, \vec\ell \vec t \mid d]$ is
+exhaustive if it has a default tree or if all labels of constructors which can
+construct an object of the corresponding type are present.
 
 An empty case tree is possible if at least one of the types is not inhabited,
 i.e. one of $F[x_1, \ldots, x_i/.]$ of the form $I \vec p \vec a$  where $x_j$
@@ -153,38 +151,103 @@ which can construct such an object.
 \subsection{Case Tree Construction}
 %------------------------------------------------------------
 
+\paragraph{Case tree for a clause}
 First we construct a case tree from a cause clause
 $\Delta \vec p^{\Vec p} := e$.
 
 $$
-\ct(p, t)
-:=
-\left\{
-    \begin{array}{lll}
-        \ct(x, t) &:=& [x \mid t]
-        \\
-        \ct(x := c, t) &:=& [x \mid c\, t \mid \epsilon ]
-        \\
-        \ct(x := \make^I_\ell \vec q \vec p, t)
-                       &:=&
-                       [x \mid \ell\, \ct(\vec p, t) \mid \epsilon ]
-    \end{array}
-\right.
+\begin{array}{lll}
+    \ct(\Delta \vec p^{\vec P} := e) &:=& \ct(\vec p, e)
+    \\
+    \ct(x, t) &:=& [x \mid t]
+    \\
+    \ct(x := c, t) &:=& [x \mid c\, t \mid \epsilon ]
+    \\
+    \ct(x := \make^I_\ell \vec q \vec p, t)
+                   &:=&
+                   [x \mid \ell\, \ct(\vec p, t) \mid \epsilon ]
+\end{array}
 $$
+%
 where $\ct(\vec p, t)$ on a sequence of pattern is threaded from behind
+%
 $$
 \ct(p_1 \ldots p_{n-1} p_n, t)
 :=
 \ct(p_1, (\ldots \ct(p_{n-1}, \ct(p_n, t))\ldots))
 $$
 
-With this function the case tree corresponding to a case clause can be
-constructed
-$$
-\ct(\Delta \vec p^{\vec P} := e) := \ct(\vec p, e)
-$$
 
 Note that the case tree of a cause clause has no branching and no default trees.
+It is a path from the root to a leave.
+
+
+
+\paragraph{Merge case trees} We have to be able to merge two case trees $t_1$
+and $t_2$ to $m(t_1, t_2)$ where the first one might be empty and the second one
+has been constructed from a clause of the pattern match expression.
+
+\begin{description}
+    \item[Merge into empty case tree]
+        $$
+        m(\varepsilon, t) := t
+        $$
+
+    \item [Merge a new constant] The new constant is not present in the tree
+        $t_1$. Just add the tree with the new constant to the first tree and
+        rename the pattern variable.
+        %
+        $$
+        \begin{array}{l}
+            m(
+                [x \mid \vec c \vec t, \, \varepsilon \mid d],\,
+                [x_2 \mid c_2 t_2 \mid \varepsilon])
+            \\
+            :=
+            [ x \mid
+                (\vec c c_2) (\vec t t_2[x/x_2]), \, \varepsilon
+                \mid m(d, t_2[x/x_2])]
+        \end{array}
+        $$
+
+    \item [Merge a new constructor] The new constructor is not present in the
+        tree $t_1$. Just add the tree with the new constructor to the first tree
+        and rename the pattern variable.
+        %
+        $$
+        m(
+            [x \mid \vec c \vec t, \, \vec\ell \vec u \mid ],\,
+            [x_2 \mid \ell_2 t_2 \mid \varepsilon])
+        :=
+        [ x \mid
+        \vec c \vec t,\,
+        (\vec\ell \ell_2)(\vec u t_2[x/x_2]
+        \mid m(d,t_2[x/x_2])]
+        $$
+
+    \item [Merge a present constant or present constructor] I.e. merge
+        $[x_2 \mid c_2 t_2 \mid \varepsilon]$
+        or
+        $[x_2 \mid \ell_2 t_2 \varepsilon d]$
+        into
+        $[x \mid \vec c \vec t,\, \vec\ell \vec u \mid d]$.
+
+        This is done by replacing the corresponding subtree $t$ in $\vec c \vec
+        t$ or $\vec \ell \vec u$ by the merged tree $m(t, t_2[x/x_2]$.
+\end{description}
+
+\paragraph{Algorithm}
+
+\begin{enumerate}
+    \item Start with an empty case tree.
+
+    \item For all clauses: Construct a case tree from the clause and merge it
+        into the existing case tree.
+
+    \item Stop at the last clause or as soon that a clause can add nothing to a
+        case tree. A clause which can add nothing is redundant which is
+        considered as an error.
+\end{enumerate}
 
 
 
@@ -235,8 +298,36 @@ $\vec s$ and evaluate $(\lambda \Delta. e^E) \vec s$.
 
 
 
+\paragraph{Unbounded Loop}
 
-\begin{alba}
+\ \begin{alba}
+    section
+        P: Nat -> Prop
+        d: Decider P
+        e: Exist P
+    :=
+        type R: Nat -> Nat -> Prop :=
+                -- 'n' and its successor figure in the relation 'R'
+                -- if 'n' does not satisfy the predicate.
+            next {n}: not P n -> R n (succ n)
+
+        type Via: Nat -> Prop :=
+                -- Set of viable candidates: A number 'n' is in the
+                -- set if all its successors in the relation 'R' are
+                -- in the set.
+            via {x}: (all {y}: R x y -> Via y) -> Via x
+
+        stepDown {n} (v: Via (succ n)): Via n :=
+            via {n} f where
+                f: all {m}: R n m -> Via m
+                := case
+                    \ next _ : Via (succ n) := v
+\end{alba}
+
+
+\paragraph{Vector}
+
+\ \begin{alba}
     type Vector (A: Any): Nat -> Any :=
         []:  Vector zero
         (::) {n: Nat}: A -> Vector n -> Vector (succ n)
@@ -250,8 +341,9 @@ $\vec s$ and evaluate $(\lambda \Delta. e^E) \vec s$.
 
 
 
+\paragraph{Equality}
 
-\begin{alba}
+\ \begin{alba}
     type (=) (A: Any): A -> A -> Prop :=
         same {x}: x = x
 
@@ -260,13 +352,14 @@ $\vec s$ and evaluate $(\lambda \Delta. e^E) \vec s$.
             -- no case clauses
 \end{alba}
 
-The compile has to verify that no match is possible. The pattern match
+The compiler has to verify that no match is possible. The pattern match
 expression is the two argument function with type $\Pi n^N. 0 = 1 + n \to
 \text{False}$.
 
 
 
-\begin{alba}
+\paragraph{$<=?$}
+\ \begin{alba}
     type Nat := [zero, succ: Nat -> Nat]
 
     (<=?): Nat -> Nat -> Nat := case
