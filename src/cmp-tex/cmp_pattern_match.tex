@@ -142,7 +142,9 @@ are pattern variables, $\vec p$ are parameter arguments and $\vec a$ are index
 arguments has no constructor $\make^I_\ell \vec p \meta y_1 \ldots$
 which can construct such an object.
 
-
+\paragraph{Exhaustiveness of a case tree}
+%
+A case tree is exhaustive if all its nodes are exhaustive.
 
 
 
@@ -187,54 +189,81 @@ It is a path from the root to a leave.
 and $t_2$ to $m(t_1, t_2)$ where the first one might be empty and the second one
 has been constructed from a clause of the pattern match expression.
 
-\begin{description}
-    \item[Merge into empty case tree]
-        $$
-        m(\varepsilon, t) := t
-        $$
+$$
+\begin{array}{lll}
+    m(\varepsilon, t)
+    &:=&
+    t
+    \\
+    m([x \mid \ldots], e)
+    &:=&
+    m([x \mid \ldots], [x \mid e]))
+    \\
+    m([x \mid t], [x_2 \mid t_2])
+    &:=&
+    [x \mid m(t, t_2[x/x_2])]
+    \\
+    m([x \mid t], [x_2 \mid c_2 t_2 ])
+    &:=&
+    ??
+    \\
+    m([x \mid \vec c \vec t \mid \vec \ell \vec t \mid d], [x_2 \mid t_2])
+    &:=&
+    \begin{array}[t]{l}
+        [x
+        \\
+        \mid m(\vec c \vec t, t_2[x/x_2])
+        \\
+        \mid m(\vec \ell \vec t, t_2[x/x_2])
+        \\
+        \mid m(d, t_2[x/x_2])
+        ]
+    \end{array}
+    \\
+    m([x \mid \vec c \vec t \mid \varepsilon \mid d],
+        [x_2 \mid c_2 t_2 \mid \varepsilon])
+    &:=&
+    [x \mid m(\vec c \vec t, c_2 t_2[x/x_2]) \mid \varepsilon \mid d]
+    \\
+    m([x \mid \vec c \vec t \mid \vec \ell \vec t \mid d],
+        [x_2 \mid \ell_2 t_2 \mid \varepsilon])
+    &:=&
+    [x \mid \vec c \vec t \mid m(\vec \ell \vec t, \ell_2 t_2[x/x_2]) \mid d]
+    \\
+    m(\vec c \vec t, c_\text{new} t_2)
+    &:=&
+    \vec c \vec t c_{\text{new}} t_2
+    \\
+    m(\vec \vec \ell \vec t, \ell_\text{new} t_2)
+    &:=&
+    \vec \ell \vec t \ell_{\text{new}} t_2
+    \\
+    m(\ldots ct \ldots, c t_2)
+    &:=&
+    \ldots c m(t,t_2) \ldots
+    \\
+    m(\ldots \ell t \ldots, \ell t_2)
+    &:=&
+    \ldots c m(t,t_2) \ldots
+\end{array}
+$$
+%
+where $m(\vec c \vec t, t_2)$ and $m(\vec \ell \vec t, t_2)$ means that $t_2$ is
+merged into all trees $\vec t$.
 
-    \item [Merge a new constant] The new constant is not present in the tree
-        $t_1$. Just add the tree with the new constant to the first tree and
-        rename the pattern variable.
-        %
-        $$
-        \begin{array}{l}
-            m(
-                [x \mid \vec c \vec t, \, \varepsilon \mid d],\,
-                [x_2 \mid c_2 t_2 \mid \varepsilon])
-            \\
-            :=
-            [ x \mid
-                (\vec c c_2) (\vec t t_2[x/x_2]), \, \varepsilon
-                \mid m(d, t_2[x/x_2])]
-        \end{array}
-        $$
+The missing cases are error cases.
+%
+\begin{enumerate}
+    \item $m(e, t)$: The tree $t$ is redundant. It cannot add any new decisions.
 
-    \item [Merge a new constructor] The new constructor is not present in the
-        tree $t_1$. Just add the tree with the new constructor to the first tree
-        and rename the pattern variable.
-        %
-        $$
-        m(
-            [x \mid \vec c \vec t, \, \vec\ell \vec u \mid ],\,
-            [x_2 \mid \ell_2 t_2 \mid \varepsilon])
-        :=
-        [ x \mid
-        \vec c \vec t,\,
-        (\vec\ell \ell_2)(\vec u t_2[x/x_2]
-        \mid m(d,t_2[x/x_2])]
-        $$
+    \item $m([x \mid t], [x_2 \mid c_2 t_2 ])$: The clauses are out of order. A
+        catch all pattern cannot be followed by a more specific pattern. If it
+        were allowed the more specific pattern could shadow cases treated by the
+        catch all pattern.
 
-    \item [Merge a present constant or present constructor] I.e. merge
-        $[x_2 \mid c_2 t_2 \mid \varepsilon]$
-        or
-        $[x_2 \mid \ell_2 t_2 \varepsilon d]$
-        into
-        $[x \mid \vec c \vec t,\, \vec\ell \vec u \mid d]$.
+    \item $m([x \mid t], [x_2 \mid \ell_2 t_2 ])$: Same as before.
+\end{enumerate}
 
-        This is done by replacing the corresponding subtree $t$ in $\vec c \vec
-        t$ or $\vec \ell \vec u$ by the merged tree $m(t, t_2[x/x_2]$.
-\end{description}
 
 \paragraph{Algorithm}
 
