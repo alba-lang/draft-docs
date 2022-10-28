@@ -45,6 +45,8 @@ Patterns are trees. Each node of the tree is labelled by a pattern variable and
 either by a constant or a constructor $\make^I_i \vec q$. A pattern clause has a
 sequence of trees.
 
+The pattern variables are assumed to be distinct in all clauses.
+
 
 
 \subsection{Welltyped}
@@ -98,7 +100,7 @@ $$
         &\mid& [
             x
             \mid
-            c_1 t_1, \ldots,  c_n t_n,\;
+            c_1 t_1, \ldots,  c_n t_n \mid
             \ell_1 t_1, \ldots, \ell_m t_m
             \mid
             d
@@ -124,15 +126,19 @@ where $n + m > 0$ and
     \end{tabular}
 \end{center}
 
-We can abbreviate the second form of an inner node by $[x \mid \vec c\vec t,\,
-\vec\ell \vec t | d]$ where the corresponding sequences have the same length.
+We can abbreviate the second form of an inner node by $[x \mid \vec c\vec t \mid
+\vec\ell \vec t | d]$.
+
+
+No duplicate constants and no duplicate labels are allowed in the second form of
+an inner node.
 
 
 
 \paragraph{Exhaustiveness of inner nodes}
 %
 
-An inner node of the form $[x \mid \vec c \vec t,\, \vec\ell \vec t \mid d]$ is
+An inner node of the form $[x \mid \vec c \vec t \mid \vec\ell \vec t \mid d]$ is
 exhaustive if it has a default tree or if all labels of constructors which can
 construct an object of the corresponding type are present.
 
