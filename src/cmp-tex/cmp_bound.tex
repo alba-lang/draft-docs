@@ -1,0 +1,53 @@
+\section{Bound Variables}
+
+The function type
+
+$$
+\Pi x^A. R
+$$
+
+has a bound variable $x$ of type $A$ and a result type $R$ which might depend on
+$x$.
+
+A bound variable has the following attributes.
+
+\begin{enumerate}
+
+    \item Implicit: Let $f: \Pi x^A. R$ be a function and $f a$ an application.
+        If the bound variable is implicit, then the compiler is instructed to
+        infer the argument $a$ from the context in case it is missing.
+
+    \item Dependent: A variable is dependent if the result type depends on it.
+
+        Open point: What happens in
+        $$
+            \Pi P^{A \to \Any} x^A. P x
+        $$
+        if $P = \lambda x^A . N$? Is $x$ dependent?
+
+    \item Ghost: A ghost variable means that its value cannot be used in the
+        runtime code. It can be
+
+        \begin{itemize}
+            \item used in types
+
+            \item used as an argument to a function which expects a ghost argument
+
+            \item pattern matched on to make decisions if the result type of the
+                decision is a proposition
+
+            \item used as an argument to any function whose return type is a
+                propositon.
+
+        \end{itemize}
+\end{enumerate}
+
+A term which is not a type (i.e. its type is not a sort) are propositional or
+non-propositional. A term is propositional if its type is a proposition.
+Otherwise it is non-propositional. Non-propositional terms represent potential
+runtime objects.
+
+If a constructor for a proposition uses non-propositional bound variables, then the
+non-propositonal bound variable is a ghost variable. A pattern match uncovering
+it can use its value only as a ghost value. A decision cannot be made on pattern
+match unless the result type of the pattern match is a proposition.
