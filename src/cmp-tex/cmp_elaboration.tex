@@ -112,6 +112,8 @@ Reasons to introduce metavariables:
 %--------------------------------------------------------------------------------
 
 
+\paragraph{Basics}
+
 In an application $f \vec a$ the types of the actual arguments $\vec a$ to the
 corresponding types of the formal arguments. I.e.
 $$
@@ -136,6 +138,18 @@ positions.
 
 In order to verify the typing constraint $T \le U$ it is necessary to visit both
 terms in parallel by converting corresponding subterms into their normal form.
+
+Constraints usually contain metavariables. Unification is the process to
+instantiate metavariables such that the terms on both sides satisfy the
+constraint.
+
+
+
+
+
+
+\paragraph{Possible Performance Problem}
+%--------------------------------------------------------------------------
 There is one sublety where performance might be affected. If we want to verify
 the constraint
 $$
@@ -151,3 +165,68 @@ arguments might be thrown away and some other arguments duplicated heavily.
 
 It is desirable to find a way to trace the constraints and recognize duplicates
 to avoid verifying the same constraints over and over again.
+
+
+
+
+
+
+\paragraph{Classification of Constraints}
+%--------------------------------------------------------------------------
+
+\begin{enumerate}
+    \item Undedidable:
+        $$
+            f \vec a \sim t
+        $$
+        where $f$ is a global function where its definition is not available and
+        $t \ne f \vec b \ldots$.
+        I.e. the terms might be unifiable if the definition
+        was available and expanded. However it cannot be verified.
+
+    \item Metavariable Instantiation:
+        $$
+        \rulev{
+            \meta m \vec x \sim e
+            \\
+            \vec x \text{ pairwise disjoint free variables}
+            \\
+            \FV(e) \subseteq \vec x
+        }
+        {
+            \meta m := \lambda \fargs x A. e
+        }
+        $$
+        With this instantiation $\meta m \vec x = (\lambda \fargs x A .e) \vec x$
+        reduces to $e$ satisfying the constraint.
+
+    \item Unsatisfiable by Structure: Let $t$ and $u$ be in head normal form.
+        The following structures for $t$ and $u$ are mutually incompatible for
+        unification
+        $$
+        \begin{array}{l}
+            \lambda \fargs x A. e
+            \\
+            \Pi \fargs x A. B
+            \\
+            x \vec a
+            \\
+            \make^I_\ell \vec a
+            \\
+            \case(f^F , \vec c)
+            \\
+            \type(\Gamma , T^K , \vec C)
+        \end{array}
+        $$
+        where $x$ is a free variable. Reason: No instantiation of metavariables
+        can change the structure of these terms.
+
+    \item Unsatisfiable by Discriminator:
+        $$
+        \begin{array}{lll}
+            x \vec a &\sim& y \vec b
+            \\
+            \make^I_{\ell_1} \vec a &\sim& \make^I_{\ell_2} \vec b
+        \end{array}
+        $$
+\end{enumerate}
