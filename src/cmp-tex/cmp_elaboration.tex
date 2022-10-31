@@ -9,7 +9,7 @@
 %--------------------------------------------------------------------------------
 
 
-\subsubsection{Basics}
+\paragraph{Basics}
 
 The parser returns expressions as an abstract syntax tree. The term elaborator
 has to transform the ast into a  term. The elaborator has to elaborate all
@@ -49,7 +49,7 @@ exploited all possibilities to elaborate other subterms before the stuck
 subterms.
 
 
-\subsubsection{Algorithm}
+\paragraph{Algorithm}
 
 \begin{description}
 \item [Elaborate subterms]
@@ -72,7 +72,7 @@ subterms.
 
 
 
-\subsubsection{Stuckness Conditions}
+\paragraph{Stuckness Conditions}
 
 \begin{enumerate}
     \item
@@ -84,3 +84,70 @@ subterms.
 
     \item A stuckness condition is a nonempty set of resumption points.
 \end{enumerate}
+
+
+
+
+
+
+\subsection{Metavariables}
+%--------------------------------------------------------------------------------
+
+Reasons to introduce metavariables:
+\begin{enumerate}
+
+    \item Untyped binders e.g. terms of the form $\lambda x. e$ or $\Pi x. R$
+        where the type of the bound variable $x$ is not present in the source
+        code.
+
+    \item Nonpresent implicit arguments in applications $f \vec a$: The type of
+        $f$ has implicit arguments which are not present in the list of actual
+        arguments $\vec a$.
+\end{enumerate}
+
+
+
+
+\subsection{Unification}
+%--------------------------------------------------------------------------------
+
+
+In an application $f \vec a$ the types of the actual arguments $\vec a$ to the
+corresponding types of the formal arguments. I.e.
+$$
+    T_\text{actual} \le T_\text{formal}
+$$
+must be valid. This constraint can be checked by transforming both types into
+their normal forms an verify it on the normal forms.
+
+The normal form of a type is $\Pi \fargs x A. s$, $\Pi \fargs x A. T \vec
+a$ or $\Pi \fargs x A . I \vec q \vec a$ where $s$ is a sort, $T$ is some global
+function without definition available and $I$ is some inductive type. The first
+form allows subtyping by $s_\text{actual} \le s_\text{formal}$. The second one
+does not allow subtyping and the third allows subtyping as defined for inductive
+type (the type with more alternatives and viewer fields is a supertype).
+
+I.e. the above constraint usually generates subconstraints of the form
+$$
+    a \sim b
+$$
+either because the compared subexpressions are not types or appear in argument
+positions.
+
+In order to verify the typing constraint $T \le U$ it is necessary to visit both
+terms in parallel by converting corresponding subterms into their normal form.
+There is one sublety where performance might be affected. If we want to verify
+the constraint
+$$
+    f \vec a \sim f \vec b
+$$
+where the definition of $f$ is available (or $f$ is simply an abstraction). The
+function $f$ might throw away some of its arguments or multiply the occurrences
+of some of its arguments. In the first szenario it would be better to first do
+the head reduction and then continue with the processing. In the second szenario
+it would be better first to verify the constraint on the corresponding arguments
+and not do the reduction. The situation might be more complex because some
+arguments might be thrown away and some other arguments duplicated heavily.
+
+It is desirable to find a way to trace the constraints and recognize duplicates
+to avoid verifying the same constraints over and over again.

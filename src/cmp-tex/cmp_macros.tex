@@ -1,16 +1,22 @@
 % Macros
 %------------------------------------------------------------
+\def\Any {{\cal A}}
 \def\Prop{{\cal P}}
-\def\Any {{\cal U}}
+\def\Uni {{\cal U}}
 
 \def\case{{\text{case}}}
+\def\llet{{\text{let}}}
+\def\FV  {{\text{FV}}}
 
 \def\make{{\cal M}}
 
-\def\meta#1{{\ ^?#1}}
+\def\meta#1{{{}^?#1}}
+
 
 \def\vec#1{{\mathbf #1}}
+\def\fargs#1#2{{\vec {#1}^{\vec {#2}}}}
 
+\def\set#1{{\{#1\}}}
 
 \def\betaeq{{\stackrel \beta \sim}}
 
@@ -27,6 +33,15 @@
 
 \def\rulev#1#2{
     \begin{array}{l}
+        #1
+        \\
+        \hline
+        #2
+    \end{array}
+}
+
+\def\ruleh#1#2{
+    \begin{array}{c}
         #1
         \\
         \hline
