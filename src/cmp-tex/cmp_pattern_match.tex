@@ -315,7 +315,7 @@ redundant which is regarded as an error (the clause is unreachable).
 An application of a pattern match expression (whose type is always a function
 type) has the form
 $$
-(\case \ldots) \vec a
+\case(f^F, \vec c) \vec a
 $$
 where $\vec a = [a_1, \ldots, a_n]$ are the arguments to which the pattern match
 function is applied. The maximal number of arguments is determined by the type
@@ -325,6 +325,16 @@ The application can be evaluated if it is possible to find a clause of the
 pattern match expression and split the arguments $\vec a$ into subexpressions
 $\vec s$ and evaluate $(\lambda \Delta. e^E) \vec s$.
 
+A pattern match expression applied to arguments is a reducible expression
+$$
+\case(f^F, \vec c) \vec a \quad\to\quad e[case(f^F, \vec c), \vec s / f, \vec x]
+$$
+where $e$ is the expression on the right hand side of the found clause, $\vec x$
+are the pattern variables of this clause and $\vec s$ are the subexpressions
+extracted from the arguments $\vec a$ during walking down the case tree. The
+hole case expression is substituted for the variable $f$ representing the
+function and the subexpressions $\vec s$ are substituted for the pattern
+variables $\vec x$.
 
 
 
