@@ -1,6 +1,30 @@
 \section{Elaboration}
 %--------------------------------------------------------------------------------
 
+
+\begin{comment}
+    Proof carrying elaboration
+    ------------------------------------------------------------
+
+    An elaboration context consists of
+    - Set of modules
+    - Set of contexts
+        - bound variables with types
+        - set of metavariables with types
+        - set of constructed terms with types in this context
+        - set of subtype or equivalence pairs
+
+    A term is a pair (context-id, term number) or an axiomatic term.
+
+    Axiomatic terms: Prop, Any u, Uni. Axiomatic terms don't need a context.
+    They are welltyped and wellformed by axiom.
+
+    Gamma |- t1: T1, t2, T2, ....
+\end{comment}
+
+
+
+
 \subsection{Contexts}
 %--------------------------------------------------------------------------------
 
@@ -197,8 +221,8 @@ to avoid verifying the same constraints over and over again.
             \meta m := \lambda \fargs x A. e
         }
         $$
-        With this instantiation $\meta m \vec x = (\lambda \fargs x A .e) \vec x$
-        reduces to $e$ satisfying the constraint.
+        With this instantiation $\meta m \vec x = (\lambda \fargs x A .e) \vec
+        x$ reduces to $e$ satisfying the constraint.
 
     \item Unsatisfiable by Structure: Let $t$ and $u$ be in head normal form.
         The following structures for $t$ and $u$ are mutually incompatible for
@@ -230,3 +254,153 @@ to avoid verifying the same constraints over and over again.
         \end{array}
         $$
 \end{enumerate}
+
+
+
+
+
+
+
+
+\subsection{Constants}
+%---------------------------------------------------------------------------
+
+The following types can have constants:
+\begin{itemize}
+    \item Natural numbers and integral numbers ({\tt Nat, Int})
+    \item Floating point numbers ({\tt Float})
+    \item Machine numbers (like {\tt U8, U16, U32, U64, ...})
+    \item Characters
+    \item Strings
+\end{itemize}
+
+With characters and strings there is no ambiguity. However the number {\tt 100}
+appearing in the source code is ambiguous. It can be an inhabitant of different
+types (practically all number types). Therefore we need a required type to fill
+a hole with the constant {\tt 100}. Without a required type the elaborator is
+stuck waiting for the required type.
+
+The elaboration of constants is straightforward. Resolve ambiguities based on
+the requirement for the hole. If unresolvable then get stuck on the requirement.
+If ambibuities can be resolved then check the required type and in case of
+success put the constant into the hole.
+
+
+
+
+
+
+
+
+\subsection{Names}
+%---------------------------------------------------------------------------
+
+Names can be ambiguous. They can point to global of local symbols. In
+order to resolve ambiguities the elaborator compares the required signature of
+the hole with the signature of the symbol. Note that types in head normal form
+look like
+$$
+\begin{array}{l}
+    \Pi \fargs x A. T \vec a
+    \\
+    \Pi \fargs x A. s
+\end{array}
+$$
+
+A signature of a type with $n$ arguments is an array of length $n+1$ where the
+first $n$ elements represent the argument types and the last element represents
+the result type. The entries are
+\begin{itemize}
+    \item {\tt G}: Reference to a global symbol which is the head symbol of the
+        type.
+    \item {\tt L}: Reference to a local symbol which is the head symbol of the
+        type.
+    \item {\tt U}: Unknown
+    \item {\tt I}: Implicit Argument
+    \item {\tt S}: Sort
+\end{itemize}
+%
+%
+Examples:
+\begin{alba}
+    (+): Nat -> Nat -> Nat
+            [Nat, Nat, Nat]
+
+    (=): all {A: Any}: A -> A -> Prop
+            [I, U, U, S]
+
+    length: all {A: Any}: List A -> Nat
+            [I, List, Nat]
+
+    identity: all {A: Any}: A -> A
+            [I, U, U]
+
+    (|>): all {A: Any} {P: A -> Any} (a: A) (f: all x: P x): P a
+            [I, I, U, U, U]
+
+    Absurd: all {A: Any}: A
+            [U, U]
+\end{alba}
+%
+If the signature of the hole and the signature of the symbol resolve the
+ambiguity then the symbol can be put into the hole (checking the type before).
+If the ambiguity cannot be resolved then the elaborator gets stuck on the hole.
+
+It has to be guaranteed that ambiguous names must be resolvable by their
+signature.
+
+
+
+
+
+
+
+
+\subsection{Applications $f \vec a$}
+%---------------------------------------------------------------------------
+
+
+
+\paragraph{Example}
+%------------------------------------------------------------
+Elaborate the term
+\begin{alba}
+    (|>) 1 (+) 2: Nat
+
+    -- equivalent to
+    (1 |> (+)) 2: Nat
+
+    -- in global context
+    (+): Nat -> Nat -> Nat
+    (+): String -> String -> String)
+
+    (|>) {A: Any} {P: A -> Any} (a: A) (f: all x: P x): P a
+    :=
+        f a
+\end{alba}
+
+The function term in the application must accept 3 explicit arguments and return
+an $N$. The global function $\triangleright$ returns an object of type $P a$ if
+applied to two arguments. $P a$ might be a function accepting the 3rd explicit
+argument. With the metavariables $A$, $P$, $a$ and $f$ it can elaborate the
+subterm
+$$
+(\triangleright) A P a f: P a
+$$
+The elaborator cannot generate a metavariable for the third argument because it
+cannot extract an argument type from $P a$. The elaboration is stuck on the
+metavariable $P$.
+
+Now it can try to elaborate the arguments. Argument $1: A$ gets stuck on $A$
+because it has to know the number type.
+
+Next it tries $(+): \Pi x^A. P x$ with the information that $P a$ must be a
+function type accepting one more explicit argument an return an $N$. With this
+information it resolves the ambiguity and generate the constraint
+$$
+    N \to N \to N \le \Pi x^A. P x
+$$
+with the resolution $A := N, P := \lambda x^N. N \to N$.
+
+From now on it can build $1: N$, $2: N$ and $(\triangleright) A P f b: N$ with
+the metavariable $b: N$ in any order.
