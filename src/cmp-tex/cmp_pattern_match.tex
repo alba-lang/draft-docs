@@ -420,3 +420,31 @@ expression is the two argument function with type $\Pi n^N. 0 = 1 + n \to
                 zero   :=   false
                 succ m :=   n <=? m
 \end{alba}
+
+
+\paragraph{Parity}
+\ \begin{alba}
+    type Parity: Nat -> Any :=
+        even n: Parity (n + n)
+        odd  n: Parity (succ (n + n))
+
+    parity: all n: Parity n := case
+        \ zero: Parity zero :=
+            even
+        \ succ n: Parity (succ n) :=
+            match parity n case
+                \ even nh :=
+                    odd nh
+                \ odd nh :=
+                    even (succ nh)
+
+    natToBin: Nat -> List Bool := case
+        \ zero :=
+            []
+        \ succ n :=
+            match parity n case
+                \ even nh :=
+                    false :: natToBin nh
+                \ odd nh :=
+                    true :: natToBin nh
+\end{alba}

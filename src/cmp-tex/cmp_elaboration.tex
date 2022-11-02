@@ -356,8 +356,26 @@ signature.
 
 
 
-\subsection{Applications $f \vec a$}
+\subsection{Applications $f a$}
 %---------------------------------------------------------------------------
+
+
+\paragraph{General Procedure}
+%------------------------------------------------------------
+
+\begin{enumerate}
+    \item Make holes for $f$ and $a$.
+
+    \item Push the elaborators for $f$ and $a$ into the ready queue.
+
+    \item Get stuck waiting for $f$ and $a$.
+
+    \item When both $f$ and $a$ are ready generate the application $f a$ and put
+        it into the hole.
+\end{enumerate}
+
+
+What with implicit arguments?
 
 
 
@@ -378,6 +396,23 @@ Elaborate the term
     :=
         f a
 \end{alba}
+
+\begin{tikzpicture}
+    \def\app{{\scriptsize app}}
+    \node {:} [sibling distance = 3.5cm, level distance = 1cm]
+        child {node {\app:$[N]$}
+            child {node {\app:$[U, N]$}
+                child {node {\app:$[U, U, N]$}
+                    child {node {$(\triangleright): [U,U,U,N]$}}
+                    child {node {$1: [U]$}}
+                }
+                child {node {$(+): [U,U,N]$}}
+            }
+            child {node {$2: [N]$}}
+        }
+        child {node {$N$}};
+\end{tikzpicture}
+
 
 The function term in the application must accept 3 explicit arguments and return
 an $N$. The global function $\triangleright$ returns an object of type $P a$ if
