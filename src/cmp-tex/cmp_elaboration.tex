@@ -2,31 +2,24 @@
 %--------------------------------------------------------------------------------
 
 
-\begin{comment}
-    Proof carrying elaboration
-    ------------------------------------------------------------
-
-    An elaboration context consists of
-    - Set of modules
-    - Set of contexts
-        - bound variables with types
-        - set of metavariables with types
-        - set of constructed terms with types in this context
-        - set of subtype or equivalence pairs
-
-    A term is a pair (context-id, term number) or an axiomatic term.
-
-    Axiomatic terms: Prop, Any u, Uni. Axiomatic terms don't need a context.
-    They are welltyped and wellformed by axiom.
-
-    Gamma |- t1: T1, t2, T2, ....
-\end{comment}
 
 
 
-
-\subsection{Contexts}
+\subsection{Tasks}
 %--------------------------------------------------------------------------------
+
+The elaborator works like an operating system. There are a set of tasks which
+can do actions like elaborate a subterm, unify two types, ... Each of these task
+is either ready or waiting for some conditions.
+
+Conditions can be atomic like wait for a hole to be filled, wait for a
+unification constraint to be resolved. The can be set of conditions as well.
+Conditions must not overlap. Either they are disjoint or one is a subset of the
+other. The subset relation establishes a partial order on conditions.
+
+As soon as a condition is satisfied, the corresponding tasks can be unqueued and
+executed. The order of the conditions have to be respected.
+
 
 
 \subsection{Term Elaboration}
@@ -295,7 +288,7 @@ success put the constant into the hole.
 \subsection{Names}
 %---------------------------------------------------------------------------
 
-Names can be ambiguous. They can point to global of local symbols. In
+Names can be ambiguous. They can point to global or local symbols. In
 order to resolve ambiguities the elaborator compares the required signature of
 the hole with the signature of the symbol. Note that types in head normal form
 look like
@@ -339,12 +332,31 @@ Examples:
             [I, I, U, U, U]
 
     Absurd: all {A: Any}: A
-            [U, U]
+            [I, U]
 \end{alba}
 %
 If the signature of the hole and the signature of the symbol resolve the
 ambiguity then the symbol can be put into the hole (checking the type before).
 If the ambiguity cannot be resolved then the elaborator gets stuck on the hole.
+
+It might be necessary to generate holes for implicit arguments an put not only
+the symbol into the hole, but the symbol applied to some implicit arguments.
+%
+Examples:
+\begin{alba}
+    (|>)        actual                  [I, I, U, U, U]
+                required                      [U, U, U, N]
+        -- make two holes for the implicits
+
+    Absurd      actual                  [I, U]
+                required                [U]
+        -- stuck on the required type, cannot decide whether to generate
+        -- implicits or not!
+
+    Absurd      actual                  [I, U]
+                required                   [N]
+        -- make a hole for the implicit
+\end{alba}
 
 It has to be guaranteed that ambiguous names must be resolvable by their
 signature.
@@ -368,14 +380,13 @@ signature.
 
     \item Push the elaborators for $f$ and $a$ into the ready queue.
 
-    \item Get stuck waiting for $f$ and $a$.
-
-    \item When both $f$ and $a$ are ready generate the application $f a$ and put
-        it into the hole.
+    \item Wait for $f$: The type of $f$ has to be a function type. Otherwise the
+        hole would not be filled. Unify the argument type with the type of $a$.
+        Generate $f a$ and put it into the hole.
 \end{enumerate}
 
+Note: $f a$ might contain unfilled holes.
 
-What with implicit arguments?
 
 
 
@@ -430,7 +441,7 @@ Now it can try to elaborate the arguments. Argument $1: A$ gets stuck on $A$
 because it has to know the number type.
 
 Next it tries $(+): \Pi x^A. P x$ with the information that $P a$ must be a
-function type accepting one more explicit argument an return an $N$. With this
+function type accepting one more explicit argument and return an $N$. With this
 information it resolves the ambiguity and generate the constraint
 $$
     N \to N \to N \le \Pi x^A. P x
