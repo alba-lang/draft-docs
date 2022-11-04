@@ -573,44 +573,78 @@ Elaborate the term
 \resizebox{8cm}{3cm}{
 \begin{tikzpicture}
     \def\app{{\scriptsize app}}
+    \def\f{{(\triangleright)}}
+    \def\p{{(+)}}
     \node {:} [sibling distance = 3.5cm, level distance = 1cm]
-        child {node {\app:$[N]$}
-            child {node {\app:$[U, N]$}
-                child {node {\app:$[U, U, N]$}
-                    child {node {$(\triangleright): [U,U,U,N]$}}
-                    child {node {$1: [U]$}}
+        child {node {$\f 1 \p 2:[N]$}
+            child {node {$\f 1 \p:[U_3, N]$}
+                child {node {$\f 1:[U_2, U_3, N]$}
+                    child {node {$\f: [U_1,U_2,U_3,N]$}}
+                    child {node {$1: [A]$}}
                 }
-                child {node {$(+): [U,U,N]$}}
+                child {node {$(+): [A,U_3,N]$}}
             }
-            child {node {$2: [N]$}}
+            child {node {$2: [U_3]$}}
         }
         child {node {$N$}};
 \end{tikzpicture}
 }
 
+We start with the elaboration of $(\triangleright) 1 (+) 2$ with the signature
+requirement $[N]$ and the required type $N$.
 
-The function term in the application must accept 3 explicit arguments and return
-an $N$. The global function $\triangleright$ returns an object of type $P a$ if
-applied to two arguments. $P a$ might be a function accepting the 3rd explicit
-argument. With the metavariables $A$, $P$, $a$ and $f$ it can elaborate the
-subterm
-$$
-(\triangleright) A P a f: P a
-$$
-The elaborator cannot generate a metavariable for the third argument because it
-cannot extract an argument type from $P a$. The elaboration is stuck on the
-metavariable $P$.
+\begin{itemize}
+    \item The term is an application with the function term $(\triangleright) 1
+        (+)$ and the argument $2$. We start the elaboration of the function term
+        with the signature requirement $[U_3, N]$ and no required type.
 
-Now it can try to elaborate the arguments. Argument $1: A$ gets stuck on $A$
-because it has to know the number type.
+    \item The term is again an application with the function term
+        $(\triangleright) 1$ and the argument $(+)$. We start the elaboration
+        of the function term with the signature requirement $[U_2, U_3, N]$ and
+        no required type.
 
-Next it tries $(+): \Pi x^A. P x$ with the information that $P a$ must be a
-function type accepting one more explicit argument and return an $N$. With this
-information it resolves the ambiguity and generate the constraint
-$$
-    N \to N \to N \le \Pi x^A. P x
-$$
-with the resolution $A := N, P := \lambda x^N. N \to N$.
+    \item The term is again an application with the function term
+        $(\triangleright)$ and the argument $1$. We start the elaboration of the
+        function term with the signature requirement $[U_1, U_2, U_3, N]$ and no
+        required type.
 
-From now on it can build $1: N$, $2: N$ and $(\triangleright) A P f b: N$ with
-the metavariable $b: N$ in any order.
+    \item The term $(\triangleright)$ is a global name with the signature $[I,
+        I, A, [A, P], P]$. Unification with the required signature $[U_1, U_2,
+        U_3, N]$ results in
+        $$
+        \begin{array}{lll}
+            U_1 &:=& A
+            \\
+            U_2 &:=& [A, U_3, N]
+            \\
+            P   &:=& [U_3, N]
+        \end{array}
+        $$
+        Because of the two implicit arguments the term is elaborated as
+        $(\triangleright)A P$ with the metavariables $A$ and $P$.
+
+    \item Next the argument term $1$ has to be elaborated with the required
+        signature $[A]$ and the required type $A$. This elaboration gets stuck
+        on $A$, because the elaborator cannot decide the number type.
+
+    \item Next the argument term $(+)$ is tried with the required signature $[A,
+        U_3, N]$. The global name is ambiguous, but the ambiguity can be
+        resolved by the result type. The signature is $[N, N, N]$. Unification
+        with the required signature results in
+        $$
+        \begin{array}{lll}
+            A &:=& N
+            \\
+            U_3 &:=& N
+        \end{array}
+        $$
+
+    \item Now the complete term can be elaborated as
+        $$
+            (\triangleright) N (N \to N) \meta a (+) \meta b
+        $$
+        leaving the two holes $\meta a$ and $\meta b$ for the remaining
+        arguments. However by unification the metavariables $\meta A$ and $\meta
+        U_3$ are instantiated by $N$ and therefore the elaboration of the
+        remaining arguments is unblocked and finally will succeed.
+\end{itemize}
