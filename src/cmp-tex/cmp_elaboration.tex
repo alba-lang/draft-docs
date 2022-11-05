@@ -382,16 +382,61 @@ The following types can have constants:
 
 With characters and strings there is no ambiguity. However the number {\tt 100}
 appearing in the source code is ambiguous. It can be an inhabitant of different
-types (practically all number types). Therefore we need a required type to fill
-a hole with the constant {\tt 100}. Without a required type the elaborator is
-stuck waiting for the required type.
+types (practically all number types).
 
-The elaboration of constants is straightforward. Resolve ambiguities based on
-the requirement for the hole. If unresolvable then get stuck on the requirement.
-If ambibuities can be resolved then check the required type and in case of
-success put the constant into the hole.
+\paragraph{Numbers} Check the signature requirement.
+\begin{enumerate}
+    \item  If it is unknown then the elaborator
+        gets stuck on that signature metavariable.
+
+    \item If it is a valid number type, then fill the hole.
+
+    \item Otherwise issue an error.
+\end{enumerate}
 
 
+\paragraph{Constants with unique type} Immediately succeed or fail depending on
+the signature requirement.
+
+
+
+
+
+
+
+
+\subsection{Sorts}
+%---------------------------------------------------------------------------
+
+\paragraph{Tasks}
+\begin{enumerate}
+    \item $U$: Unify the generated term with its requirement.
+    \item $P$: Put the generated term into the hole.
+\end{enumerate}
+
+\paragraph{Algorithm}
+\begin{enumerate}
+    \item Generate the term.
+        \begin{itemize}
+            \item If the sort is $Prop$, then the term is $\Prop: \Any_0$ with
+                the signature $S$.
+            \item If the sort is $\Any$, then generate a new universe variable
+                $u$ and the term is $\Any_u : \Any_{u+1}$ with the signature $S$.
+        \end{itemize}
+
+    \item Push $U$ to the ready queue.
+    \item Push $P$ to the wait queue of $U$.
+\end{enumerate}
+
+
+The task $U$ decides on success or failure. Possible failures:
+\begin{itemize}
+    \item The required signature is not unknown or sort.
+    \item The required type is $\Any_0$ because $u + 1 \le 0$ can never be
+        valid.
+\end{itemize}
+
+The task $U$ can never become stuck. It immediately succeeds or fails.
 
 
 
