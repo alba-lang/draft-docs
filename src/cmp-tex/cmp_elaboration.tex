@@ -12,11 +12,11 @@ Elaboration is an event driven system. There are the following events:
 
 \begin{itemize}
     \item Hole filled
-    \item Unification problem resolved
-    \item Another task placed into the wait queue for some events
+    \item Task finished.
 \end{itemize}
 
-Events can happen only once.
+Events can happen only once. A task is finished if all its subtasks are
+finished.
 
 Tasks are the elementary processing units of elaboration. They are either
 executing (only one task is executing), ready to execute or waiting for events.
@@ -506,30 +506,35 @@ subtask $E_a$ can run interleaved.
 
 \paragraph{Algorithm}
 \begin{enumerate}
-    \item Make the unkown signature element $\meta U$.
+    \item Make holes:
+        \begin{enumerate}
+            \item Make the unkown signature element $\meta U$.
 
-    \item Make a hole $\meta f$ for $f$ with signature requirement $[\meta U, R]$.
+            \item Make a hole $\meta f$ for $f$ with signature requirement $[\meta U, R]$.
 
-    \item Make a hole $\meta A$ for the type of $a$ with the signature
-        requirement $[S]$.
+            \item Make a hole $\meta A$ for the type of $a$ with the signature
+                requirement $[S]$.
 
-    \item Make a hole $\meta a$ for $a$ with signature requirement $[\meta U]$
-        and the
-        required type $\meta A$.
+            \item Make a hole $\meta a$ for $a$ with signature requirement $[\meta U]$
+                and the
+                required type $\meta A$.
+        \end{enumerate}
 
-    \item Put $U_{A}$ into the wait queue for $\meta f$.
+    \item Waiting tasks:
+        \begin{enumerate}
+            \item Put $U_{A}$ into the wait queue for $\meta f$.
 
-    \item If there is a required type
+            \item Put $U_R$ into the wait queue for $U_A$.
 
-    \item Put $E_a$ into the ready queue.
+            \item Put $E_{fa}$ into the wait queue for $U_R$.
+        \end{enumerate}
 
-    \item If there is a required type for $fa$, then Put $U_R$ into the wait
-        queue for the termination of $U_A$ and $E_{fa}$ into the waitqueue for
-        termination of $U_A$.
+    \item Ready tasks:
+        \begin{enumerate}
+            \item Push $E_a$ into the ready queue.
 
-        Otherwise put $E_{fa}$ into the wait queue for the termination of $U_A$.
-
-    \item Start $E_f$.
+            \item Push $E_f$ into the ready queue.
+        \end{enumerate}
 \end{enumerate}
 
 
