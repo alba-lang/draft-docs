@@ -526,6 +526,38 @@ signature.
 
 
 
+\subsection{Typed terms $t: T$}
+%---------------------------------------------------------------------------
+
+\paragraph{Substasks}
+\begin{enumerate}
+    \item $E_T$: Elaborate $T$
+    \item $E_t$: Elaborate $t$
+    \item $U_T$: Unify $\meta T$ as a subtype of the required type.
+    \item $U_t$: Unify the type of $\meta t$ as a subtype of $\meta T$.
+    \item $E_{t:T}$: Make $\meta t: \meta T$ and put it into the hole.
+\end{enumerate}
+
+\paragraph{Algorithm}
+\begin{enumerate}
+    \item Make a hole $\meta T$ with the signature requirement $S$.
+    \item Make a signature unknown $\meta U$.
+    \item Make a hole $\meta t$ with the signature requirement $\meta U$ and the
+        required type $\meta T$.
+
+    \item Push $E_t$ onot the ready queue.
+    \item Push $E_T$ onto the ready queue.
+    \item Push $U_T$ onto the wait queue for $E_T$.
+    \item Push $U_t$ onto the wait queue for $E_t$.
+\end{enumerate}
+
+
+
+
+
+
+
+
 \subsection{Applications $f a$}
 %---------------------------------------------------------------------------
 
