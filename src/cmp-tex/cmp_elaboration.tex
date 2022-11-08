@@ -572,6 +572,44 @@ signature.
 
 
 
+\subsection{Products $\Pi x^A. B$}
+%---------------------------------------------------------------------------
+
+Input: $E_A$, $E_B$, $h$ an elaborator for $A$ and for $B$ and a hole $h$ to put
+the expression.
+
+\begin{enumerate}
+    \item Generate an unknown universe variable $u_A$ and a hole $\meta A:
+        \Any_{u_A}$ as a requirement for $E_A$. Having $u_A$, the term $\meta A$
+        is welltyped. Any filler of the hole must fill it with a type in a
+        universe better than $u_A$.
+
+    \item Generate a new context by pushing $\meta A: \Any_{u_A}$ as a local
+        variable.
+
+    \item Make a hole $\meta B$ with the signature requirement $[S]$.
+
+    \item Make a task $V_B$ which waits until all holes in the inner context are
+        filled. It verifies, that the product $\Pi x^{\meta A}. \meta B$ can be
+        filled into the hole $h$.
+
+    \item Push the elaborators $E_A$ and $E_B$ onto the ready queue.
+\end{enumerate}
+
+The elaborators $E_A$ and $E_B$ succeed, if they can elaborate a type. They only
+have the signature requirement $[S]$.
+
+The verification task $V$ cannot start before $E_B$ has filled the hole $\meta
+B$, because it awaits the filling of all holes of the inner context. It is not
+necessary to wait for $E_A$.
+
+
+
+
+
+
+
+
 \subsection{Typed terms $t: T$}
 %---------------------------------------------------------------------------
 
