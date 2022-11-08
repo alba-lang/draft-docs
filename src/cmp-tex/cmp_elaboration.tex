@@ -5,6 +5,52 @@
 
 
 
+\subsection{Universe Polymorphism}
+%--------------------------------------------------------------------------------
+
+$$
+\begin{array}{ll}
+    \underbrace{
+        \Pi
+        X^{\overbrace{\Any_i}^{: \Any_{i+1}}}
+        .
+        \underbrace{B}_{: \Prop}
+    }_{: \Prop}
+    &\text{Impredicative}
+    \\
+    \\
+    \underbrace{
+        \Pi
+        X^{\overbrace{\Any_i}^{: \Any_{i+1}}}
+        .
+        \underbrace{\Prop}_{: \Any_0}
+    }_{: \Any_{i+1}}
+    &\text{Predicative}
+    \\
+    \\
+    \underbrace{
+        \Pi
+        X^{\overbrace{\Any_i}^{: \Any_{i+1}}}
+        .
+        \underbrace{B}_{: \Any_0}
+    }_{: \Any_{i+1}}
+    &\text{Polymorphic function } B \ne \Prop
+    \\
+    \\
+    \underbrace{
+        \Pi
+        X^{\overbrace{\Any_i}^{: \Any_{i+1}}}
+        .
+        \underbrace{\Any_0}_{: \Any_1}
+    }_{: \Any_{i+1}}
+    &\text{Polymorphic type}
+
+\end{array}
+$$
+
+
+
+
 \subsection{Tasks}
 %--------------------------------------------------------------------------------
 
@@ -123,7 +169,7 @@ instantiate them by some global or local symbols via unification of signatures.
 \subsection{Term Elaboration}
 %--------------------------------------------------------------------------------
 
-\begin{verbatim}
+\begin{comment}
     auxialiary terms: (context, term, type), ...
 
     For each subterm a hole. A hole is a metavariable.
@@ -134,7 +180,7 @@ instantiate them by some global or local symbols via unification of signatures.
 
     Signature metavariables (for the unknowns). Instantiated by signature
     unification.
-\end{verbatim}
+\end{comment}
 
 
 
