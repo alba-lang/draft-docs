@@ -8,6 +8,110 @@
 \subsection{Universe Polymorphism}
 %--------------------------------------------------------------------------------
 
+\paragraph{Occurrences of a Sort}
+
+\begin{enumerate}
+
+    \item Argument type:
+        $$
+        \rulev{
+            \Gamma, x^{\Any_i} \vdash B: \Any_j
+            \\
+            \Gamma, x^{\Any_i} \vdash e: B
+        }
+        {
+            \Gamma \vdash \lambda x^{\Any_i}. e
+            : \Pi x^{\Any_i}. B
+            : \Any_{\text{max}(i+1, j)}
+        }
+        $$
+
+        The universe index $i$ has to be floating in order to accomodate an
+        actual argument replacing the formal argument $x$ from any universe.
+        This makes any function $\lambda x^{\Any_i}. e$ of type $\Pi x^{\Any_i}.
+        B$ really universe polymorphic.
+
+        I.e. Let $A: \Any_k$, then $(\lambda x^{\Any_i}. e) A$ is valid under the
+        constraint $k \le i$.
+
+        The expression $(\lambda x^{\Any_i}. e) \Any_l$ is valid under the
+        constraint $l+1 \le i$ or $l < i$.
+
+
+    \item Result type:
+        $$
+        \rulev{
+            \Gamma \vdash A: \Any_i
+            \\
+            \Gamma, x^A \vdash \Any_j : \Any_{j+1}
+            \\
+            \Gamma, x^A \vdash e: \Any_j
+        }
+        {
+            \Gamma \vdash \lambda x^A. e
+            : \Pi x^A. \Any_j
+            : \Any_{\text{max}(i, j+1)}
+        }
+        $$
+
+        The universe index $j$ need not be floating. It can be nailed down to
+        $0$ if possible. However there might be constraints of the form $u \le
+        j$ or $v < j$. In these cases $j$ can be set as low as possible
+        respecting the constraints.
+
+    \item Actual argument:
+        $$
+        \rulev{
+            \Gamma \vdash f : \Pi x^{\Any_j}. B
+            \\
+            \Gamma \vdash \Any_i : \Any_{i+1}
+            \\
+            i+1 \le j
+        }
+        {
+            \Gamma \vdash f \Any_i: B[\Any_i / x]
+        }
+        $$
+        The usage of $\Any_i$ as a actual argument in a function $f$ of type
+        $\Pi x^{\Any_j}$ is valid under the constraint $i < j$. In order to
+        satisfy this constraint, the level $j$ has to be floating.
+
+    \item Sort of an inductive type:
+        Let
+        $$
+        [\,\Gamma
+        \mid
+        T^{\Pi \vec x ^{\vec A}. \Any_i}
+        \mid
+        C_{\ell_1}, \ldots, C_{\ell_n}
+        \,]
+        $$
+        be an inductive type where the constructor types $C_{\ell_k}$ have the
+        form
+        $$
+        \Pi \vec y^{\vec B}. T \vec a
+        $$
+        with
+        $$
+        B_k : \Any_{j_k}
+        $$
+        Then the definition is valid only under the constraint
+        $$
+        j_k \le i
+        $$
+
+        Note: Constructor argument types $B_k: \Prop$ do not create any
+        constraints.
+
+        Intuitive rationale for the rule: The construction of an object of an
+        inductive type cannot \emph{hide} an object of a higher universe than
+        the universe $i$ of the inductive type within the object. Therefore no
+        object from a higher universe than the universe of the inductive type
+        can be uncovered by pattern match.
+\end{enumerate}
+
+
+\paragraph{General Typing Rules for Sorts}
 $$
 \begin{array}{ll}
     \underbrace{
@@ -46,6 +150,24 @@ $$
     &\text{Polymorphic type}
 
 \end{array}
+$$
+
+
+
+\paragraph{Universe Polymorphic Definition}
+
+Any function which has arguments where of type $\Any$ is treated as universe
+polymorphic in that argument. The result type does not need to be universe
+polymorphic.
+$$
+\text{List}: \Pi u^\Uni: \underbrace{\Any_u \to \Any_0}_{: \Any_{u+1}}
+$$
+
+Having that definition the types $\text{List}\, 0\, \Nat$ and $\text{List}\,
+(u+1)\, \Any_u$ are welltyped. Then we can form a hetergeneous list which is
+indexed by a list of types
+$$
+    \text{HList}: \Pi u^\Uni. \text{List}\, (u+1)\, \Any_u \to \Any_0
 $$
 
 
@@ -268,6 +390,16 @@ subterms.
 
 \subsection{Metavariables}
 %--------------------------------------------------------------------------------
+
+
+\begin{comment}
+    Holes: Places to fill in terms.
+
+    Metavariables are based on holes with a type. We cannot base a metavariable
+    on a hole without type. Reason: We want to construct only welltyped terms.
+\end{comment}
+
+
 
 Reasons to introduce metavariables:
 \begin{enumerate}
