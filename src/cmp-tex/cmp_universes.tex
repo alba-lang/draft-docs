@@ -1,18 +1,22 @@
 \section{Universes}
 
 
+
+
+
+\subsection{Universes and Sorts}
+
+
 We have the following sorts or universes (sorts and universes are synonymous):
 \begin{enumerate}
-
-\item $\Uni$: Type of universe variables
-
 \item $\Prop$: Impredicative universe of propositions
 
-\item $\Any_i$: Predicative universes of types for $i \in \set{0, 1, 2, \ldots}$.
+\item $\Any_i$: Predicative universes of types for $i \in \set{0, 1, 2, \ldots}$
 
-\item $\Any_\infty$: Top universe.
+\item $\Any_\infty$: Top universe
 \end{enumerate}
-with the typing judgements:
+and the builtin type $\Uni$ with the typing judgements which are treated as
+axioms:
 $$
 \begin{array}{l}
     \Uni : \Any_\infty
@@ -23,7 +27,10 @@ $$
 
 
 All sorts except the top sort $\Any_\infty$ have types. Therefore it is
-possible to introduce variables $x: s$ for all sorts except the top sort.
+possible to introduce type variables $X: s$ for all sorts except the top sort.
+
+Furthermore since $\Uni$ has type $\Any_\infty$ it is possible to introduce
+universe variables $u: \Uni$.
 
 The type of a type is always a sort. The sort of a type defines the
 universe of the type. I.e. all types live in a universe. The typing judgement
@@ -50,3 +57,44 @@ $\Any_0$ lives in the universe $\Any_2$.
 
 All types regarded as objects live in a universe higher than the types regarded
 as types.
+
+
+Typing rules for products:
+$$
+\begin{array}{lll}
+    \rulev{
+        \Gamma \vdash A: s
+        \\
+        \Gamma, x^A \vdash B: \Prop
+        \\
+        A \ne \Uni
+    }
+    {
+        \Gamma \vdash \Pi x^A. B : \Prop
+    }
+    &
+    \rulev{
+        \Gamma \vdash A: \Any_i
+        \\
+        \Gamma, x^A \vdash B: \Any_i
+        \\
+        A \ne \Uni
+    }
+    {
+        \Gamma \vdash \Pi x^A. B : \Any_i
+    }
+    &
+    \rulev{
+        \Gamma \vdash u: \Uni
+        \\
+        \Gamma, u^\Uni \vdash B: s
+        \\
+        A \ne \Uni
+    }
+    {
+        \Gamma \vdash \Pi u^\Uni. B : \Any_\infty
+    }
+\end{array}
+$$
+These rules guarantee that the type $\Pi u^\infty. B$ of a universe polymorphic
+object cannot be used as an argument to a function.
