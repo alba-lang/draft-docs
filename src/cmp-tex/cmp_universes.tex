@@ -1,0 +1,52 @@
+\section{Universes}
+
+
+We have the following sorts or universes (sorts and universes are synonymous):
+\begin{enumerate}
+
+\item $\Uni$: Type of universe variables
+
+\item $\Prop$: Impredicative universe of propositions
+
+\item $\Any_i$: Predicative universes of types for $i \in \set{0, 1, 2, \ldots}$.
+
+\item $\Any_\infty$: Top universe.
+\end{enumerate}
+with the typing judgements:
+$$
+\begin{array}{l}
+    \Uni : \Any_\infty
+    \\
+    \Prop : \Any_0 : \Any_1 \ldots
+\end{array}
+$$
+
+
+All sorts except the top sort $\Any_\infty$ have types. Therefore it is
+possible to introduce variables $x: s$ for all sorts except the top sort.
+
+The type of a type is always a sort. The sort of a type defines the
+universe of the type. I.e. all types live in a universe. The typing judgement
+$T: s$ says that the type $T$ lives in the universe $s$.
+
+
+There is a subtle difference between the universe of a type and the universe of
+an object. An object has a type and its type lives in a universe. We say the an
+\emph{object $o$ lives in a universe $s$ if its type $T$ lives in the universe
+$s$}. I.e. the typing judgement $o : T : s$ must be valid. In other words $o$
+has type $T$ and $T$ has type $s$.
+
+A type $T$ can be regarded as a type. Then its type is a sort $s$ with $T : s$
+and it therefore lives in the universe $s$ as a type.
+
+However a type can be regarded as an object as well. Then there is the typing
+judgement $T: s_1 : s_2$. We say the object $T$ lives in the universe $s_2$.
+
+Some examples: The type $\Nat$ lives in the universe $\Any_0$. The object $1$
+has type $\Nat$. Therefore the object $1$ lives in the universe $\Any_0$. The
+object $\Nat$ has type $\Any_0$ which has the type $\Any_1$. Therefore the
+object $\Nat$ lives in the universe $\Any_1$. By the same reasoning the object
+$\Any_0$ lives in the universe $\Any_2$.
+
+All types regarded as objects live in a universe higher than the types regarded
+as types.
