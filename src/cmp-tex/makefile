@@ -21,7 +21,7 @@ source-files = \
 # Run it twice to get crossreferences correct if new labels have been
 # introduced.
 .PHONY: pdf
-pdf:
+pdf: mk-build-dir
 	rm $(build-dir)*.tex;  \
 	cp $(source-files) $(build-dir); \
 	(cd $(build-dir); pdflatex cmp.tex)
@@ -30,5 +30,10 @@ pdf:
 # Extract citations for the bib database. Run always, if a new citation has been
 # added.
 .PHONY: bib
-bib:
-	(cd $(build-dir); bibtex cc)
+bib: mk-build-dir
+	(cd $(build-dir); bibtex cmp)
+
+
+.PHONY: mk-build-dir
+mk-build-dir:
+	test -d "$(build-dir)" || mkdir -p $(build-dir)
