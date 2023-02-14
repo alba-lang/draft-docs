@@ -59,42 +59,128 @@ All types regarded as objects live in a universe higher than the types regarded
 as types.
 
 
+
+
+\subsection{Typing Rules}
+
+
 Typing rules for products:
-$$
-\begin{array}{lll}
-    \rulev{
-        \Gamma \vdash A: s
-        \\
-        \Gamma, x^A \vdash B: \Prop
-        \\
-        A \ne \Uni
-    }
-    {
-        \Gamma \vdash \Pi x^A. B : \Prop
-    }
-    &
-    \rulev{
-        \Gamma \vdash A: \Any_i
-        \\
-        \Gamma, x^A \vdash B: \Any_i
-        \\
-        A \ne \Uni
-    }
-    {
-        \Gamma \vdash \Pi x^A. B : \Any_i
-    }
-    &
-    \rulev{
-        \Gamma \vdash u: \Uni
-        \\
-        \Gamma, u^\Uni \vdash B: s
-        \\
-        A \ne \Uni
-    }
-    {
-        \Gamma \vdash \Pi u^\Uni. B : \Any_\infty
-    }
-\end{array}
-$$
-These rules guarantee that the type $\Pi u^\infty. B$ of a universe polymorphic
+\begin{enumerate}
+    \item Propositional Products:
+        $$
+            \rulev{
+                \Gamma \vdash A: s
+                \\
+                \Gamma, x^A \vdash B: \Prop
+                \\
+                A \ne \Uni
+            }
+            {
+                \Gamma \vdash \Pi x^A. B : \Prop
+            }
+        $$
+    \item Predicative Products:
+        $$
+            \rulev{
+                \Gamma \vdash A: \Any_i
+                \\
+                \Gamma, x^A \vdash B: \Any_i
+            }
+            {
+                \Gamma \vdash \Pi x^A. B : \Any_i
+            }
+        $$
+
+    \item Universe Products:
+        $$
+            \rulev{
+                \Gamma \vdash u: \Uni
+                \\
+                \Gamma, u^\Uni \vdash B: s
+                \\
+                A \ne \Uni
+            }
+            {
+                \Gamma \vdash \Pi u^\Uni. B : \Any_\infty
+            }
+        $$
+\end{enumerate}
+These rules guarantee that the type $\Pi u^\Uni. B$ of a universe polymorphic
 object cannot be used as an argument to a function.
+
+
+Furthermore we have the cumulativity rule
+$$
+\rulev{
+    \Gamma \vdash t : T
+    \\
+    \Gamma \vdash U : s
+    \\
+    T \le U
+}
+{
+    \Gamma \vdash t : U
+}
+$$
+The cumulativity rule for predicative universes says that whenever $T: \Any_i$
+is valid, then $T: \Any_j$ is valid for all $i \le j$ since $\Any_i \le \Any_j$
+is valid.  Together with the predicative product rule we get
+$$
+\rulev{
+    \Gamma \vdash A: \Any_i
+    \\
+    \Gamma, x^A \vdash B: \Any_j
+    \\
+    i \le k
+    \\
+    j \le k
+}
+{
+    \Gamma \vdash \Pi x^A.B : \Any_k
+}
+$$
+or maybe more specific
+$$
+\rulev{
+    \Gamma \vdash A: \Any_i
+    \\
+    \Gamma, x^A \vdash B: \Any_j
+}
+{
+    \Gamma \vdash \Pi x^A.B : \Any_{\text{max}(i,j)}
+}
+$$
+
+
+
+
+
+
+\subsection{Constraints}
+
+
+Universe variables are always implicit. The programmer usually ommits universe
+variables in the source code i.e. instead of $\Any_u$ the source code contains
+only $\Any$. The compiler generates for each sort $\Any$ in the source code a
+metavariable $\meta u : \Uni$ and interprets the sort $\Any$ as $\Any_{\meta
+u}$.
+
+There are the following two sources of constraints between universes.
+
+\begin{enumerate}
+    \item Predicative type argument $T: \Any_{u}$: If $T$ is used as an actual
+        argument e.g. in the expression $f T$, then the function $f$ must have
+        the type $\Pi X^{\Any_v}. R$.  This creates the constraint $u \le v$.
+
+    \item Predicative inductive type $\Pi \vec x^{\vec A}. \Any_{v}$: Any
+        instance of such an inductive type lives in the universe $\Any_{v}$.
+
+        This requires that all arguments of all contructors must not live in a
+        higher universe. Reason: Pattern matches of an indutive type living in
+        the universe $\Any_{v}$ must not uncover any object living in a
+        higher universe. In other words: \emph{Only smaller (or equal) things
+        can be used to create greater things}.
+
+        I.e. any constructor argument living as an object in the universe
+        $\Any_u$ creates the constraint $u \le v$.
+\end{enumerate}
