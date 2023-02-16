@@ -184,3 +184,86 @@ There are the following two sources of constraints between universes.
         I.e. any constructor argument living as an object in the universe
         $\Any_u$ creates the constraint $u \le v$.
 \end{enumerate}
+
+
+
+
+
+
+\subsection{Predicative Inductive Types}
+
+In Alba new types can be created as inductive types. The simplest inductive
+types have neither parameter nor index arguments.
+$$
+\begin{array}{lll}
+    B &:=& [T^{\Any_0} \mid T, T]
+    \\
+    N &:=& [T^{\Any_0} \mid N, N \to N]
+\end{array}
+$$
+
+The types of booleans and natural numbers live in the universe $\Any_0$ because
+of the typing judgements $B: \Any_0$ and $N: \Any_0$. Objects of type boolean do
+not contain anything. Objects of type $N$ might contain other natural numbers
+(second constructor). There is no possibility for such simple types to contain
+objects living in a higher universe than $\Any_0$.
+
+Polymorphic types like lists and pairs have type parameters. The type parameters
+can live in any universe. Therefore they need an universe level parameter and a
+type parameter whhich depents on the uinverse level.
+
+$$
+\begin{array}{lllll}
+    L &:=& [i^\Uni, A^{\Any_i} &\mid T^{\Any_i} &\mid T, A \to T \to T]
+    \\
+    P &:=& [i^\Uni, A^{\Any_i}, B^{\Any_i} &\mid T^{\Any_i} &\mid A \to B \to T]
+\end{array}
+$$
+
+Having that we can construct a list of natural numbers $L\,0\,N: \Any_0$ living
+in the universe level $0$. However it is possible to construct list of types
+$L\,(i+1)\,\Any_i$ which might live in the universe level $i$. The types as
+types live in the universe level $i$, but the types as objects live in the
+universe level $i+1$. Therefore the whole list which contains objects from the
+universe level $i + 1$ lives in the universe level $i+1$ as well.
+
+
+A more complex type is the dependent list.
+$$
+\begin{array}{lllll}
+    \text{DL} &:=&
+    [
+        i^\Uni, A^{\Any_i}, P^{A \to \Any_i}
+        &\mid
+        T^{LiA \to \Any_i}
+        &\mid
+        T[],
+        \Pi a^A \text{as}^{LiA}.
+            Pa \to T\text{as} \to T(a :: \text{as})
+    ]
+\end{array}
+$$
+
+A dependent list might contain objects of type $A$, $LiA$, $Pa$ and
+$T\text{as}$. All these object live in the universe level $i$. Therefore the
+whole dependent list can live in the universe level $i$.
+
+Furthermore we can construct hetergeneous lists.
+$$
+\begin{array}{lllll}
+    \text{HL} &:=&
+    [
+        i^\Uni
+        &\mid
+        T^{L(i+1)\Any_i \to \Any_{i+1}}
+        &\mid
+        T[],
+        \Pi A^{\Any_i} \text{As}^{L(i+1)\Any_i}.
+            A \to T\text{As} \to T(A :: \text{As})
+    ]
+\end{array}
+$$
+A heterogeneous list contains objects $A$ and $\text{As}$ with the typing
+judgements $A : \Any_i : \Any_{i+1}$, $\text{As}: L(i+1)\Any_i : \Any_{i+1}$.
+These objects live in the universe level $i+1$. Therefore the whole
+heterogeneous list object must live in the universe level $i+1$ as well.
