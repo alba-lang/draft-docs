@@ -267,3 +267,20 @@ A heterogeneous list contains objects $A$ and $\text{As}$ with the typing
 judgements $A : \Any_i : \Any_{i+1}$, $\text{As}: L(i+1)\Any_i : \Any_{i+1}$.
 These objects live in the universe level $i+1$. Therefore the whole
 heterogeneous list object must live in the universe level $i+1$ as well.
+
+
+Here is a rather strange type
+$$
+\begin{array}{lllll}
+    \text{Ex}
+    &:=&
+    [
+        i^\Uni,
+        P^{\Any_i \to \Prop}
+        &\mid
+        T^{\Any_{i+1}}
+        &\mid
+        \Pi X^{\Any_i}. P X \to T
+    ]
+\end{array}
+$$
