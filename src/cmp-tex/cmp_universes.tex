@@ -5,6 +5,7 @@
 
 
 \subsection{Universes and Sorts}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 We have the following sorts or universes (sorts and universes are synonymous):
@@ -62,6 +63,7 @@ as types.
 
 
 \subsection{Typing Rules}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 Typing rules for products:
@@ -157,6 +159,7 @@ $$
 
 
 \subsection{Constraints}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 Universe variables are always implicit. The programmer usually ommits universe
@@ -191,6 +194,7 @@ There are the following two sources of constraints between universes.
 
 
 \subsection{Predicative Inductive Types}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 In Alba new types can be created as inductive types. The simplest inductive
 types have neither parameter nor index arguments.
@@ -284,3 +288,25 @@ $$
     ]
 \end{array}
 $$
+
+
+
+
+\subsection{No Universe Polymorphism}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+No universe polymorphis means that all user entered $\Any$ are interpreted as
+$\Any_0$. Therefore all types live as types at the universe level $0$ and all
+objects which are not types live as well at the universe level $0$. Types as
+objects live at the universe level $1$.
+
+This has an important consequence: \emph{Type objects cannot be contained within
+other objects}. There is no list of types, no pair of types etc.
+
+Of the above examples nearly all types are possible without universe
+polymorphism. Only heterogeneous lists $\text{HL}$ and the strange type
+$\text{Ex}$ are not possible without universe polymorphism.
+
+Without universe polymorphism we are basically in the calculus of constructions
+with inductive types. All construction which require an infinite set of
+stratified universes with cumulativity are not possible.
