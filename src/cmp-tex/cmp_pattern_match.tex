@@ -2,6 +2,27 @@
 %----------------------------------------------------------------------
 
 
+\subsection{Examples}
+%----------------------------------------------------------------------
+
+\begin{alba}
+    type Vec (A: Any): Nat -> Any :=
+        []: Vec zero
+        (::) {n}: A -> Vec n -> Vec (succ n)
+
+
+    map {A B C} (f: A -> B -> C)
+        : all {n}
+          : Vec A n -> Vec B n -> Vec C n
+    := case
+        \ {zero}, [], [] :=
+            []
+        \ {succ n}, (::) {n} x xs, (::) {n} y ys :=
+            (::) {n} (f x y) (map {n} xs ys)
+\end{alba}
+
+
+
 \subsection{Basics}
 %----------------------------------------------------------------------
 
@@ -19,16 +40,16 @@ $$
 and where each clause $c_i$ has the form
 %
 $$
-    [\Delta_1. p_1^{P_1}, \ldots, \Delta_m. p_m^{P_m}] := e^E
+    [\Delta \mid p_1^{P_1}, \ldots, p_m^{P_m} \mid e^E]
 $$
-where the context $\Delta_i$ contains all pattern variables introduced in the
-pattern $p_i$
+where the context $\Delta$ contains all pattern variables introduced in the
+pattern, $p_i$ is the $i$-th pattern
 and $P_i$ is the corresponding type of the pattern, $e$ is the body of the
 clause and $E$ its corresponding type.
 
 Each clause defines the function
 $$
-\lambda \Delta_1 \ldots \Delta_m. e^E
+\lambda \Delta . e^E
 $$
 
 
@@ -55,9 +76,9 @@ The pattern variables are assumed to be distinct in all clauses.
 A clause of the pattern match expression is welltyped if
 $$
 \begin{array}{lll}
-    \Delta_1,\ldots,\Delta_i &\vdash& p_i : P_i
+    \Delta &\vdash& p_i : P_i
     \\
-    \Delta_1,\ldots,\Delta_m &\vdash& e : E
+    \Delta &\vdash& e : E
 \end{array}
 $$
 %
