@@ -519,7 +519,7 @@ to avoid verifying the same constraints over and over again.
             \\
             x \vec a
             \\
-            \make^I_\ell \vec a
+            \Make^I_\ell \vec a
             \\
             \case(f^F , \vec c)
             \\
@@ -534,7 +534,7 @@ to avoid verifying the same constraints over and over again.
         \begin{array}{lll}
             x \vec a &\sim& y \vec b
             \\
-            \make^I_{\ell_1} \vec a &\sim& \make^I_{\ell_2} \vec b
+            \Make^I_{\ell_1} \vec a &\sim& \Make^I_{\ell_2} \vec b
         \end{array}
         $$
 \end{enumerate}
@@ -704,8 +704,10 @@ signature.
 
 
 
-\subsection{Products $\Pi x^A. B$}
+\subsection{Products}
 %---------------------------------------------------------------------------
+
+$$ \Pi x^A. B $$
 
 Input: $E_A$, $E_B$, $h$ an elaborator for $A$ and for $B$ and a hole $h$ to put
 the expression.
@@ -742,8 +744,10 @@ necessary to wait for $E_A$.
 
 
 
-\subsection{Typed terms $t: T$}
+\subsection{Typed terms}
 %---------------------------------------------------------------------------
+
+$$ t : T $$
 
 \paragraph{Substasks}
 \begin{enumerate}
@@ -774,9 +778,10 @@ necessary to wait for $E_A$.
 
 
 
-\subsection{Applications $f a$}
+\subsection{Applications}
 %---------------------------------------------------------------------------
 
+$$ f a$$
 
 
 The elaborator of $f a$ starts with a signature requirement $[R]$ and
