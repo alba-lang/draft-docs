@@ -84,17 +84,17 @@ recursive argument.
 %--------------------------------------------------------------------------------
 
 $$
-    \make^I_{\ell_i} \vec p \vec b: I \vec p \vec a
+    \Make^\Ind_{\ell_i} \vec p \vec b: \Ind \vec p \vec a
 $$
 where $I$ is the inductive type, $i$ marks the $i$th constructor, $\vec p$ are
 the parameter arguments and $\vec b$ are the constructor arguments, $a$ are the
 index arguments which depend on the constructor arguments.
 
-The peano number $2$ looks like $ \make^N_1 (\make^N_1 \make^N_0) $.
+The peano number $2$ looks like $ \Make^N_1 (\Make^N_1 \Make^N_0) $.
 
 A constructor has the type
 $$
-    \make^I_{\ell_i} : \Pi \Gamma \Delta_{\ell_i}. T {\vec a}_{\ell_i}
+    \Make^\Ind_{\ell_i} : \Pi \Gamma \Delta_{\ell_i}. T {\vec a}_{\ell_i}
 $$
 
 
@@ -128,7 +128,7 @@ inductive type. Then we have the following typing rules.
             [] \vdash I: \Pi \Gamma. K
         }
         {
-            \make^I_{\ell_i}: \Gamma \Delta.T \vec a
+            \Make^\Ind_{\ell_i}: \Gamma \Delta.T \vec a
         }
         $$
 \end{description}
