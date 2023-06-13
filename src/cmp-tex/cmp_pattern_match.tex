@@ -132,9 +132,6 @@ $$
         &::=& e
         %
         \\
-        &\mid& [x^T \mid t]
-        %
-        \\
         &\mid& [
             x^T
             \mid
@@ -164,14 +161,17 @@ where $n + m > 0$ and
     \end{tabular}
 \end{center}
 
-We can abbreviate the second form of an inner node by $[x^T \mid \vec c\vec t \mid
+We can abbreviate the inner node by $[x^T \mid \vec c\vec t \mid
 \vec\ell \vec t | d]$.
 
 
 No duplicate constants and no duplicate labels are allowed in the second form of
 an inner node.
 
-The application of a case scans the list of arguments left to write with a
+Note that an inner node of the form $x \mid \empty \mid \empty \mid \empty]$ is
+a leave node.
+
+The application of a case tree scans the list of arguments left to write with a
 pointer to a subexpression to some of its arguments. Semantic actions associated
 to the nodes of a case tree.
 \begin{itemize}
@@ -179,12 +179,6 @@ to the nodes of a case tree.
         arguments. The list of collected subexpression $u_1, u_2, \ldots$ cover
         all free variables in the expression $e$. Action: Return the value
         $e[u_1,u_2,\ldots / .]$.
-
-    \item $[x^T \mid t]$: The pointer has to point to some subexpression of the
-        arguments and there has to be a next pointer position. Action: Append
-        the term $u$ to the list of terms $u_1,u_2,\ldots$ where $u$ is the
-        subexpression at the pointer and apply the case tree $t$ to the pointer
-        advance by one.
 
     \item $[x^T \mid \vec c \vec t \mid \vec \ell \vec t \mid d]$:
         The pointer has to point to some subexpression of the arguments. The
@@ -271,7 +265,7 @@ $[\Delta \mid \vec p \mid e]$.
         \begin{array}{lll}
             \ct(x,t)
             &:=&
-            [x \mid t]
+            [x \mid \empty \mid \empty \mid t]
             \\
             \ct(x := c, t)
             &:=&
@@ -297,7 +291,7 @@ $[\Delta \mid \vec p \mid e]$.
     $\ct(\vec p, e)$.
 }
 
-Note that the case tree of a cause clause has no branching and no default trees.
+Note that the case tree of a cause clause has no branching.
 It is a path from the root to a leave.
 
 
