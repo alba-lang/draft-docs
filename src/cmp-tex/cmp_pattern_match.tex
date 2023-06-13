@@ -132,11 +132,11 @@ $$
         &::=& e
         %
         \\
-        &\mid& [x \mid t]
+        &\mid& [x^T \mid t]
         %
         \\
         &\mid& [
-            x
+            x^T
             \mid
             c_1 t_1, \ldots,  c_n t_n \mid
             \ell_1 t_1, \ldots, \ell_m t_m
@@ -156,7 +156,7 @@ where $n + m > 0$ and
         \\
         $e$ & expression on the right hand side of a case clause
         \\
-        $x$ & pattern variable
+        $x^T$ & pattern variable with its corresponding type
         \\
         $c$ & constant
         \\
@@ -164,7 +164,7 @@ where $n + m > 0$ and
     \end{tabular}
 \end{center}
 
-We can abbreviate the second form of an inner node by $[x \mid \vec c\vec t \mid
+We can abbreviate the second form of an inner node by $[x^T \mid \vec c\vec t \mid
 \vec\ell \vec t | d]$.
 
 
@@ -180,13 +180,13 @@ to the nodes of a case tree.
         all free variables in the expression $e$. Action: Return the value
         $e[u_1,u_2,\ldots / .]$.
 
-    \item $[x \mid t]$: The pointer has to point to some subexpression of the
+    \item $[x^T \mid t]$: The pointer has to point to some subexpression of the
         arguments and there has to be a next pointer position. Action: Append
         the term $u$ to the list of terms $u_1,u_2,\ldots$ where $u$ is the
         subexpression at the pointer and apply the case tree $t$ to the pointer
         advance by one.
 
-    \item $[x \mid \vec c \vec t \mid \vec \ell \vec t \mid d]$:
+    \item $[x^T \mid \vec c \vec t \mid \vec \ell \vec t \mid d]$:
         The pointer has to point to some subexpression of the arguments. The
         subexpression has to reduce to a head normal form which has either a
         constant or a constructor in the head position. From the constant or the
@@ -217,20 +217,39 @@ to the nodes of a case tree.
 \paragraph{Exhaustiveness of inner nodes}
 %
 
-An inner node of the form $[x \mid \vec c \vec t \mid \vec\ell \vec t \mid d]$ is
+An inner node of the form $[x^T \mid \vec c \vec t \mid \vec\ell \vec t \mid d]$ is
 exhaustive if it has a default tree or if all labels of constructors which can
-construct an object of the corresponding type are present.
+construct an object of the corresponding type are present (none of the missing
+constructors can construct an object of type $T$).
 
-An empty case tree is possible if at least one of the types is not inhabited,
-i.e. one of $F[x_1, \ldots, x_i/.]$ of the form $I \vec p \vec a$  where $x_j$
-are pattern variables, $\vec p$ are parameter arguments and $\vec a$ are index
-arguments has no constructor $\Make^I_\ell \vec p \meta y_1 \ldots$
-which can construct such an object.
+An empty inner node of the form $[x^T \mid \empty \mid \empty \mid \empty]$ is
+possible if $T$ is an inductive type and none of the constructors of the
+inductive type can construct an object of type $T$.
 
 \paragraph{Exhaustiveness of a case tree}
 %
 A case tree is exhaustive if all its nodes are exhaustive.
 
+
+
+\paragraph{Redundancy of an inner node}
+
+An inner node of the form $[x^T \mid \vec c \vec t \mid \vec\ell \vec t \mid d]$
+is redundant if
+\begin{itemize}
+    \item it has multiple entries of the same constant
+
+    \item it has multiple entries of the same constructor
+
+    \item it has a default tree and none of the missing constructors can
+        construct an object of type $T$ or there are no missing constructors.
+\end{itemize}
+
+
+
+\paragraph{Redundancy of case tree}
+
+A case tree is redundant of some of its nodes are redundant.
 
 
 
