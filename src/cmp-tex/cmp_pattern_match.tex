@@ -259,30 +259,43 @@ A case tree is redundant of some of its nodes are redundant.
 
 \paragraph{Case tree for a clause}
 First we construct a case tree from a cause clause
-$\Delta \vec p^{\Vec p} := e$.
+$[\Delta \mid \vec p \mid e]$.
 
-$$
-\begin{array}{lll}
-    \ct(\Delta \vec p^{\vec P} := e) &:=& \ct(\vec p, e)
-    \\
-    \ct(x, t) &:=& [x \mid t]
-    \\
-    \ct(x := c, t) &:=& [x \mid c\, t \mid \epsilon ]
-    \\
-    \ct(x := \Make^I_\ell \vec q \vec p, t)
-                   &:=&
-                   [x \mid \ell\, \ct(\vec p, t) \mid \epsilon ]
-\end{array}
-$$
-%
-where $\ct(\vec p, t)$ on a sequence of pattern is threaded from behind
-%
-$$
-\ct(p_1 \ldots p_{n-1} p_n, t)
-:=
-\ct(p_1, (\ldots \ct(p_{n-1}, \ct(p_n, t))\ldots))
-$$
-
+{
+    \def\ct{f_\text{ct}}
+    The case tree corresponding to $e$ is $e$. The case tree $\ct(p, t)$ of a
+    pattern $p$ where $t$ is a partially constructed case tree is defined
+    recursively
+    $$
+    \ct(p, t) := \left\{
+        \begin{array}{lll}
+            \ct(x,t)
+            &:=&
+            [x \mid t]
+            \\
+            \ct(x := c, t)
+            &:=&
+            [x \mid c t \mid \empty \mid \empty]
+            \\
+            \ct(x := \Make^\Ind_\ell \vec q \vec p, t)
+            &:=&
+            [x \mid \empty \mid \ell \ct(\vec p, t) \mid \empty]
+        \end{array}
+    \right.
+    $$
+    %
+    where $\ct(\vec p, t)$ on a sequence of pattern is threaded from behind
+    %
+    $$
+    \ct(p_1 \ldots p_{n-1} p_n, t)
+    :=
+    \ct(p_1, (\ldots \ct(p_{n-1}, \ct(p_n, t))\ldots))
+    $$
+    with the corner case $\ct(\empty, t) = t$.
+    %
+    The case tree of a case clause $[\Delta \mid \vec p \mid e]$ is defined as
+    $\ct(\vec p, e)$.
+}
 
 Note that the case tree of a cause clause has no branching and no default trees.
 It is a path from the root to a leave.
