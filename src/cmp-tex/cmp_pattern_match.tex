@@ -404,6 +404,20 @@ variables $\vec x$.
 \end{alba}
 
 
+\paragraph{Ackermann Function}
+
+\ \begin{alba}
+    ack: Nat -> Nat -> Nat := case
+        \ zero  ,     n       :=  succ n
+        \ succ m,     zero    :=  ack m (succ zero)
+        \ k := succ m, succ n :=  ack m (ack k n)
+\end{alba}
+
+Proof of termination: In each recursive application either the first argument
+decreases or the first argument remains the same and the second argument
+decreases.
+
+
 \paragraph{Vector}
 
 \ \begin{alba}
