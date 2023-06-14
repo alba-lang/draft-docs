@@ -30,6 +30,11 @@ $$
 \lambda \Delta . e^E
 $$
 
+The number of toplevel pattern in all clauses of a case expression must be the
+same. The number of toplevel pattern in the clauses must not exceed the number
+of arguments of the corresponding function type $\Pi x_1^{A_1} \ldots x_k^{A_k}.
+R$.
+
 
 The patterns are terms generated from the grammar
 $$
@@ -71,6 +76,61 @@ $$
 $$
 %
 where $F = \Pi x_1^{A_1} \ldots x_m^{A_m}. R$.
+
+
+
+
+
+
+\subsection{Recursion}
+%------------------------------------------------------------
+
+The bound variable $f$ in a case expression $[f^F \mid \vec c \mid t]$ might
+occur in one of the right hand sides $e$ of the case clauses in the form $f \vec
+a$ where the number of arguments is the same as the number of toplevel pattern
+in the corresponding case clause. In that case we have a recursive call where
+termination has to be guaranteed.
+
+For each cause clause we have a list of pattern variables $\Delta = [y_1^{B_1},
+y_2^{B_2}, ldots ]$. We attach to each pattern variable the number pair $i/l$
+where $i$ is the position of the toplevel argument from which it comes from and
+$j$ is the level i.e. the number of constructors used to uncover it.
+
+\noindent Example Ackermann's function
+\begin{alba}
+    ack: Nat -> Nat -> Nat := case
+        \ zero  ,      n      :=  succ n
+
+        \ succ m,      zero   :=  ack m (succ zero)
+    --         1/1
+
+        \ k := succ m, succ n :=  ack m (ack k n)
+    --    1/0       1/1     2/1
+\end{alba}
+
+For each recursive call we attach to each argument the level if the argument is
+a pattern variable coming from the same toplevel argument.
+
+\begin{alba}
+    ack    m     (succ zero)
+    --     1
+
+    ack    m     (ack k n)
+    --     1
+
+    ack    k     n
+    --     0     1
+\end{alba}
+
+From this signature we see that either the first argument decreases (i.e. level
+$> 0$) or the first argument stays at the same level (i.e. level $0$) and the
+second argument decreases.
+
+A recursion terminates if some of its arguments can be brought into a
+lexicographic order such that they decrease in the lexicographic order in each
+recursive call. If such an order cannot be found, then the recursion is not
+guaranteed to terminate and therefore illegal.
+
 
 
 
@@ -230,12 +290,11 @@ to the nodes of a case tree.
 
 
 
-\subsection{Case Tree Construction}
+\subsection{Case Tree of a Clause}
 %------------------------------------------------------------
 
-\paragraph{Case tree for a clause}
 First we construct a case tree from a cause clause
-$[\Delta \mid \vec p \mid e]$.
+$$ [\Delta \mid \vec p \mid e] $$.
 
 {
     \def\ct{f_\text{ct}}
@@ -278,7 +337,10 @@ It is a path from the root to a leave.
 
 
 
-\paragraph{Merge case trees} We have to be able to merge two case trees $t_1$
+\subsection{Merge Case Trees}
+%--------------------------------------------------------------------------------
+
+We have to be able to merge two case trees $t_1$
 and $t_2$ to $m(t_1, t_2)$ where the first one might an already merged case tree
 and the second one has been constructed from a clause of the pattern match
 expression.
@@ -326,7 +388,11 @@ case tree:
         the available constructors and their case trees.
 \end{enumerate}
 
-\paragraph{Algorithm}
+
+
+
+\subsection{Algorithm to Construct a Case Tree}
+%--------------------------------------------------------------------------------
 
 \ \begin{enumerate}
     \item Construct a case tree from the first clause.
@@ -346,33 +412,6 @@ inductive type which cannot be constructed (e.g. $\text{False}$ or $\text{zero}
 
 
 
-
-
-\subsection{Application of a pattern match expression}
-
-An application of a pattern match expression (whose type is always a function
-type) has the form
-$$
-\case(f^F, \vec c) \vec a
-$$
-where $\vec a = [a_1, \ldots, a_n]$ are the arguments to which the pattern match
-function is applied. The maximal number of arguments is determined by the type
-$F$ of the pattern match expression.
-
-The application can be evaluated if it is possible to find a clause of the
-pattern match expression and split the arguments $\vec a$ into subexpressions
-$\vec s$ and evaluate $(\lambda \Delta. e^E) \vec s$.
-
-A pattern match expression applied to arguments is a reducible expression
-$$
-\case(f^F, \vec c) \vec a \quad\to\quad e[case(f^F, \vec c), \vec s / f, \vec x]
-$$
-where $e$ is the expression on the right hand side of the found clause, $\vec x$
-are the pattern variables of this clause and $\vec s$ are the subexpressions
-extracted from the arguments $\vec a$ during walking down the case tree. The
-hole case expression is substituted for the variable $f$ representing the
-function and the subexpressions $\vec s$ are substituted for the pattern
-variables $\vec x$.
 
 
 
@@ -412,8 +451,8 @@ variables $\vec x$.
 
 \ \begin{alba}
     ack: Nat -> Nat -> Nat := case
-        \ zero  ,     n       :=  succ n
-        \ succ m,     zero    :=  ack m (succ zero)
+        \ zero  ,      n      :=  succ n
+        \ succ m,      zero   :=  ack m (succ zero)
         \ k := succ m, succ n :=  ack m (ack k n)
 \end{alba}
 
