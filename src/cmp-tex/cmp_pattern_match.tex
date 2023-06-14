@@ -133,8 +133,6 @@ $$
         %
         \\
         &\mid& [
-            x^T
-            \mid
             c_1 t_1, \ldots,  c_n t_n \mid
             \ell_1 t_1, \ldots, \ell_m t_m
             \mid
@@ -153,23 +151,46 @@ where $n + m > 0$ and
         \\
         $e$ & expression on the right hand side of a case clause
         \\
-        $x^T$ & pattern variable with its corresponding type
-        \\
         $c$ & constant
         \\
         $\ell$ & label of a constructor
     \end{tabular}
 \end{center}
 
-We can abbreviate the inner node by $[x^T \mid \vec c\vec t \mid
-\vec\ell \vec t | d]$.
+We can abbreviate the inner node by $[\vec c\vec t \mid \vec\ell \vec t | d]$.
 
 
-No duplicate constants and no duplicate labels are allowed in the second form of
-an inner node.
+No duplicate constants and no duplicate labels are allowed in an inner node.
 
-Note that an inner node of the form $x \mid \empty \mid \empty \mid \empty]$ is
+Note that an inner node of the form $[\empty \mid \empty \mid \empty]$ is
 a leave node.
+
+
+
+\paragraph{Exhaustiveness of inner nodes}
+%
+
+An inner node of the form $[\vec c \vec t \mid \vec\ell \vec t \mid d]$ is
+exhaustive if it has a default tree or if all labels of constructors which can
+construct an object of the corresponding type are present (none of the missing
+constructors can construct an object of type $T$).
+
+An empty inner node of the form $[\empty \mid \empty \mid \empty]$ is
+possible if $T$ is an inductive type and none of the constructors of the
+inductive type can construct an object of type $T$.
+
+
+\paragraph{Exhaustiveness of a case tree}
+%
+A case tree is exhaustive if all its nodes are exhaustive.
+
+
+
+
+
+
+\subsection{Application of a Case Tree}
+%--------------------------------------------------------------------------------
 
 The application of a case tree scans the list of arguments left to write with a
 pointer to a subexpression to some of its arguments. Semantic actions associated
@@ -180,7 +201,7 @@ to the nodes of a case tree.
         all free variables in the expression $e$. Action: Return the value
         $e[u_1,u_2,\ldots / .]$.
 
-    \item $[x^T \mid \vec c \vec t \mid \vec \ell \vec t \mid d]$:
+    \item $[\vec c \vec t \mid \vec \ell \vec t \mid d]$:
         The pointer has to point to some subexpression of the arguments. The
         subexpression has to reduce to a head normal form which has either a
         constant or a constructor in the head position. From the constant or the
@@ -208,24 +229,6 @@ to the nodes of a case tree.
 
 
 
-\paragraph{Exhaustiveness of inner nodes}
-%
-
-An inner node of the form $[x^T \mid \vec c \vec t \mid \vec\ell \vec t \mid d]$ is
-exhaustive if it has a default tree or if all labels of constructors which can
-construct an object of the corresponding type are present (none of the missing
-constructors can construct an object of type $T$).
-
-An empty inner node of the form $[x^T \mid \empty \mid \empty \mid \empty]$ is
-possible if $T$ is an inductive type and none of the constructors of the
-inductive type can construct an object of type $T$.
-
-\paragraph{Exhaustiveness of a case tree}
-%
-A case tree is exhaustive if all its nodes are exhaustive.
-
-
-
 
 \subsection{Case Tree Construction}
 %------------------------------------------------------------
@@ -244,15 +247,15 @@ $[\Delta \mid \vec p \mid e]$.
         \begin{array}{lll}
             \ct(x,t)
             &:=&
-            [x \mid \empty \mid \empty \mid t]
+            [\empty \mid \empty \mid t]
             \\
             \ct(x := c, t)
             &:=&
-            [x \mid c t \mid \empty \mid \empty]
+            [c t \mid \empty \mid \empty]
             \\
             \ct(x := \Make^\Ind_\ell \vec q \vec p, t)
             &:=&
-            [x \mid \empty \mid \ell \ct(\vec p, t) \mid \empty]
+            [\empty \mid \ell \ct(\vec p, t) \mid \empty]
         \end{array}
     \right.
     $$
@@ -289,21 +292,22 @@ expression.
         applied to deliver some result the second tree would immdiately return
         $e$.
 
-    \item $m([x \mid . \mid . \mid t_1], [x \mid . \mid .
-        \mid t_2]$: Ambiguous: Which default shall be taken?
+    \item $m([. \mid . \mid t_1], [. \mid .  \mid t_2]$: Ambiguous: Which
+        default shall be taken?
 
-    \item $m([x\mid . \mid \vec \ell \vec t_1 \mid \empty],
-        [x \mid \empty \mid \empty \mid t_2])$ where $\vec \ell$ covers all
+    \item $m([. \mid \vec \ell \vec t_1 \mid \empty],
+        [\empty \mid \empty \mid t_2])$ where $\vec \ell$ covers all
         possible constructors for the corresponding inductive type: Default case
         is redundant.
 
-    \item $m([x\mid . \mid \vec \ell \vec t_1 \mid .],
-        [x \mid ct_t \mid \empty \mid \empty])$ where $\vec \ell$ has at least
+    \item $m([. \mid \vec \ell \vec t_1 \mid .],
+        [ct_t \mid \empty \mid \empty])$ where $\vec \ell$ has at least
         one constructor: Out of order. All constants have to be merged before
         the first constructor case.
 \end{enumerate}
 
-\noindent Success cases:
+\noindent Success cases of merging a case tree from a case clause into another
+case tree:
 \begin{enumerate}
     \item Merge a default tree: In the first case tree the top node must not be
         exhaustive.
