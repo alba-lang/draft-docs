@@ -413,6 +413,23 @@ inductive type which cannot be constructed (e.g. $\text{False}$ or $\text{zero}
 
 
 
+\subsection{Mutual Recursion}
+%--------------------------------------------------------------------------------
+
+A pattern match expression can be mutual recursive.
+$$
+    \case \bracklist {
+        f_1^{F_1} \mid \vec c_1 \mid t_1
+        \\
+        f_2^{F_2} \mid \vec c_2 \mid t_2
+        \\
+        \ldots
+    }
+$$
+Any $f_i$ can occur in the clauses of $\vec c_j$.
+
+
+
 
 
 \subsection{Code Examples}
@@ -423,28 +440,63 @@ inductive type which cannot be constructed (e.g. $\text{False}$ or $\text{zero}
 \paragraph{Unbounded Loop}
 
 \ \begin{alba}
-    section
-        P: Nat -> Prop
-        d: Decider P
-        e: Exist P
-    :=
-        type R: Nat -> Nat -> Prop :=
-                -- 'n' and its successor figure in the relation 'R'
-                -- if 'n' does not satisfy the predicate.
-            next {n}: not P n -> R n (succ n)
+    type Decision {A: Any} (P: A -> Prop) (x: A): Any :=
+        true:  P x -> Decision
+        false: Not P x -> Decision
 
-        type Via: Nat -> Prop :=
-                -- Set of viable candidates: A number 'n' is in the
-                -- set if all its successors in the relation 'R' are
-                -- in the set.
-            via {x}: (all {y}: R x y -> Via y) -> Via x
+    Decider {A: Any} (P: A -> Prop): Any :=
+        all x: Decision P x
 
-        stepDown {n} (v: Via (succ n)): Via n :=
-            via {n} f where
-                f: all {m}: R n m -> Via m
+    type Finite: Nat -> Prop :=
+        fin {x}: (all y: y < x -> Finite y) -> Finite x
+
+    type Refine {A: Any} (P: A -> Prop): Any :=
+        (,) x: P x -> Refine
+
+    LB (P: Nat -> Prop) (x: Nat): Prop :=
+        all {y}: P y -> x <= y
+
+    Least (P: Nat -> Prop) (x: Nat): Prop :=
+        LB P x /\ P x
+
+    natFinite: all {n}: Finite n :=
+        -- induction proof
+
+    zeroLB {P: Nat -> Prop}: LB P zero := ...
+
+    lbSucc {P: Nat -> Prop}:
+        all {n}: LB P n -> Not (P n) -> LB P (succ n)
+    := ...
+
+    invLT {a b c: Nat}: a <= c -> b < a -> c - a < c - b
+    := ...
+
+    leRefl {a: Nat}: a <= a :=
+    := ... -- induction proof
+
+    find {P: Nat -> Prop} (d: Decider P): Exist P -> Refine (Least P)
+    := case
+        \ (w, pW) :=
+            let
+                aux: all n: LB P n -> Decision P n -> Finite (w - n)
+                     -> Refine (Least P)
                 := case
-                    \ next _ : Via (succ n) := v
+                    \ n, lbN, true pN, ? :=
+                        (n, (lbN, pN))
+                    \ n, lbN, false npN, fin f :=
+                        let
+                            lbSN: LB P (succ n) :=
+                                lbSucc lbN npN
+                            ltWmSN: w - succ n < w - n :=
+                                invLT (lbSN pW) leRefl
+                        :=
+                            aux (succ n) lbSN (d (succ n)) (f ltWmSN)
+            :=
+                aux zero zeroLB (d zero) natFinite where
 \end{alba}
+
+
+
 
 
 \paragraph{Ackermann Function}
@@ -459,6 +511,30 @@ inductive type which cannot be constructed (e.g. $\text{False}$ or $\text{zero}
 Proof of termination: In each recursive application either the first argument
 decreases or the first argument remains the same and the second argument
 decreases.
+
+
+
+
+
+
+
+\paragraph{Mutual Recursion}
+
+\ \begin{alba}
+    type Tree (A: Any): Any :=
+        node: A -> List (Tree A) -> Tree A
+
+    preT: Tree A -> List A := case
+        \ node a ts := a :: preF ts
+
+    preF: List (Tree A) -> List A := case
+        \ []         :=  []
+        \ t :: ts    :=  preT t + preF ts
+\end{alba}
+
+
+
+
 
 
 \paragraph{Vector}
