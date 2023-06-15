@@ -91,8 +91,8 @@ a$ where the number of arguments is the same as the number of toplevel pattern
 in the corresponding case clause. In that case we have a recursive call where
 termination has to be guaranteed.
 
-For each cause clause we have a list of pattern variables $\Delta = [y_1^{B_1},
-y_2^{B_2}, ldots ]$. We attach to each pattern variable the number pair $i/l$
+For each cause we have a list of pattern variables $\Delta = [y_1^{B_1},
+y_2^{B_2}, \ldots ]$. We attach to each pattern variable the number pair $i/j$
 where $i$ is the position of the toplevel argument from which it comes from and
 $j$ is the level i.e. the number of constructors used to uncover it.
 
@@ -130,6 +130,69 @@ A recursion terminates if some of its arguments can be brought into a
 lexicographic order such that they decrease in the lexicographic order in each
 recursive call. If such an order cannot be found, then the recursion is not
 guaranteed to terminate and therefore illegal.
+
+
+
+
+
+
+\subsection{Wellfounded Recursion}
+%--------------------------------------------------------------------------------
+
+\begin{alba}
+    type Finite: Nat -> Prop :=
+        fin {x}: (all {y}: y < x -> Finite y) -> Finite x
+\end{alba}
+
+
+
+\begin{alba}
+    (^) (a b: Nat): Nat :=
+        let
+            exp: all n: Finite n -> Nat := case
+                \ zero,          ?      := succ zero
+                \ succ n,        fin f  :=
+                    let
+                        (hb, even) := half (succ n)
+                        lt: hb < succ n := ...
+                        r := exp hb (f lt)
+                    :=
+                        if even then
+                            r * r
+                        else
+                            a * r * r
+        :=
+            exp b natFinite
+
+    -- a possible definition of 'half'
+    half: Nat -> (Nat, Bool) := case
+        \ zero          := (zero, true)
+        \ succ zero     := (zero, false)
+        \ succ (succ n) :=
+            let (r, even) := half n
+            :=
+                (succ r, even)
+\end{alba}
+
+
+
+
+
+
+\subsection{Mutual Recursion}
+%--------------------------------------------------------------------------------
+
+A pattern match expression can be mutual recursive.
+$$
+    \case \bracklist {
+        f_1^{F_1} \mid \vec c_1 \mid t_1
+        \\
+        f_2^{F_2} \mid \vec c_2 \mid t_2
+        \\
+        \ldots
+    }
+$$
+Any $f_i$ can occur in the clauses of $\vec c_j$.
 
 
 
@@ -412,26 +475,6 @@ inductive type which cannot be constructed (e.g. $\text{False}$ or $\text{zero}
 
 
 
-
-\subsection{Mutual Recursion}
-%--------------------------------------------------------------------------------
-
-A pattern match expression can be mutual recursive.
-$$
-    \case \bracklist {
-        f_1^{F_1} \mid \vec c_1 \mid t_1
-        \\
-        f_2^{F_2} \mid \vec c_2 \mid t_2
-        \\
-        \ldots
-    }
-$$
-Any $f_i$ can occur in the clauses of $\vec c_j$.
-
-
-
-
-
 \subsection{Code Examples}
 %----------------------------------------------------------------------
 
@@ -499,6 +542,46 @@ Any $f_i$ can occur in the clauses of $\vec c_j$.
 
 
 
+\paragraph{Half}
+
+\ \begin{alba}
+    type Half: Nat -> Any :=
+        even n: Half (n + n)
+        odd  n: Half (succ (n + n))
+
+    half: all n: Half n := case
+        \ zero          :=   even zero
+        \ succ zero     :=   odd zero
+        \ succ (succ n) :=
+            let
+                f: Half n -> Half (succ (succ n)) := case
+                    \ even h := even (succ h)
+                    \ odd  h := odd  (succ h)
+            :=
+                f (half n)
+
+            -- other syntax
+            match half n case
+                : Half n -> Half (succ (succ n)) -- type usually inferred
+                \ even h := even (succ h)
+                \ odd  h := odd  (succ h))
+\end{alba}
+
+This function does not typecheck. Let's look into the first case:
+\begin{alba}
+    -- The type checker unifies n = hn + hn
+    -- Required type
+        Half (succ (succ n))      =   Half (succ (succ (h + h)))
+    -- Actual type
+        Half (succ h + succ h)  ==> Half (succ (h + succ h))
+\end{alba}
+We have to pull out the successor constructor of the second argument out of the
+parenthesis.
+
+
+
+
+
 \paragraph{Ackermann Function}
 
 \ \begin{alba}
@@ -508,9 +591,33 @@ Any $f_i$ can occur in the clauses of $\vec c_j$.
         \ k := succ m, succ n :=  ack m (ack k n)
 \end{alba}
 
-Proof of termination: In each recursive application either the first argument
-decreases or the first argument remains the same and the second argument
-decreases.
+
+
+
+
+\paragraph{Exponentiation}
+
+\ \begin{alba}
+    (^) (a b: Nat): Nat :=
+        let
+            exp: all n: Finite n -> Nat := case
+                \ zero,          ?      := succ zero
+                \ succ zero,     ?      := a
+                \ succ (succ n), fin f  :=
+                    let
+                        (hb, even) := half (succ (succ n))
+                        lt: hb < succ (succ n) := ...
+                        r := exp hb (f lt)
+                    :=
+                        if even then
+                            r * r
+                        else
+                            a * r * r
+        :=
+            exp b natFinite
+\end{alba}
+
+
 
 
 
