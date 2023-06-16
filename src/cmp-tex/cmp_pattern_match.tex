@@ -315,6 +315,24 @@ A case tree is exhaustive if all its nodes are exhaustive.
 \subsection{Application of a Case Tree}
 %--------------------------------------------------------------------------------
 
+A pattern match expression is a function. It can be applied to arguments.
+$$
+    \case [f^F \mid \vec c \mid t]\; \vec a
+$$
+
+The expression can be reduced only if there are sufficient arguments and the
+application of the case tree reaches one of the right hand sides $e$ of one of
+the clauses. The application of the case tree $t$ to the arguments $\vec a$
+extracts from the arguments a collection of subexpressions $\vec u = u_1, u_2,
+\ldots$ and finds the right hand side $e$. The final result is
+$$
+    e[\case[f^F\mid \vec c \mid t], u_1, u_2, \ldots /.]
+$$
+Note that in the recursive case the right hand side might contain the free
+variable $f$ and the pattern variables. The free variable $f$ is replaced by the
+pattern match expression and the pattern variables are replaced by the
+corresponding subterms.
+
 The application of a case tree scans the list of arguments left to write with a
 pointer to a subexpression to some of its arguments. Semantic actions associated
 to the nodes of a case tree.
@@ -322,7 +340,7 @@ to the nodes of a case tree.
     \item $e$: The pointer has to point beyond the last argument of the
         arguments. The list of collected subexpression $u_1, u_2, \ldots$ cover
         all free variables in the expression $e$. Action: Return the value
-        $e[u_1,u_2,\ldots / .]$.
+        $e[\case[f^F \mid \vec c \mid t], u_1,u_2,\ldots / .]$.
 
     \item $[\vec c \vec t \mid \vec \ell \vec t \mid d]$:
         The pointer has to point to some subexpression of the arguments. The
