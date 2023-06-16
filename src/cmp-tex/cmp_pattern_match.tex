@@ -553,30 +553,70 @@ inductive type which cannot be constructed (e.g. $\text{False}$ or $\text{zero}
         \ zero          :=   even zero
         \ succ zero     :=   odd zero
         \ succ (succ n) :=
-            let
-                f: Half n -> Half (succ (succ n)) := case
-                    \ even h := even (succ h)
-                    \ odd  h := odd  (succ h)
-            :=
-                f (half n)
-
-            -- other syntax
             match half n case
                 : Half n -> Half (succ (succ n)) -- type usually inferred
                 \ even h := even (succ h)
                 \ odd  h := odd  (succ h))
 \end{alba}
 
-This function does not typecheck. Let's look into the first case:
+This function does not typecheck. Let's look into the cases:
 \begin{alba}
-    -- The type checker unifies n = hn + hn
-    -- Required type
-        Half (succ (succ n))      =   Half (succ (succ (h + h)))
-    -- Actual type
-        Half (succ h + succ h)  ==> Half (succ (h + succ h))
+    --  Required types                          Actual types
+        Half (succ (succ (h + h)))              Half (succ (h + succ h))
+        Half (succ (succ (succ (h + h))))       Half (succ (succ (h + succ h))
 \end{alba}
 We have to pull out the successor constructor of the second argument out of the
-parenthesis.
+parenthesis. With a proof of
+\begin{alba}
+    succ (h + h) = h + succ h
+\end{alba}
+the required types and the actual type would be unifiable.
+
+\begin{alba}
+    value {n}: Half n -> Nat := case
+        \ even h := h
+        \ odd  h := h
+
+    halfLT {n} (lt: 0 < n):  value (half n) < n :=
+        let
+            aux {n} {h: Half n}: 0 < n  ->  value h < n := case
+                \ {even h},       lt :=
+                -- : Half (h+h)   : 0 < h + h
+                    ?: h < h + h
+                \ {odd h},              ? :=
+                --: Half (succ (h+h))
+                    ?: h < succ (h + h)
+        := aux {half n} lt
+\end{alba}
+
+
+
+
+
+
+\paragraph{Exponentiation}
+
+\ \begin{alba}
+    (^) (a b: Nat): Nat :=
+        let
+            exp: all n: Half n -> Finite n -> Nat := case
+                \ zero, ?, ? :=
+                    succ zero
+                \ succ i, even h, fin f :=
+                    let
+                        ltH: h < succ i := ...
+                        r := exp h (f ltH)
+                    :=
+                        r * r
+                \ succ i, odd h, fin f :=
+                    let
+                        ltH: h < succ i := ...
+                        r := exp h (f ltH)
+                    :=
+                        a * r * r
+        :=
+            exp b (half b) natFinite
+\end{alba}
 
 
 
@@ -589,32 +629,6 @@ parenthesis.
         \ zero  ,      n      :=  succ n
         \ succ m,      zero   :=  ack m (succ zero)
         \ k := succ m, succ n :=  ack m (ack k n)
-\end{alba}
-
-
-
-
-
-\paragraph{Exponentiation}
-
-\ \begin{alba}
-    (^) (a b: Nat): Nat :=
-        let
-            exp: all n: Finite n -> Nat := case
-                \ zero,          ?      := succ zero
-                \ succ zero,     ?      := a
-                \ succ (succ n), fin f  :=
-                    let
-                        (hb, even) := half (succ (succ n))
-                        lt: hb < succ (succ n) := ...
-                        r := exp hb (f lt)
-                    :=
-                        if even then
-                            r * r
-                        else
-                            a * r * r
-        :=
-            exp b natFinite
 \end{alba}
 
 
