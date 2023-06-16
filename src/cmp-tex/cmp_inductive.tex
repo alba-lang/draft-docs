@@ -25,7 +25,8 @@ $$
         $$
             [y_1^{\Pi B_1. R_1}, \ldots, y_n^{\Pi B_m. R_m}]
         $$
-        and $T$ can occur only in $R_i$. I.e. the arguments of constructors are
+        and $T$ can occur only in $R_i$ and if it occurs in $R_io$, then $R_i$
+        has the form $T \vec a$. I.e. the arguments of constructors are
         functions (arity zero included) where $T$ occurs only in the result type
         and not in the argument types.
 
@@ -86,7 +87,7 @@ recursive argument.
 $$
     \Make^\Ind_{\ell_i} \vec p \vec b: \Ind \vec p \vec a
 $$
-where $I$ is the inductive type, $i$ marks the $i$th constructor, $\vec p$ are
+where $\Ind$ is the inductive type, $i$ marks the $i$th constructor, $\vec p$ are
 the parameter arguments and $\vec b$ are the constructor arguments, $a$ are the
 index arguments which depend on the constructor arguments.
 
