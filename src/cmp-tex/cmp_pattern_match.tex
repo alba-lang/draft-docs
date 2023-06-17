@@ -91,10 +91,14 @@ a$ where the number of arguments is the same as the number of toplevel pattern
 in the corresponding case clause. In that case we have a recursive call where
 termination has to be guaranteed.
 
-For each cause we have a list of pattern variables $\Delta = [y_1^{B_1},
+For each clause we have a list of pattern variables $\Delta = [y_1^{B_1},
 y_2^{B_2}, \ldots ]$. We attach to each pattern variable the number pair $i/j$
-where $i$ is the position of the toplevel argument from which it comes from and
+where $i$ is the position of the toplevel argument from which it comes and
 $j$ is the level i.e. the number of constructors used to uncover it.
+
+For each recursive call we attach to each argument + 0 - if the argument is a
+pattern variable coming from the same top level argument indicating if the
+argument has been increased, is the same of has been structurally decreased.
 
 \noindent Example Ackermann's function
 \begin{alba}
@@ -102,25 +106,17 @@ $j$ is the level i.e. the number of constructors used to uncover it.
         \ zero  ,      n      :=  succ n
 
         \ succ m,      zero   :=  ack m (succ zero)
-    --         1/1
+    --         1/1                    -  +
 
         \ k := succ m, succ n :=  ack m (ack k n)
-    --    1/0       1/1     2/1
+    --    1/0       1/1     2/1              0 -
+    --                                -  +
+    --  recursive calls:
+    --     - +
+    --     - +
+    --     0 -
 \end{alba}
 
-For each recursive call we attach to each argument the level if the argument is
-a pattern variable coming from the same toplevel argument.
-
-\begin{alba}
-    ack    m     (succ zero)
-    --     1
-
-    ack    m     (ack k n)
-    --     1
-
-    ack    k     n
-    --     0     1
-\end{alba}
 
 From this signature we see that either the first argument decreases (i.e. level
 $> 0$) or the first argument stays at the same level (i.e. level $0$) and the
