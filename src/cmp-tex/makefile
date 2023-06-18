@@ -9,6 +9,7 @@ source-files = \
 	cmp_bound.tex       \
 	cmp_inductive.tex   \
 	cmp_pattern_match.tex \
+	cmp_find_terms.tex  \
 	cmp_elaboration.tex
 
 
