@@ -137,40 +137,61 @@ guaranteed to terminate and therefore illegal.
 
 \begin{alba}
     type Finite: Nat -> Prop :=
-        fin {x}: (all {y}: y < x -> Finite y) -> Finite x
+        finite {x}: (all {y}: y < x -> Finite y) -> Finite x
 \end{alba}
 
+A pattern match on an object of type \lstinline!Finite n! uncovers with the
+pattern \lstinline!finite f! a function \lstinline!f! and not another object of
+type \lstinline!Finite n!. In that case the function \lstinline!f! is considered
+structurally smaller than \lstinline!Finite n! and all applications
+\lstinline!f {y} (lt: y < n)! of type \lstinline!Finite y! are structurally
+smaller than the object of type \lstinline!Finite n!.
 
-
+We can prove that all natural numbers are finite. In order to do this we need
+the helper theorems
+%
 \begin{alba}
-    (^) (a b: Nat): Nat :=
-        let
-            exp: all n: Finite n -> Nat := case
-                \ zero,          ?      := succ zero
-                \ succ n,        fin f  :=
-                    let
-                        (hb, even) := half (succ n)
-                        lt: hb < succ n := ...
-                        r := exp hb (f lt)
-                    :=
-                        if even then
-                            r * r
-                        else
-                            a * r * r
-        :=
-            exp b natFinite
-
-    -- a possible definition of 'half'
-    half: Nat -> (Nat, Bool) := case
-        \ zero          := (zero, true)
-        \ succ zero     := (zero, false)
-        \ succ (succ n) :=
-            let (r, even) := half n
+    splitLE: all {a b: Nat}: a <= b  ->  a < b \/ a = b
+    replace: all {A: Any} {P: A -> Prop} {a b}: a = b -> P a -> P b
+\end{alba}
+%
+and derive the proof
+%
+\begin{alba}
+    natFinite: all {n: Nat}: Finite n := case
+        \ {zero}   := fin notLTZ
+        \ {succ n} :=
+            let
+                g: all {y}: Finite n -> (y < n \/ y = n) -> Finite y := case
+                    \ finite f, left  lt   := f lt
+                    \ finN,     right eq   := replace (flip eq) finN
+                f: all {y}: y < succ n -> Finite y := case
+                    \ next le :=
+                        g natFinite (splitLE le)
             :=
-                (succ r, even)
+                finite f
 \end{alba}
 
+Since all natural numbers are finite we can write recursive functions where the
+recursive calls are not necessarly structurally decreasing of one of the
+arguments of an inductive type, but where some measure which depends on the
+arguments decreases within the relation \lstinline!<!.
 
+Assume we want to write a function with one argument where some measure on the
+argument decreases in each recursive call. Then we equip the function with an
+additional argument stating that the measure is finite.
+%
+\begin{alba}
+    f: all (a: A): Finite (measure a) -> R := case
+        \ a, finite g :=
+            f a0 (g (lt: measure a0 < measure a))
+\end{alba}
+%
+Within the function we have to generate a proof that the measure really
+decreases. Since all natural numbers are finite, the function can be called on
+all arguments.
+
+The same applies to functions with more arguments.
 
 
 
@@ -497,12 +518,12 @@ inductive type which cannot be constructed (e.g. $\text{False}$ or $\text{zero}
 \paragraph{Unbounded Loop}
 
 \ \begin{alba}
-    type Decision {A: Any} (P: A -> Prop) (x: A): Any :=
-        true:  P x -> Decision
-        false: Not P x -> Decision
+    type Decision {A: Any} (P: Prop): A): Any :=
+        true:  P     -> Decision
+        false: Not P -> Decision
 
     Decider {A: Any} (P: A -> Prop): Any :=
-        all x: Decision P x
+        all x: Decision (P x)
 
     type Finite: Nat -> Prop :=
         fin {x}: (all y: y < x -> Finite y) -> Finite x
@@ -535,7 +556,7 @@ inductive type which cannot be constructed (e.g. $\text{False}$ or $\text{zero}
     := case
         \ (w, pW) :=
             let
-                aux: all n: LB P n -> Decision P n -> Finite (w - n)
+                aux: all n: LB P n -> Decision (P n) -> Finite (w - n)
                      -> Refine (Least P)
                 := case
                     \ n, lbN, true pN, ? :=
