@@ -464,6 +464,11 @@ expression.
         [ct_t \mid \empty \mid \empty])$ where $\vec \ell$ has at least
         one constructor: Out of order. All constants have to be merged before
         the first constructor case.
+
+    \item $m([. \mid . \mid t], [ c t_2 \mid \empty \mid \empty])$
+        or
+        $m([. \mid . \mid t], [ . \mid \ell t_2 \mid \empty])$: Out of order. All
+        constants and constructors have to be merged before any default case.
 \end{enumerate}
 
 \noindent Success cases of merging a case tree from a case clause into another
@@ -518,7 +523,7 @@ inductive type which cannot be constructed (e.g. $\text{False}$ or $\text{zero}
 \paragraph{Unbounded Loop}
 
 \ \begin{alba}
-    type Decision {A: Any} (P: Prop): A): Any :=
+    type Decision (P: Prop): Any :=
         true:  P     -> Decision
         false: Not P -> Decision
 
