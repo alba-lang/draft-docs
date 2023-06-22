@@ -10,6 +10,7 @@ source-files = \
 	cmp_inductive.tex   \
 	cmp_pattern_match.tex \
 	cmp_find_terms.tex  \
+	cmp_unification.tex \
 	cmp_elaboration.tex
 
 

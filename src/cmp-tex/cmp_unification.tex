@@ -1,0 +1,73 @@
+\section{Unification}
+
+
+
+
+
+
+\subsection{Description of the Problem}
+%--------------------------------------------------------------------------------
+
+Whenever a function is applied to an actual argument then the type of the actual
+argument $A$ has to be a subtype of the type of the formal argument $R$ i.e. $A
+\le R$ has to be valid. Otherwise the actual argument is not a legal argument to
+the function. Without metavariables and performance considerations the solution
+is quite simple:
+
+\begin{itemize}
+
+    \item Transform both types into normal form. Since both are types their normal
+        forms have to be products with zero or more arguments and the result type is
+        either a sort or a base term i.e. the have one of the forms
+        $$
+        \begin{array}{l}
+            \Pi x_1^{A_1} \ldots x_n^{A_n}. x \vec a
+            \\
+            \Pi x_1^{A_1} \ldots x_n^{A_n}. s
+        \end{array}
+        $$
+
+    \item Check that both have the same number of arguments and  all argument types
+        are identical.
+
+    \item The result types have to be either both base terms or sorts. In case of
+        base terms both have to be identical. In case of sorts the sort of the actual
+        argument type has to be a subtype of the sort of the formal argument type.
+
+\end{itemize}
+
+
+There are two problems with this approach:
+
+\begin{itemize}
+
+    \item The source code is not fully annotated. Metavariables are introduced
+        during elaboration for terms missing in the source code. The elaborator
+        has to instantiate these metavariables.
+
+    \item A complete normalization performs a lot of function unfolding, case
+        expression reductions, let term reductions and beta reductions.
+        Operation of let and beta reduction is variable substitution in terms.
+        Since variables can occur several times in terms the normalized terms
+        can be considerably large even growing exponentially. Consider that
+        there are 10 beta reductions which duplicate a term. If this duplication
+        is nested then there are finally 1014 duplicates.
+
+        Furthermore case term reductions can grow exponentially in the worst
+        case.
+
+        Therefore reduction to complete normal form can be a performance
+        problem.
+\end{itemize}
+
+
+We work with contexts
+$$
+    \Gamma ::= [] \mid \Gamma,x^A \mid \Gamma, x^A := a \mid \Gamma, \meta m^M
+                \mid \Gamma, \meta m^M := a
+$$
+The unification problem looks like
+$$
+\Gamma \vdash A \le R
+$$
+where $A$ and $R$ are welltyped in the context $\Gamma$.
