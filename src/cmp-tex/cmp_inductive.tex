@@ -105,7 +105,7 @@ $$
 \subsection{Typing}
 %--------------------------------------------------------------------------------
 
-Let $I = [\Gamma \mid T^K \mid C_{\ell_1}, \ldots, C_{\ell_n}]$ be a wellformed
+Let $\Ind = [\Gamma \mid T^K \mid C_{\ell_1}, \ldots, C_{\ell_n}]$ be a wellformed
 inductive type. Then we have the following typing rules.
 
 \begin{description}
@@ -118,7 +118,7 @@ inductive type. Then we have the following typing rules.
                 \forall i.\; \Gamma, T^K \vdash C_{\ell_i}: s
             }
             {
-                [] \vdash I : \Pi \Gamma. K
+                [] \vdash \Ind : \Pi \Gamma. K
             }
         $$
 
@@ -126,7 +126,7 @@ inductive type. Then we have the following typing rules.
     \item [Constructor] Let $C_{\ell_i} = \Pi \Delta. T \vec a$.
         $$
         \rulev{
-            [] \vdash I: \Pi \Gamma. K
+            [] \vdash \Ind: \Pi \Gamma. K
         }
         {
             \Make^\Ind_{\ell_i}: \Gamma \Delta.T \vec a
@@ -157,6 +157,6 @@ $$
 $$
 
 All kinds $K_i$ are valid in the context $\Gamma$ and all constructors of the
-$i$th type construct an object of type $I_i \vec a$ but can use any other
-objects of type $I_j \vec a$ as arguments. All constructors are valid types in
+$i$th type construct an object of type $T_i \vec a$ but can use any other
+objects of type $T_j \vec a$ as arguments. All constructors are valid types in
 the context $\Gamma, T_1^{K_1}, \ldots , T_m^{K_m}$.
