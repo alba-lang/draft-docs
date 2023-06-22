@@ -4,7 +4,7 @@
 \subsection{Form of an inductive type:}
 %--------------------------------------------------------------------------------
 $$
-    [\Gamma \mid T^K \mid C_{\ell_1}, \ldots, C_{\ell_n}] : \Pi \Gamma. K
+    \type[\Gamma \mid T^K \mid C_{\ell_1}, \ldots, C_{\ell_n}] : \Pi \Gamma. K
 $$
 
 \begin{description}
@@ -43,29 +43,29 @@ $$
     \begin{array}{lll}
         \text{boolean}
         &
-        [B^\Any \mid B, B]
+        \type[B^\Any \mid B, B]
         \\
         %
         \text{peano numbers}
         &
-        [N^\Any \mid N, N\to N]
+        \type[N^\Any \mid N, N\to N]
         \\
         %
         \text{list}
         &
-        [A^\Any \mid L^\Any \mid L, A \to L\to L]
+        \type[A^\Any \mid L^\Any \mid L, A \to L\to L]
         \\
         %
         \text{equality}
         &
-        [A^\Any
+        \type[A^\Any
         \mid E^{A \to A \to \Prop}
         \mid \Pi x^A. E x x]
         \\
         %
         \text{accessibles}
         &
-        [
+        \type[
             A^\Any, R^{A \to A \to \Prop}
             \mid
             T^{A \to \Prop}
@@ -145,6 +145,7 @@ inductive type. Then we have the following typing rules.
 It is just an array of inductive types where all inductive types share the same
 parameters.
 $$
+    \type
     \left[\Gamma \mid
     \bracklist{
         T_1^{K_1} \mid C_{11}, \ldots, C_{1n_1}
