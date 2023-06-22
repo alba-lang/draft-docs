@@ -229,8 +229,59 @@ $$
         \ldots
     }
 $$
-Any $f_i$ can occur in the clauses of $\vec c_j$.
+Any $f_i$ can occur in the right hand sides of any of the clauses of $\vec c_j$.
 
+A recursive call happens if there is a cycle e.g. $f_1$ calls $f_2$ calls $\ldots$
+calls $f_1$.
+
+In order to check termination we try to find a sequence of arguments as a subset
+of all arguments of all $f_i$ such that the sequence decreases lexicographically
+in each cycle.
+
+We work for each pattern variable with triples $i/j/k$ where $i$ represents the
+function $f_i$ from which it comes, $j$ is the argument from which it comes and
+$k$ is the number of constructors used to uncover it.
+
+Following a cycle it is clear if the first function of the cylce receives in the
+recursive call an argument which is unchanged, decreased or potentially
+increased. With this information we can establish a signature of $+$, $0$, and
+$-$ for each argument and try to find a sequence which decreases
+lexicographically for each cycle.
+
+
+Example: Flatten a tree:
+
+\begin{alba}
+    type Tree (A: Any): Any :=
+        node: A -> List (Tree A) -> Tree A
+
+    flatT: Tree A -> List A := case
+        \ node a ts := a :: flatF ts
+
+    flatF: List (Tree A) -> List A := case
+        \ []         :=  []
+        \ t :: ts    :=  flatT t + flatF ts
+\end{alba}
+
+In this mutual recursion we have two functions each with one argument. The set
+of all arguments is $\set{t, f}$ where $t$ represents the argument of
+\lstinline!flatT! and $f$ the argument of \lstinline!flatF!. There are two cycles
+possible:
+\begin{alba}
+    flatT: flatF, flatT             -- indirect recursion
+    flatF: flatF                    -- direct recursion
+\end{alba}
+
+For each cycle we can find the signature:
+\begin{alba}
+    --                                 t           f
+    flatT: flatF, flatT                -           0
+    flatF: flatF                       0           -
+\end{alba}
+
+In the first cycle $t$ decreases (by two) and $f$ is not involved, in the second
+cycle $f$ decreases (by one) and $t$ is not involved. I.e. any sequence of $t$
+and $f$ decreases lexicographically in each cycle.
 
 
 
@@ -677,7 +728,6 @@ the required types and the actual type would be unifiable.
         :=
             exp b (half b) natFinite
 \end{alba}
-
 
 
 
