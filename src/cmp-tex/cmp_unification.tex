@@ -66,8 +66,65 @@ $$
     \Gamma ::= [] \mid \Gamma,x^A \mid \Gamma, x^A := a \mid \Gamma, \meta m^M
                 \mid \Gamma, \meta m^M := a
 $$
+Clearly duplicate names are not allowed.
+
 The unification problem looks like
 $$
 \Gamma \vdash A \le R
 $$
 where $A$ and $R$ are welltyped in the context $\Gamma$.
+
+
+
+
+
+\subsection{Metavariables}
+%--------------------------------------------------------------------------------
+
+
+Metavariables are introduced when there is something unknown in a certain
+context (e.g. a missing type, an implicit variable). Each metavariable has a
+type $\Gamma \vdash \meta m : M$. I.e. metavariables are required to be
+welltyped.
+
+The type $M$ of a metavariable is a required type. The actual type used in
+instantiations can be a subtype of $M$.
+
+If we have two metavariables $\meta m_1$ and $\meta m_2$ and both are separated
+in the context by a free variable (i.e. variable without definition $\Gamma = [
+    \ldots, \meta m_1^{M_1}, \ldots x^A, \ldots, \meta m_2^{M_2}, \ldots]$) then
+the meta variable $m_2$ is an \emph{inner metavariable} with respect to $\meta
+m_1$. Metavariables which are not separated by free variables are in the same
+group.
+
+Metavariables can be \emph{instantiated} during unification. Whenever there is a
+unification condition of one of the forms
+$$
+\begin{array}{lllll}
+    \Gamma &\vdash &\meta m \vec x &\le &t^T
+    \\
+    \Gamma &\vdash &t^T &\le &\meta m \vec x
+\end{array}
+$$
+we can instantiate
+$$
+    \meta m := \lambda \vec x ^{\vec A}. t
+$$
+where $\Gamma \vdash \lambda \vec x^{\vec A}. t : \Pi \vec x^{\vec A}. T$ under
+the conditions
+\begin{enumerate}
+
+    \item $\vec x$ are free variables without definitions with the corresponding
+        types $\vec A$ in the context $\Gamma$.
+
+    \item $\text{FV}(t) \subseteq \set{\vec x}$.
+
+    \item $t$ does not contain neither directly or indirectly neither $\vec m$
+        nor more inner metavariables.
+
+    \item $\Pi \vec x^{\vec A}. T \le M$.
+\end{enumerate}
+
+This instantiation makes $\meta m \vec x$ and $t$ equivalent which can be easily
+proved by beta reduction. Therefore it is not important if
+$\meta m \vec x$ is required to be a subtype or a supertype of $t$.
