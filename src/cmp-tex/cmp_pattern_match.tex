@@ -96,9 +96,34 @@ y_2^{B_2}, \ldots ]$. We attach to each pattern variable the number pair $i/j$
 where $i$ is the position of the toplevel argument from which it comes and
 $j$ is the level i.e. the number of constructors used to uncover it.
 
-For each recursive call we attach to each argument + 0 - if the argument is a
-pattern variable coming from the same top level argument indicating if the
-argument has been increased, is the same of has been structurally decreased.
+For each recursive call we attach to each argument which is a pattern variable
+(or a pattern variable applied to arguments (see below wellfounded recursion)
+coming from the same toplevel argument one of the symbols  $0$ or $-$ indicating
+if the argument is the toplevel argument or it has been structurally decreased.
+All other arguments get a $+$ which means \emph{don't know}.
+
+The recursive calls are valid if there are is a sequence of arguments such that
+they decrease in lexicograhic order with each recursive call.
+
+This is possible only if there are candidates for the leftmost argument in the
+sequence of arguments. A candidate for the leftmost argument is an argument
+which either stays the same or decreases on all calls.
+
+A candidate for the next argument in the sequence is an argument which
+decreases or stays the same when the previous stays the same.
+
+A candidate for the first or next argument is a last argument in the
+sequence if it decreases in all calls where the previous (if present) stays the
+same.
+
+The trivial case is when there is one argument which decreases in all recursive
+calls. In this case the sequence consists of one element only.
+
+An argument which does not decrease in some calls cannot be part of the
+sequence.
+
+Trying all possible candidates for the first and subsequent arguments either
+finds a sequence or fails. In the failure case termination is not guaranteed.
 
 \noindent Example Ackermann's function
 \begin{alba}
@@ -121,11 +146,6 @@ argument has been increased, is the same of has been structurally decreased.
 From this signature we see that either the first argument decreases (i.e. level
 $> 0$) or the first argument stays at the same level (i.e. level $0$) and the
 second argument decreases.
-
-A recursion terminates if some of its arguments can be brought into a
-lexicographic order such that they decrease in the lexicographic order in each
-recursive call. If such an order cannot be found, then the recursion is not
-guaranteed to terminate and therefore illegal.
 
 
 
