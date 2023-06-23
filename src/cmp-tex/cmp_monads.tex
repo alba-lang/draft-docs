@@ -1,0 +1,199 @@
+\section{Monads}
+
+
+
+
+
+\subsection{Basics}
+%--------------------------------------------------------------------------------
+
+
+
+
+A monadic type is a type constructor with at least one type argument.
+$$
+    M: \Pi \Gamma A^\Any \Delta. \Any
+$$
+
+Type of a monadic bind operation:
+$$
+    \Pi A^\Any B^\Any \ldots \,.\,
+    M \vec a A \vec b
+    \to
+    (A \to M \vec c B \vec d)
+    \to
+    M \vec e B \vec f
+$$
+
+
+
+
+
+
+\subsection{Recursion}
+%--------------------------------------------------------------------------------
+
+
+
+
+
+
+
+\subsection{Code Examples}
+%--------------------------------------------------------------------------------
+
+
+
+
+\paragraph{State with Success}
+
+\ \begin{alba}
+    State (A S: Any): Any :=
+        S -> (Maybe A, S)
+
+    return {A S: Any} (a: A): State A S :=
+        \ s := (just a, s)
+
+    (>>=) {A B S: Any} (m: State A S) (f: A -> State B S): State B S :=
+        \ s1 :=
+            match m s1 case
+                \ (just a, s2) :=  (f a) s2     -- potential recursive call!
+                \ (empty,  s2) :=  (empty, s2)
+\end{alba}
+
+
+
+
+\paragraph{Continuation with State and Success}
+
+\ \begin{alba}
+    Cont (S A R: Any): Any :=
+        S -> ((Maybe A, S) -> R) -> R
+
+    return {S A R: Any} (a: A): Cont S A R :=
+        \ s k := k s (just a)
+
+    (>>=) {S A B R: Any} (m: Cont S A R) (f: A -> Cont S B R): Cont S B R :=
+        \ s kb :=
+            m s1
+              (case
+                \ (just a, s2)  := f a s2 kb        -- potential recursive call
+                \ (empty,  s2)  := kb (empty, s2))
+
+    run {S A Any} (s: S) (m: Cont S (Maybe A) (Maybe A)): Maybe A :=
+        m s (\ x := x)
+\end{alba}
+
+
+
+
+
+
+
+\paragraph{State}
+
+\ \begin{alba}
+    State (A S: Any): Any :=
+        S -> (A, S)
+
+    return {A S: Any} (a: A): State A S :=
+        \ s := (a, s)
+
+    (>>=) {A B S: Any} (m: State A S) (f: A -> State B S): State B S :=
+        \ s :=
+            match m s case
+                \ (a, s2)  := f a s2
+
+    map {A B S: Any} (f: A -> B) (m: State A S): State B S :=
+            -- 'State' is covariant in 'A'
+        \ s :=
+            match m s case
+                \ (a, s2) := (f a, s2)
+
+    mapS {A S1 S2: Any} (f: S1 -> S2) (g: S2 -> S1) (m: State A S1): State A S2 :=
+            -- 'State' is not variant in 'S'
+        \ (s2: S2) :=
+            match m (g s2)  case
+                \ (a, s1) := (a, f s1)
+\end{alba}
+
+
+
+
+\paragraph{Continuation}
+
+\ \begin{alba}
+    Cont (A R: Any): Any :=
+        (A -> R) -> R
+
+    return {A R: Any} (a: A): Cont A R :=
+        \ (k: A -> R) := k a
+
+    (>>=) {A B R: Any} (m: Cont A R) (f: A -> Cont B R): Cont B R :=
+        \ (k: B -> R) :=
+            m (\ a := f a k)
+
+    map {A B R: Any} (f: A -> B) (m: Cont A R): Cont B R :=
+            -- 'Cont' is covariant in 'A'
+        \ (k: B -> R) :=
+            m (\ a := k (f a))
+
+    mapR {A R1 R2: Any} (f: R2 -> R1) (m: Cont A R1): Cont A R2 :=
+            -- 'Cont' is contravariant in 'R'
+        \ (k: A -> R2) :=
+            m (\ a :=  f (k a))
+
+
+    run {A: Any} (m: Cont A A): A :=
+        m (\ x := x)
+\end{alba}
+
+
+
+
+\paragraph{State with Continuation}
+
+\ \begin{alba}
+    SCont (S A R: Any): Any :=
+        S -> (A -> S -> R) -> R
+        -- or equivalent
+        S -> ((A, S) -> R) -> R
+
+    return {S A R: Any} (a: A): SCont S A R :=
+        \ s k := k a s
+
+    (>>=) {S A B R: Any} (m: SCont S A R) (f: A -> SCont S B R): SCont S B R :=
+        \  s1 kb :=
+            m s1 (\ a s2 := f a s2 kb)
+
+    map {S A B R: Any} (f: A -> B) (m: SCont S A R): SCont S B R :=
+            -- 'Cont' is covariant in 'A'
+        \ s1 kb
+            m s1 (\ a s2 := kb (f a) s2)
+\end{alba}
+
+
+
+
+\paragraph{Function}
+
+\ \begin{alba}
+    Fun (X A: Any): Any :=
+        X -> A
+
+    return {X A: Any} (a: A): Fun X A :=
+        \ _ := a
+
+    (>>=) {X A B: Any} (m: Fun X A) (f: A -> Fun X B): Fun X B :=
+        \ x :=
+            f (m x)
+
+    map {X A B: Any} (f: A -> B) (m: Fun X A): Fun X B :=
+            -- 'Fun' is covariant in the result type
+        \ x := f (m x)
+
+    mapX {X1 X2 A: Any} (f: X2 -> X1) (m: Fun X1 A): Fun X2 A :=
+            -- 'Fun' is contravariant in the argument type
+        \ (x: X2) :=
+            m (f x)
+\end{alba}
