@@ -33,8 +33,30 @@ $$
 \subsection{Recursion}
 %--------------------------------------------------------------------------------
 
+Form of monadic types where recursion is possible:
 
+$$
+\begin{array}{l}
+    S \to R (D A) S
+    \\
+    S \to (D A \to S \to Z) \to Z
+    \\
+    S_1 \to \ldots \to S_n \to ((D A) \to S_1 \to \ldots \to S_n \to Z) \to Z
+\end{array}
+$$
+where $D$ is an inductive type constructor with two constructors (one contains
+$A$, the other not) and $R$ is an inductive record type constructor (only one
+constructor.
 
+Usually $D$ is either \lstinline!Maybe! or \lstinline!Result! and $R$ is a
+tuple.
+\begin{alba}
+    S -> (Maybe A, S)
+
+    S -> (Maybe A -> S -> Z) -> Z
+
+    S1 -> S2 -> ... ->  (Maybe A -> S1 -> S2 -> ... -> Z) -> Z
+\end{alba}
 
 
 
