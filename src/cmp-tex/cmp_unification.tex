@@ -210,12 +210,12 @@ $$
 \begin{array}{lll}
     \Gamma \vdash (\lambda \vec x^{\vec A}. e) \vec a \vec b
     &\leadsto&
-    \Gamma, \vec x^{\vec A} := \vec a \vdash e \vec b
+    \Gamma, (\vec x^{\vec A} := \vec a) \vdash e \vec b
     \\
     %
     \Gamma \vdash \llet[\vec x^{\vec A} := \vec a \mid e] \vec b
     &\leadsto&
-    \Gamma, \vec x^{\vec A} := \vec a \vdash e \vec b
+    \Gamma, (\vec x^{\vec A} := \vec a) \vdash e \vec b
     \\
     %
     \Gamma \vdash \case[f^F \mid \vec c \mid t] \vec a \vec b
@@ -228,3 +228,99 @@ by the corrresponding case tree applied to the arguments $\vec a$.
 
 A term is in head normal form if all head reductions are done which do not
 involve the unfolding of definition.
+
+
+
+
+
+\subsection{Unify Products}
+%--------------------------------------------------------------------------------
+
+$$
+    \Gamma \vdash \Pi x^{A_1}. B_1 \le \Pi x^{A_2}. B_2
+$$
+
+Requirements to satisfy:
+$$
+\begin{array}{llll}
+    \Gamma &\vdash&
+    A_2 \le A_1
+    &\text{arguments contravariant}
+    \\
+    \Gamma, x^{A_2} &\vdash&
+    B_1 \le B_2
+    &\text{results covariant}
+\end{array}
+$$
+The first requirement has to be satisfied before the second one is checked,
+otherwise we have no valid type for the variable $x$ which is valid for both
+result types.
+
+Why do we use $A_2$ as the type of $x$? We have the general typing rule
+specialized for variables
+$$
+    \rulev{
+        \Gamma \vdash x : T
+        \\
+        T \le U
+    }
+    {
+        \Gamma \vdash x: U
+    }
+$$
+If a variable has type $T$ which is a subtype of type $U$, then the variable has
+type $U$ as well. Therefore in the above requirement for the result type we have
+to use the stronger (subtype) of the types $A_1$ and $A_2$.
+
+
+
+
+
+
+\subsection{Unify Abstractions}
+%--------------------------------------------------------------------------------
+
+Lambda terms are never types. Therefore they have to be equivalent.
+
+$$
+    \Gamma \vdash \lambda x^{A_1}. e_1 \equiv \lambda x^{A_2}. e_2
+$$
+
+Requirements to satisfy:
+$$
+\begin{array}{lll}
+    \Gamma &\vdash&
+    A_1 \equiv A_2
+    \\
+    \Gamma, x^{A_1} &\vdash&
+    e_1 \equiv e_2
+\end{array}
+$$
+The first requirement has to be satisfied before the second one is checked,
+otherwise we have no valid type for the variable $x$ which is valid for both
+bodies. Since $A_1$ and $A_2$ are equivalent after the first check we can choose
+either one as the type for the variable $x$.
+
+
+
+
+
+
+\subsection{Unify Base Term with Other Term}
+%--------------------------------------------------------------------------------
+
+
+$$
+    \Gamma \vdash h \vec a \le t
+$$
+
+
+
+
+\subsection{Unify two Base Terms}
+%--------------------------------------------------------------------------------
+
+
+$$
+    \Gamma \vdash h_1 \vec a_1 \le h_2 \vec a_2
+$$
