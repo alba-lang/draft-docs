@@ -378,7 +378,7 @@ a leave node.
 
 
 
-\paragraph{Exhaustiveness of inner nodes}
+\paragraph{Exhaustiveness of Inner Nodes}
 %
 
 An inner node of the form $[\vec c \vec t \mid \vec\ell \vec t \mid d]$ is
@@ -405,25 +405,56 @@ A case tree is exhaustive if all its nodes are exhaustive.
 
 A pattern match expression is a function. It can be applied to arguments.
 $$
-    \case [f^F \mid \vec c \mid t]\; \vec a
+    \case [f^F, \vec c, t]\; \vec a
 $$
 
-The expression can be reduced only if there are sufficient arguments and the
-application of the case tree reaches one of the right hand sides $e$ of one of
-the clauses. The application of the case tree $t$ to the arguments $\vec a$
-extracts from the arguments a collection of subexpressions $\vec u = u_1, u_2,
-\ldots$ and finds the right hand side $e$. The final result is
+A pattern match expression applied to the arguments $\vec a \vec b$ where $\vec
+a$ are the arguments needed by the case expression can be reduced to a case tree
+application
 $$
-    e[\case[f^F\mid \vec c \mid t], u_1, u_2, \ldots /.]
+    \cta(\text{pm}, t, \vec u, p) \vec b
 $$
-Note that in the recursive case the right hand side might contain the free
+where
+\begin{enumerate}
+    \item $\text{pm}$: Pattern match expression $\case[f^F, \vec c, t]$.
+
+    \item $t$: Case tree.
+
+    \item $\vec u = [u_1, u_2, \ldots]$: Collected subterms of the arguments
+        $\vec a$. Initially empty $\empty$.
+
+    \item $p$: Pointer into the arguments $\vec a$: Initially $p$ points to the
+        first argument of $\vec a$.
+
+        A pointer points to its
+        focal term $p.f$ which is the subexpression of the arguments $\vec a$
+        which is currently to be matched.
+
+        $p.n$ is a pointer to next term after the
+        focal point (or $\empty$ if there are no more subterms).
+
+        $p.a_i$ is a pointer to the $i$-th index argument of the focal term.
+        This is possible only if the focal term is a constructur expression.
+        Note the $p.a_1$ is the first argument after the parameter arguments of
+        the constructor.
+\end{enumerate}
+
+The case tree application is completed if the case tree is the right hand side
+$t = e$ of one of the case clauses and the pointer points to nowhere $p =
+\empty$. In that case the reduced form of the case tree application is
+$$
+    e[\text{pm}, \vec u/ .]
+$$
+
+Note that the right hand side might contain the free
 variable $f$ and the pattern variables. The free variable $f$ is replaced by the
 pattern match expression and the pattern variables are replaced by the
-corresponding subterms.
+corresponding subterms. In the recursive case the right hand side $e$ contains
+the free variable and therefore the reduct contains the pattern match expression
+again.
 
-The application of a case tree scans the list of arguments left to write with a
-pointer to a subexpression to some of its arguments. Semantic actions associated
-to the nodes of a case tree.
+The case tree application scans via the pointer the list of arguments left to
+write. Semantic actions associated to the nodes of a case tree:
 \begin{itemize}
     \item $e$: The pointer has to point beyond the last argument of the
         arguments. The list of collected subexpression $u_1, u_2, \ldots$ cover
