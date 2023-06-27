@@ -5,13 +5,14 @@ source-files = \
 	cmp.tex \
 	cmp_macros.tex      \
 	cmp_lmacros.tex     \
-	cmp_universes.tex   \
-	cmp_bound.tex       \
+	cmp_calculus.tex    \
 	cmp_inductive.tex   \
 	cmp_pattern_match.tex \
 	cmp_find_terms.tex  \
 	cmp_unification.tex \
 	cmp_monads.tex \
+	cmp_universes.tex   \
+	cmp_bound.tex       \
 	cmp_elaboration.tex
 
 
