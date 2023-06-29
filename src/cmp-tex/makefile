@@ -8,6 +8,7 @@ source-files = \
 	cmp_calculus.tex    \
 	cmp_inductive.tex   \
 	cmp_pattern_match.tex \
+	cmp_ambiguity.tex   \
 	cmp_find_terms.tex  \
 	cmp_unification.tex \
 	cmp_monads.tex \

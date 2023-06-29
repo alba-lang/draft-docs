@@ -1,0 +1,70 @@
+\section{Ambiguity}
+
+
+
+
+\subsection{Simplified Terms}
+%--------------------------------------------------------------------------------
+
+Simplified terms are defined by the grammar
+$$
+\vertlist{
+    A, B, a :=
+    \\
+    \quad
+    \vertlist{
+        \mid & I &\text{implicit}
+        \\
+        \mid&
+        U &\text{unknown}
+        \\
+        \mid&
+        S &\text{sort}
+        \\
+        \mid&
+        x \vec a &\text{variable application}
+        \\
+        \mid&
+        \type[*] \vec a &\text{type application}
+        \\
+        \mid&
+        A \to B &\text{function type}
+    }
+}
+$$
+
+Assume that a term is in head normal form and $h$ is a function mapping a term
+to its head normal form without unfolding definitions then we can define the
+recursive function $f$ mapping terms from head normal form to simplified terms.
+$$
+\vertlist{
+    f(\Prop) &:=& S
+    \\
+    f(\Any)  &:=& S
+    \\
+    \cta[*] \vec a &:=& U \vec a
+    \\
+    f(x \vec a)  &:=& U f(h(\vec a))
+    &\text{$x$ is type used}
+    \\
+    f(x \vec a)  &:=& x f(h(\vec a))
+    \\
+    f(\Pi x^A.B) &:=& I \to f(h(B)) & \text{$x^A$ is implicit}
+    \\
+    f(\Pi x^A.B)
+    &:=&
+    f(h(A)) \to f(h(B))
+    \\
+    f(\lambda x^A.e) &:=& U
+}
+$$
+A variable $x$ is type used if it has been introduced by mapping $\Pi x^A.B$.
+
+The context $\Gamma$ of the terms has been omitted for clarity but clearly the
+mapping of a term $\Pi x^A.B$ and the mapping to head normal form does introduce
+variables into the context.
+
+Note that mapping a term into a simplified term introduces variables without
+definition only by mapping $\Pi x^A.B$. The mapping to head normal form only
+introduces definitions.
+
