@@ -133,57 +133,6 @@ $\meta m \vec x$ is required to be a subtype or a supertype of $t$.
 
 
 
-
-
-
-\subsection{Head Reductions}
-%--------------------------------------------------------------------------------
-
-The following head reductions are possible:
-$$
-\begin{array}{llll}
-        \Gamma \vdash (\lambda \vec x^{\vec A}. e) \vec a \vec b
-        &\reduce&
-        \Gamma, [\vec x^{\vec A} := \vec a] \vdash e \vec b
-        \\
-        \Gamma \vdash \llet[\vec x^{\vec A} := \vec a , e] \vec b
-        &\reduce&
-        \Gamma, [\vec x^{\vec A} := \vec a] \vdash e \vec b
-        \\
-        \Gamma \vdash \case[*, *, t] \vec a \vec b
-        &\reduce&
-        \Gamma \vdash \cta[\case[*,*,t], t, \empty, p.f = a_1] \vec b
-        \\
-        \Gamma \vdash \cta[*, t_1, \vec u_1, p_1] \vec b
-        &\reduce&
-        \Gamma \vdash \cta[*, t_2, \vec u_2, p_2] \vec b
-        \\
-        \Gamma
-        \vdash
-        \cta(\text{pm}, e, \vec u, \empty) \vec b
-        %
-        &\reduce&
-        %
-        \Gamma, [f,\vec x := \text{pm}, \vec u]
-        \vdash
-        e \vec b
-        \\
-        \Gamma \vdash x \vec b
-        &\reduce&
-        \Gamma \vdash a \vec b
-\end{array}
-$$
-
-The last reduction is an unfolding of a definition i.e. $(x:=a) \in \Gamma$ is
-assumed. A case tree application can become stuck if the focal term does not
-allow a decision.
-
-Note that the head reductions make only substitutions of head terms. Instead of
-substitutions variables with definitions are introduced.
-
-
-
-
 \subsection{Flat Head Normal Forms}
 %--------------------------------------------------------------------------------
 
@@ -221,39 +170,6 @@ The following terms are not unifiable:
         without definition or one of them a constructor and the other a variable
         without definition in the head position.
 \end{enumerate}
-
-A term $t$ in a context $\Gamma$ can be transformed into head normal form by the
-following transformations head reductions:
-$$
-\begin{array}{lll}
-    \Gamma \vdash (\lambda \vec x^{\vec A}. e) \vec a \vec b
-    &\leadsto&
-    \Gamma, (\vec x^{\vec A} := \vec a) \vdash e \vec b
-    \\
-    %
-    \Gamma \vdash \llet[\vec x^{\vec A} := \vec a \mid e] \vec b
-    &\leadsto&
-    \Gamma, (\vec x^{\vec A} := \vec a) \vdash e \vec b
-    \\
-    %
-    \Gamma \vdash \case[f^F \mid \vec c \mid t] \vec a \vec b
-    &\leadsto&
-    \Gamma \vdash e[\case [f^F \mid \vec c \mid t] / f] \; \vec b
-\end{array}
-$$
-where in the case expression $e$ is the right hand side of the case clause found
-by the corrresponding case tree applied to the arguments $\vec a$.
-
-A term is in head normal form if all head reductions are done which do not
-involve the unfolding of definition.
-
-
-
-
-
-\subsection{Deep Head Normal Forms}
-%--------------------------------------------------------------------------------
-
 
 
 
