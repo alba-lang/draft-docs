@@ -97,6 +97,10 @@ the meta variable $m_2$ is an \emph{inner metavariable} with respect to $\meta
 m_1$. Metavariables which are not separated by free variables are in the same
 group.
 
+
+
+\paragraph{Instantiation}
+%------------------------------------------------------------
 Metavariables can be \emph{instantiated} during unification. Whenever there is a
 unification condition of one of the forms
 $$
@@ -131,6 +135,27 @@ This instantiation makes $\meta m \vec x$ and $t$ equivalent which can be easily
 proved by beta reduction. Therefore it is not important if
 $\meta m \vec x$ is required to be a subtype or a supertype of $t$.
 
+
+
+\paragraph{Push to Lower Context} A metavariables lives only in its context and
+in higher contexts. It cannot be used in lower contexts. In order to use a
+metavariable $\meta m_h$ living in the context $\Gamma, x^A$ in the lower
+context $\Gamma$ we have to create a metavariable $\meta m_l$ in the lower
+context $\Gamma$ and instantiate $\meta m_h$ by using $\meta m_l$ in the
+following manner
+$$
+\vertlist{
+    \Gamma, x^A &\vdash& \meta m_h: M_h
+    \\
+    \Gamma &\vdash& \meta m_l: \Pi x^A.M_h
+    &\text{new meta in lower context}
+    \\
+    \Gamma, x^A &\vdash& \meta m_l x : M_h
+    &\text{welltyped}
+    \\
+    \meta m_h &:=& \meta m_l x &\text{instantiation}
+}
+$$
 
 
 \subsection{Flat Head Normal Forms}
