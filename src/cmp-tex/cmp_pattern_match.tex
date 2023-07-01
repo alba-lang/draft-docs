@@ -386,6 +386,11 @@ exhaustive if it has a default tree or if all labels of constructors which can
 construct an object of the corresponding type are present (none of the missing
 constructors can construct an object of type $T$).
 
+In order to verify that a constructor cannot construct an object of the required
+type $T$ we create for all constructor arguments metavariables and unify the
+constructed type with the required type. Unification has to fail definitively
+(and not just for lack of knowledge).
+
 An empty inner node of the form $[\empty \mid \empty \mid \empty]$ is
 possible if $T$ is an inductive type and none of the constructors of the
 inductive type can construct an object of type $T$.
