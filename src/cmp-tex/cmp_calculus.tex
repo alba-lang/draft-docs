@@ -144,3 +144,189 @@ allow a decision.
 
 Note that the head reductions make only substitutions of head terms. Instead of
 substitutions variables with definitions are introduced.
+
+
+
+
+
+
+\subsection{Typing Rules}
+%--------------------------------------------------------------------------------
+
+We introduce two relations.
+$$
+\Gamma \vdash t: T
+$$
+means in the context $\Gamma$ the term $t$ has type $T$.
+$$
+\Gamma \vdash A \le B
+$$
+means $A$ and $B$ are welltyped in the context $\Gamma$ and $A$ is a subtype of
+$B$.
+
+
+
+
+
+The rules for $\Gamma \vdash t : T$:
+
+$$
+\vertlist {
+    \text{axiom} &
+    %----------------
+    [] \vdash \Prop: \Any_0
+    \quad
+    \rulev{
+        i < j
+    }
+    {
+        [] \vdash \Any_i : \Any_j
+    }
+    \\
+    \\
+    \text{var add} &
+    %----------------
+    \rulev{
+        \Gamma \vdash A: s
+    }
+    {
+        \Gamma, x^A \vdash x: A
+    }
+    \quad
+    \rulev{
+        \Gamma \vdash a: A
+    }
+    {
+        \Gamma, [x^A := a] \vdash x: A
+    }
+    \\
+    \\
+    \text{def elim} &
+    %----------------
+    \rulev{
+        \Gamma, [x^A:= a] \vdash t : T
+    }
+    {
+        \Gamma \vdash t[a/x] : T[a/x]
+    }
+    \quad
+    \rulev{
+        \Gamma, [x^A:= a] \vdash t : T
+    }
+    {
+        \Gamma, x^A \vdash t : T
+    }
+    \\
+    \\
+    \text{product} &
+    %----------------
+    \rulev{
+        \Gamma \vdash A: s
+        \\
+        \Gamma, x^A \vdash B: \Prop
+    }
+    {
+        \Gamma \vdash \Pi x^A. B: \Prop
+    }
+    \quad
+    \rulev{
+        \Gamma \vdash A: \Any_i
+        \\
+        \Gamma, x^A \vdash B: \Any_j
+    }
+    {
+        \Gamma \vdash \Pi x^A. B: \Any_{\text{max}(i,j)}
+    }
+    \\
+    \\
+    \text{lambda} &
+    %----------------
+    \rulev{
+        \Gamma, x^A \vdash e : B
+    }
+    {
+        \Gamma \vdash \lambda x^A. e := \Pi x^A. B
+    }
+    \\
+    \\
+    \text{app} &
+    %----------------
+    \rulev{
+        \Gamma \vdash f : \Pi x^A. B
+        \\
+        \Gamma \vdash a: A
+    }
+    {
+        \Gamma, [x^A := a] \vdash f x: B
+    }
+    \\
+    \\
+    \text{weaken} &
+    %----------------
+    \rulev{
+        \Gamma \vdash t: T
+        \\
+        \Gamma \vdash A: s
+    }
+    {
+        \Gamma, x^A \vdash t : T
+    }
+    \quad
+    \rulev{
+        \Gamma \vdash t: T
+        \\
+        \Gamma \vdash a: A
+    }
+    {
+        \Gamma, [x^A:=a] \vdash t : T
+    }
+    \\
+    \\
+    \text{subtype} &
+    %----------------
+    \rulev{
+        \Gamma \vdash t : T
+        \\
+        \Gamma \vdash T \le U
+    }
+    {
+        \Gamma \vdash t: U
+    }
+}
+$$
+
+
+The rules for $\Gamma \vdash A \le B$:
+$$
+\vertlist {
+    \text{same} &
+    %---------------
+    \rulev {
+        \Gamma \vdash A: s
+    }
+    {
+        \Gamma \vdash A \le A
+    }
+    \\
+    \\
+    \text{weaken} &
+    %---------------
+    \rulev {
+        \Gamma \vdash T \le U
+        \\
+        \Gamma \vdash A : s
+    }
+    {
+        \Gamma, x^A \vdash T \le U
+    }
+    \quad
+    \rulev {
+        \Gamma \vdash T \le U
+        \\
+        \Gamma \vdash a: A
+    }
+    {
+        \Gamma, [x^A := a] \vdash T \le U
+    }
+}
+$$
