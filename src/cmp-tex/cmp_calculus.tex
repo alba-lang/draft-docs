@@ -106,26 +106,26 @@ The following head reductions are possible:
 $$
 \begin{array}{llll}
         \Gamma \vdash (\lambda \vec x^{\vec A}. e) \vec a \vec b
-        &\reduce&
+        &\hreduce&
         \Gamma, [\vec x^{\vec A} := \vec a] \vdash e \vec b
         \\
         \Gamma \vdash \llet[\vec x^{\vec A} := \vec a , e] \vec b
-        &\reduce&
+        &\hreduce&
         \Gamma, [\vec x^{\vec A} := \vec a] \vdash e \vec b
         \\
         \Gamma \vdash \case[*, *, t] \vec a \vec b
-        &\reduce&
+        &\hreduce&
         \Gamma \vdash \cta[\case[*,*,t], t, \empty, p.f = a_1] \vec b
         \\
         \Gamma \vdash \cta[*, t_1, \vec u_1, p_1] \vec b
-        &\reduce&
+        &\hreduce&
         \Gamma \vdash \cta[*, t_2, \vec u_2, p_2] \vec b
         \\
         \Gamma
         \vdash
         \cta(\text{pm}, e, \vec u, \empty) \vec b
         %
-        &\reduce&
+        &\hreduce&
         %
         \Gamma, [f,\vec x := \text{pm}, \vec u]
         \vdash
@@ -133,7 +133,7 @@ $$
         \\
         \\
         \Gamma \vdash x \vec b
-        &\reduce&
+        &\hreduce&
         \Gamma \vdash a \vec b
 \end{array}
 $$
@@ -239,6 +239,16 @@ $$
     }
     \\
     \\
+    \text{pi elim} &
+    %----------------
+    \rulev{
+        \Gamma,[x^A:=a],\Delta \vdash \Pi x^A. B
+    }
+    {
+        \Gamma,[x^A:=a],\Delta \vdash B
+    }
+    \\
+    \\
     \text{lambda} &
     %----------------
     \rulev{
@@ -252,12 +262,10 @@ $$
     \text{app} &
     %----------------
     \rulev{
-        \Gamma \vdash f : \Pi x^A. B
-        \\
-        \Gamma \vdash a: A
+        \Gamma, [x^A:=a], \Delta \vdash f : \Pi x^A. B
     }
     {
-        \Gamma, [x^A := a] \vdash f x: B
+        \Gamma, [x^A := a], \Delta \vdash f x: B
     }
     \\
     \\
@@ -299,14 +307,33 @@ $$
 The rules for $\Gamma \vdash A \le B$:
 $$
 \vertlist {
-    \text{same} &
+    \text{axiom} &
     %---------------
+    [] \vdash \Prop \le \Any_0
+    \quad
     \rulev {
-        \Gamma \vdash A: s
+        i \le j
     }
     {
-        \Gamma \vdash A \le A
+        [] \vdash \Any_i \le \Any_j
     }
+    \\
+    \\
+    \text{product} &
+    %---------------
+    \rulev {
+        \Gamma \vdash A_2 \le A_1
+        \\
+        \Gamma, x^{A_2} \vdash B_1 \le B_2
+    }
+    {
+        \Gamma \vdash \Pi x^{A_1}.B_1 \le \Pi x^{A_2}. B_2
+    }
+    \\
+    \\
+    \text{inductive} &
+    %---------------
+    \text{MISSING}
     \\
     \\
     \text{weaken} &
@@ -327,6 +354,42 @@ $$
     }
     {
         \Gamma, [x^A := a] \vdash T \le U
+    }
+    \\
+    \\
+    \text{unfold} &
+    %---------------
+    \rulev {
+        \Gamma \vdash a : A
+        \\
+        \Gamma,[x^A:=a],\Delta \vdash T \le U
+    }
+    {
+        \Gamma,\Delta[a/x] \vdash T[a/x] \le U[a/x]
+    }
+    \\
+    \\
+    \text{same} &
+    %---------------
+    \rulev {
+        \Gamma \vdash A: s
+    }
+    {
+        \Gamma \vdash A \le A
+    }
+    \\
+    \\
+    \text{equiv} &
+    %---------------
+    \rulev {
+        \Gamma \vdash A \equiv B
+        \\
+        \Gamma \vdash B \le C
+        \\
+        \Gamma \vdash C \equiv D
+    }
+    {
+        \Gamma \vdash A \le D
     }
 }
 $$
