@@ -3,35 +3,60 @@
 
 
 
-\subsection{Simplified Terms}
+\subsection{Simplified Types}
 %--------------------------------------------------------------------------------
 
 Simplified terms are defined by the grammar
 $$
 \vertlist{
-    A, B, a :=
+    F, A, B :=
     \\
     \quad
     \vertlist{
-        \mid & I &\text{implicit}
-        \\
-        \mid&
-        U &\text{unknown}
-        \\
         \mid&
         S &\text{sort}
         \\
         \mid&
-        x \vec a &\text{variable application}
+        O &\text{optional (e.g. implicit)}
         \\
         \mid&
-        \type[*] \vec a &\text{type application}
+        D &\text{expr depending on prev vars}
+        \\
+        \mid&
+        \meta X &\text{metavariable}
+        \\
+        \mid&
+        C &\text{constant, type constructor}
+        \\
+        \mid&
+        F A &\text{application}
         \\
         \mid&
         A \to B &\text{function type}
     }
 }
 $$
+
+
+Code Examples:
+\begin{alba}
+    -- dependent type                               simplified type
+ 
+    String -> String -> String                      String -> String -> String
+
+    all {A: Any} (a: A) (n: Nat): Vec A n           I -> D -> Nat -> Vec D D
+
+    all {A: Any}: A                                 I -> D
+
+    all {A: Any}: A -> A                            I -> D -> D
+
+    all {A: Any} {P: A -> Any} (a: A) (f: all x: P x): P a
+                                                    I -> I -> D -> (D -> D D) -> D D
+
+    Nat -> Nat -> Prop                              Nat -> Nat -> S
+
+    all {n: Nat}: zero <= n                         I -> (<=) D D
+\end{alba}
 
 Assume that a term is in head normal form and $h$ is a function mapping a term
 to its head normal form without unfolding definitions then we can define the
