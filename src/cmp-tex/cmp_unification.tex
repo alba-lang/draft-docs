@@ -97,43 +97,92 @@ the meta variable $m_2$ is an \emph{inner metavariable} with respect to $\meta
 m_1$. Metavariables which are not separated by free variables are in the same
 group.
 
+There are the following reasons to introduce metavariables:
+\begin{enumerate}
+    \item Missing type annotation: In the source code a variable is introduced
+        without an explicit type (e.g. types in global or local definitions,
+        argument type of an a abstraction or a product, argument type of a let
+        binding). The usage of the variable shall finally instantiate the
+        metavariable standing for the type.
+
+    \item Implicit actual argument: In a function application the implicit
+        arguments can be ommitted in the source code. For each implicit actual
+        argument a metavariable is introduced. Usually the implicit argument is
+        used in one of the subsequent argument types or in the result type.
+        Having these types the implicit argument can be instantiated.
+
+    \item Interleaved elaboration: In the elaboration of an application $f a$
+        the function term $f$ and the argument term $a$ can be elaborated in
+        parallel. A metavariable for the argument $a$ and its type is
+        introduced. The elaboration of the function term $f$ can fill the
+        argument type and the elaboration of the argument can fill the argument
+        and the type.
+
+    \item Wildcard: In the source code a wildcard can be used to ask the
+        compiler to fill the wildcard from information it already has.
+
+    \item Constructor arguments in pattern of case expressions:
+\end{enumerate}
+
+
+
 
 
 \paragraph{Instantiation}
 %------------------------------------------------------------
-Metavariables can be \emph{instantiated} during unification. Whenever there is a
-unification condition of one of the forms
+Metavariables can be \emph{instantiated} during unification.
+
+Suppose we have
 $$
 \begin{array}{lllll}
-    \Gamma &\vdash &\meta m \vec x &\le &t^T
+    \Gamma &\vdash& \meta m: \Pi \vec x^{\vec A}. M
     \\
-    \Gamma &\vdash &t^T &\le &\meta m \vec x
+    \Gamma, \Delta & \vdash & \meta m \vec x \le t^T
+    \text{ or }
+    t^T \le \meta m \vec x
 \end{array}
 $$
-we can instantiate
+the variables $\vec x$ are pairwise distinct, $t$ does not contain metavariables
+and the conditions
 $$
-    \meta m := \lambda \vec x ^{\vec A}. t
+\vertlist{
+    \FV(t) \subseteq \FV(\Gamma) \cup \set{\vec x}
+    \\
+    \vec x^{\vec A} \subseteq \Delta
+    \\
+    \Gamma,\Delta \vdash T \le M
+}
 $$
-where $\Gamma \vdash \lambda \vec x^{\vec A}. t : \Pi \vec x^{\vec A}. T$ under
-the conditions
+are satisfied. In that case we can do the instantiation
+$$
+\meta m := \lambda \vec x^{\vec A}. t
+$$
+
+Why are the conditions necessary?
 \begin{enumerate}
+    \item $\FV(t) \subseteq \FV(\Gamma) \cup \set{\vec x}$: The metavariable
+        $\meta m$ has to be valid in the context $\Gamma$. In the substitution
+        term $\lambda \vec x^{\vec A}. t$ the variables $\vec x$ are bound. However
+        if $t$ contained more free variables outside of $\Gamma$, then these
+        variables are not bound making $\meta m$ invalid in the context
+        $\Gamma$.
 
-    \item $\meta m$ does not yet have a definition.
+    \item $\vec x^{\vec A} \subseteq \Delta$ and $\vec x$ are pairwise distinct:
+        This guarantees that the variables $\vec x$ can be abstracted over. It
+        is possible to permute the variables in $\Delta$ into the form $\vec
+        x^{\vec A}, \Delta'$ where $t$ does not contain free variables of
+        $\Delta'$.
 
-    \item $\vec x$ are free variables without duplicate, without definitions
-        with the corresponding types $\vec A$ in the context $\Gamma$.
+    \item $\Gamma, \Delta \vdash T \le M$: The instantiation term satisfies
+        $\Gamma \vdash \lambda \vec x^{\vec A}. t : \Pi \vec x^{\vec A}. T$.
+        Its type has to be a subtype of $\Pi \vec x^{\vec A}. M$.
 
-    \item $\text{FV}(t) \subseteq \set{\vec x}$.
-
-    \item $t$ does not contain neither directly or indirectly neither $\vec m$
-        nor more inner metavariables.
-
-    \item $\Pi \vec x^{\vec A}. T \le M$.
+    \item $t$ does not contain metavariables: This strong condition guarantees
+        that metavariables are instantiated bottoms up and there is no
+        circularity in the instantiations.
 \end{enumerate}
 
-This instantiation makes $\meta m \vec x$ and $t$ equivalent which can be easily
-proved by beta reduction. Therefore it is not important if
-$\meta m \vec x$ is required to be a subtype or a supertype of $t$.
+
 
 
 
