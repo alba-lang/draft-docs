@@ -44,18 +44,18 @@ Code Examples:
  
     String -> String -> String                      String -> String -> String
 
-    all {A: Any} (a: A) (n: Nat): Vec A n           I -> D -> Nat -> Vec D D
+    all {A: Any} (a: A) (n: Nat): Vec A n           O -> D -> Nat -> Vec D D
 
-    all {A: Any}: A                                 I -> D
+    all {A: Any}: A                                 O -> D
 
-    all {A: Any}: A -> A                            I -> D -> D
+    all {A: Any}: A -> A                            O -> D -> D
 
     all {A: Any} {P: A -> Any} (a: A) (f: all x: P x): P a
-                                                    I -> I -> D -> (D -> D D) -> D D
+                                                    O -> O -> D -> (D -> D D) -> D D
 
     Nat -> Nat -> Prop                              Nat -> Nat -> S
 
-    all {n: Nat}: zero <= n                         I -> (<=) D D
+    all {n: Nat}: zero <= n                         O -> (<=) D D
 \end{alba}
 
 Assume that a term is in head normal form and $h$ is a function mapping a term
@@ -74,7 +74,7 @@ $$
     \\
     f(x \vec a)  &:=& x f(h(\vec a))
     \\
-    f(\Pi x^A.B) &:=& I \to f(h(B)) & \text{$x^A$ is implicit}
+    f(\Pi x^A.B) &:=& O \to f(h(B)) & \text{$x^A$ is implicit}
     \\
     f(\Pi x^A.B)
     &:=&
