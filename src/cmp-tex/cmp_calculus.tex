@@ -142,7 +142,7 @@ The last reduction is an unfolding of a definition i.e. $(x:=a) \in \Gamma$ is
 assumed. A case tree application can become stuck if the focal term does not
 allow a decision.
 
-Note that the head reductions make only substitutions of head terms. Instead of
+Note that the head reductions only make substitutions of head terms. Instead of
 substitutions variables with definitions are introduced.
 
 
@@ -157,11 +157,11 @@ We introduce two relations.
 $$
 \Gamma \vdash t: T
 $$
-means in the context $\Gamma$ the term $t$ has type $T$.
+Read: In the context $\Gamma$ the term $t$ has type $T$.
 $$
 \Gamma \vdash A \le B
 $$
-means $A$ and $B$ are welltyped in the context $\Gamma$ and $A$ is a subtype of
+Read: $A$ and $B$ are welltyped in the context $\Gamma$ and $A$ is a subtype of
 $B$.
 
 
