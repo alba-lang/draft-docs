@@ -17,10 +17,7 @@ $$
         S &\text{sort}
         \\
         \mid&
-        O &\text{optional (e.g. implicit)}
-        \\
-        \mid&
-        D &\text{expr depending on prev vars}
+        U &\text{unknown}
         \\
         \mid&
         \meta X &\text{metavariable}
@@ -33,6 +30,9 @@ $$
         \\
         \mid&
         A \to B &\text{function type}
+        \\
+        \mid&
+        \set{A} \to B &\text{function with implicit argument}
     }
 }
 $$
@@ -40,22 +40,22 @@ $$
 
 Code Examples:
 \begin{alba}
-    -- dependent type                               simplified type
+    -- dependent type                       simplified type
  
-    String -> String -> String                      String -> String -> String
+    String -> String -> String              String -> String -> String
 
-    all {A: Any} (a: A) (n: Nat): Vec A n           O -> D -> Nat -> Vec D D
+    all {A: Any} (a: A) (n: Nat): Vec A n   {S} -> U -> Nat -> Vec U U
 
-    all {A: Any}: A                                 O -> D
+    all {A: Any}: A                         {S} -> U
 
-    all {A: Any}: A -> A                            O -> D -> D
+    all {A: Any}: A -> A                    {S} -> U -> U
 
     all {A: Any} {P: A -> Any} (a: A) (f: all x: P x): P a
-                                                    O -> O -> D -> (D -> D D) -> D D
+                                            {S} -> {U -> S} -> U -> (U -> U U) -> U U
 
-    Nat -> Nat -> Prop                              Nat -> Nat -> S
+    Nat -> Nat -> Prop                      Nat -> Nat -> S
 
-    all {n: Nat}: zero <= n                         O -> (<=) D D
+    all {n: Nat}: zero <= n                 {Nat} -> (<=) U U
 \end{alba}
 
 Assume that a term is in head normal form and $h$ is a function mapping a term

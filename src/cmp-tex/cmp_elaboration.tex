@@ -17,14 +17,17 @@ The type annotations $A$ and $E$ are optional.
 An elaboration can be successful only if it elaborates a term which satifies the
 requirement $R$. There are only two possibilities to satisfy the requirement.
 
-$R$ represents a function type i.e. it has the form $\Pi x^{A_r}. B_r$. In that
-case the requirement can flow down to give requirements for $A$, $E$ and $e$.
+\begin{enumerate}
+    \item $R$ represents a function type i.e. it has the form $\Pi x^{A_r}.
+        B_r$. In that case the requirement can flow down to give requirements
+        for $A$, $E$ and $e$.
 
-$R$ has a metavariable $\meta M$ as a head term and $R$ is a pattern i.e. $R =
-\meta M \vec y$ where $\vec y$ are pairwise distinct free variables. In that
-case the requirement can flow up. I.e. the elaboration elaborates a term with
-the type $\Pi x^A. B$ and the unification of the type with $R$ instantiates
-$\meta M$.
+    \item $R$ has a metavariable $\meta M$ as a head term and $R$ is a pattern
+        i.e. $R = \meta M \vec y$ where $\vec y$ are pairwise distinct free
+        variables. In that case the requirement can flow up. I.e. the
+        elaboration elaborates a term with the type $\Pi x^A. B$ and the
+        unification of the type with $R$ instantiates $\meta M$.
+\end{enumerate}
 
 
 \begin{enumerate}
