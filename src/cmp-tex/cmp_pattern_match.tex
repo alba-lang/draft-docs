@@ -6,7 +6,7 @@
 
 Fully elaborated pattern match expression:
 $$
-\case[ f^F \mid c_1,  \ldots, c_n \mid t]
+\case( f^F , [c_1,  \ldots, c_n] , t)
 $$
 %
 where $F$ is a function type of the form
@@ -18,7 +18,7 @@ $$
 and where each clause $c_i$ has the form
 %
 $$
-    [\Delta \mid p_1^{P_1}, \ldots, p_m^{P_m} \mid e^E]
+    (\Delta, [p_1^{P_1}, \ldots, p_m^{P_m}], e^E)
 $$
 where the context $\Delta$ contains all pattern variables introduced in the
 pattern, $p_i$ is the $i$-th pattern
