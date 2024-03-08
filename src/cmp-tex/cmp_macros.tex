@@ -26,6 +26,7 @@
 \def\meta#1{{{}^? \kern-0.2em #1}}
 
 
+\def\impl{\rightarrow}
 \def\vec#1{{\mathbf #1}}
 \def\fargs#1#2{{\vec {#1}^{\vec {#2}}}}
 
@@ -44,6 +45,12 @@
     \left[ \vertlist{#1} \right]
 }
 
+
+\def\cases#1{
+    \left\{ \vertlist {#1} \right.
+}
+
+
 \def\rulev#1#2{
     \begin{array}{l}
         #1
@@ -61,7 +68,6 @@
         #2
     \end{array}
 }
-
 
 
 

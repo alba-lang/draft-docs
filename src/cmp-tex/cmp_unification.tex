@@ -18,7 +18,7 @@ is quite simple:
 
     \item Transform both types into normal form. Since both are types their normal
         forms have to be products with zero or more arguments and the result type is
-        either a sort or a base term i.e. the have one of the forms
+        either a sort or a base term i.e. they have one of the forms
         $$
         \begin{array}{l}
             \Pi x_1^{A_1} \ldots x_n^{A_n}. x \vec a
@@ -49,9 +49,7 @@ There are two problems with this approach:
         expression reductions, let term reductions and beta reductions.
         Operation of let and beta reduction is variable substitution in terms.
         Since variables can occur several times in terms the normalized terms
-        can be considerably large even growing exponentially. Consider that
-        there are 10 beta reductions which duplicate a term. If this duplication
-        is nested then there are finally 1014 duplicates.
+        can be considerably large even growing exponentially.
 
         Furthermore case term reductions can grow exponentially in the worst
         case.
@@ -121,7 +119,9 @@ There are the following reasons to introduce metavariables:
     \item Wildcard: In the source code a wildcard can be used to ask the
         compiler to fill the wildcard from information it already has.
 
-    \item Constructor arguments in pattern of case expressions:
+    \item Constructor arguments in pattern of case expressions.
+
+    \item The unifier might introduce metavariables.
 \end{enumerate}
 
 
@@ -207,43 +207,229 @@ $$
 $$
 
 
-\subsection{Flat Head Normal Forms}
+
+
+
+
+\subsection{Flex-Rigid Constraints}
 %--------------------------------------------------------------------------------
 
+A \emph{flex-rigid} constraint looks like
 
-The following terms are in \emph{flat head normal form}
+$$
+%
+    \Gamma_1, \Gamma_2
+%
+    \vdash
+%
+    \meta m \vec a
+%
+    \equiv
+%
+    \cases {
+        h \vec b
+        \\
+        \Pi x^A. B
+        \\
+        \lambda x^A. e
+    }
+$$
+
+where $\Gamma_1$ is the context where the metavariable $\meta m$ has been
+introduced.
+
+The left hand side is called flexible because its structure can be changed by
+substitutions and reductions, the right hand side is called \emph{rigid} because
+its structure cannot be changed by substitutions and reductions.
+
+The left and right hand side are in head normal form.
+
+
+
+\paragraph{Ambiguity}
+%----------------------------------------
+In higher order unification there is no \emph{most general unifier}. On the
+contrary, multiple unifiers can exist. The simplest example to demonstrate the
+ambiguity is the contraint $\meta m x \equiv x$ where $x \in \Gamma_1$. It has
+the solutions
+$$
+    \meta m := \cases {
+        \lambda y^A. x & \text{constant function}
+        \\
+        \lambda y^A. y & \text{identity function}
+    }
+$$
+
+Both solutions satisfy the constraint. Multiple solutions might cause
+backtracking which we want to avoid.
+
+
+
+
+\paragraph{Huet's Algorithm}
+%----------------------------------------
+Gérard Huet's higher order unification algorithm gives a general procedure to
+solve constraints of the form
+$$
+    \Gamma_1, \Gamma_2
+    \vdash
+    \meta m \vec a \equiv h \vec b
+$$
+where $h$ is either a constant of a bound variable. In our setting all variables
+$x_i \in \Gamma_1$ and all global variables correspond to constants and all $x_j
+\in \Gamma_2$ correspond to bound variables.
+
+Any valid instantiation of $\meta m$ must have the form $\lambda \vec y^{\vec
+B}. e$ such that $\meta m \vec a = e[\vec a/\vec y] \reduce h \vec b$. This is
+possible only if $e = h \ldots$ (\emph{imitation}) or $e = y_i \ldots$
+(\emph{projection}) i.e. either $e$ has $h$ is its head term or $a_i \ldots
+\reduce h \ldots$.
+
+In order to get the most general instantiation some fresh metavariables $\meta
+h_1, \meta h_2, \ldots$ valid in the context $\Gamma_1$ are introduced
+$$
+    \meta m
+    := \lambda \vec y^{\vec B}.
+    \cases {
+        h (\meta h_1 \vec y) \ldots (\meta h_n \vec y)
+        & \text{imitation}
+        %
+        \\
+        %
+        y_i (\meta h_1 \vec y) \ldots (\meta h_m \vec y)
+        & \text{projection}
+    }
+$$
+
+where $n$ is the arity of $h$ and $m$ is the arity of $y_i$,
+giving one of the constraints
+
+$$
+\vertlist{
+    %
+    h (\meta h_1 \vec a) \ldots (\meta h_n \vec a)
+    &\equiv&
+    h \vec b
+    & \text{imitation}
+    %
+    \\
+    a_i (\meta h_1 \vec a) \ldots (\meta h_m \vec a)
+    &\equiv&
+    h \vec b
+    & \text{projection}
+}
+$$
+
+If $h$ is a bound variable (i.e. $h\in \Gamma_2$), then imitation is not
+possible. Otherwise the instantiation of $\meta m$ would contain a bound
+variable from an inner context.
+
+The constraint in the imitation case has the rigid-rigid form and immediately
+results in the simpler problems
+$$
+    \Gamma_1, \Gamma_2 \vdash \meta h_i \vec a \equiv b_i
+$$
+whilst the projection case might introduce new redexes therefore might lead to
+more complex problems. The projection case is the reason why Huet's algorithm
+might not terminate and is therefore only a semidecision procedure.
+
+The general solution of a flex-rigid constraint in Huet's algorithm might
+generate up to $1 + n$ alternatives where $n$ is the arity of the metavariable
+$\meta m$.
+
+
+
+
+\paragraph{Restriction}
+%----------------------------------------
+In order to avoid backtracking we try to instantiate the metavariable $\meta m$
+only if the constraint is in pattern form
+$$
+    \Gamma_0, \Gamma_1
+    \vdash
+    \meta m \vec x
+    \equiv
+    \cases{
+        h \vec b
+        \\
+        \Pi z^C . D
+        \\
+        \lambda z^C . e
+    }
+$$
+where
+$\Gamma_0 \vdash \meta m : \Pi \vec y^{\vec A}$, $\Gamma_0,
+\Gamma_1 \vdash h \vec b : T$
+and
+$\vec x \in \Gamma_0, \Gamma_1$
+are different variables (multiple occurrences of the same variable would be a
+quasi pattern form). This has the advantage that most of the solutions are
+unique.
+
 \begin{enumerate}
-    \item Products
 
-    \item Abstractions
+    \item $\meta m \vec x \equiv x_i$ where $x_i \in \Gamma_0$: This is the
+        only case which creates an ambiguity. It has the solutions
+        $$
+            \meta m := \cases{
+                \lambda \vec y. x_i & \text{imitation}
+                \\
+                \lambda \vec y. y_i & \text{projection}
+            }
+        $$
 
-    \item Base terms $h \vec a$: The head symbol $h$ is one of
-        \begin{enumerate}
-            \item Variable or metavariable
-            \item Constructor
-            \item Inductive type
-            \item Stuck case tree application $\cta(*, t, *, p)$
-                where the the focal term $p.f$ has not enough information to
-                make the decision of the current tree $t$.
-        \end{enumerate}
+        This disambiguity can be resolved if we encounter another constraint of
+        one of the two forms
+        $$
+            \meta m \vec z \equiv
+            \cases{
+                x_i &\text{where } z_i \ne x_i
+                \\
+                z_i &\text{where } z_i \ne x_i
+            }
+        $$
+        The first form requires imitation i.e. $\meta m \vec z$ ignores the
+        arguments and always returns $x_i$. The second form requires projection
+        i.e. $\meta m \vec z$ always projects onto the $i$th argument.
 
 
-        $x$ is a prime term i.e. either a variable,
-        metavariable, constructor or inductive type or $x$ is a case expression
-        which cannot be reduced by analyzing its arguments $\vec a$ with the help
-        of its case tree.
+    \item $\meta m \vec x \equiv x_i$ where $x_i \in \Gamma_1$: The only
+        possible solution is projection, because any solution must not contain
+        variables from inner contexts
+        $$
+            \meta m := \lambda \vec y . y_i
+        $$
+
+
+    \item $\meta m \vec x \equiv h \vec b$ where $h \in \vec x \impl (h \in
+        \Gamma_0 \land |b| > 0)$:
+        The only solution is imitation.
+
+        We introduce fresh metavariables $\meta h_1, \ldots \meta h_n$ with the
+        types $\Gamma_0 \vdash \meta h_i : \Pi \vec y^{\vec A} : B_i$ where $n$
+        is the arity of $h$ and $B_i$ is the type of $b_i$.
+
+        The constraint can be solved by
+        %
+        $$
+            \meta m :=
+            \lambda \vec y^{\vec A} .
+            h (\meta h_1 \vec y) \ldots (\meta h_n \vec y)
+        $$
+        %
+        which converts the constraint into
+        $$
+            h (\meta h_1 \vec x) \ldots (\meta h_n \vec x)
+            \equiv
+            h \vec b
+        $$
+        %
+        which is rigid-rigid now and can be simplified. Note that simplification
+        leads to new constraints of the form $\meta h_i \vec x \equiv b_i$ which
+        are in pattern form.
+
 \end{enumerate}
 
-The following terms are not unifiable:
-\begin{enumerate}
-    \item Two terms in head normal form of different structure are mutually not
-        unifiable except one of them is a base term with a head symbol which has
-        a definition.
-
-    \item Two base terms with different constructors, different free variables
-        without definition or one of them a constructor and the other a variable
-        without definition in the head position.
-\end{enumerate}
 
 
 
