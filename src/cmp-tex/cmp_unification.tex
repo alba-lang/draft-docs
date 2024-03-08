@@ -260,7 +260,7 @@ instantiated by an object of a more specific type.
 
 
 
-\paragraph{Ambiguity}
+\subsubsection{Ambiguity}
 %----------------------------------------
 In higher order unification there is no \emph{most general unifier}. On the
 contrary, multiple unifiers can exist. The simplest example to demonstrate the
@@ -280,7 +280,7 @@ backtracking which we want to avoid.
 
 
 
-\paragraph{Huet's Algorithm}
+\subsubsection{Huet's Algorithm}
 %----------------------------------------
 Gérard Huet's higher order unification algorithm gives a general procedure to
 solve constraints of the form
@@ -354,7 +354,7 @@ $\meta m$.
 
 
 
-\paragraph{Restriction}
+\subsubsection{Algorithm with Restriction}
 %----------------------------------------
 In order to avoid backtracking we try to instantiate the metavariable $\meta m$
 only if the constraint is in pattern form
@@ -504,6 +504,51 @@ unique.
         $$
         which can be simplified.
 \end{enumerate}
+
+
+
+
+\subsubsection{Code Example} Suppose we have the code
+%----------------------------------------
+
+\begin{alba}
+    type (=) (A: Any): A -> A -> Prop :=
+        same {x}: x = x
+
+    flip {A: Any} {a b: A}: a = b -> b = a :=
+        ...
+
+    adapt {A B: Any} {a b: A} {F: A -> B}: F a -> F b :=
+        ...
+
+    (,) {A: Any} {a b c: A} (ab: a = b) (bc: b = c): a = c :=
+        adapt {A} {b} {a} {?F} (flip ab) bc
+\end{alba}
+
+and we want to instantiate ?F by unification.
+
+\begin{alba}
+    -- unification constraints
+    ?F b   ~   b = c
+    ?F a   ~   a = c
+
+    -- instantiation from the first flex-rigid constraint
+    ?F := (\ x := ?h1 x = ?h2 x)
+
+    -- after simplification
+    ?h1 b  ~  b             -- ambiguous: imitation or projection
+    ?h2 b  ~  c             -- only imitation is possible
+
+    ?h2 := (\ x := c)
+
+    -- instantiation of ?F and ?h2 into the second constraint
+    ?h1 a = c    ~    a = c
+
+    -- after simplification
+    ?h1 a  ~  a             -- now only projection is possible
+                            -- ambiguity resolved
+    ?h1 := (\ x := x)
+\end{alba}
 
 
 
