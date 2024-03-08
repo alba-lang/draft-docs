@@ -218,7 +218,7 @@ A \emph{flex-rigid} constraint looks like
 
 $$
 %
-    \Gamma_1, \Gamma_2
+    \Gamma_0, \Gamma_1
 %
     \vdash
 %
@@ -236,13 +236,27 @@ $$
 $$
 
 where $\Gamma_1$ is the context where the metavariable $\meta m$ has been
-introduced.
+introduced and the typing conditions
+$\Gamma_0 \vdash \meta m : \Pi \vec y^{\vec A}. R$
+and
+$\Gamma_0, \Gamma_1 \vdash \text{\emph{right hand side}}: T$
+are valid.
 
 The left hand side is called flexible because its structure can be changed by
 substitutions and reductions, the right hand side is called \emph{rigid} because
 its structure cannot be changed by substitutions and reductions.
 
 The left and right hand side are in head normal form.
+
+
+The constraint is satisfiable when the typing condition
+$$
+    \Gamma_0, \Gamma_1 \vdash T \le R[\vec x / \vec y]
+$$
+is valid which implies that all free variables of the type of the right hand side
+$T$ are within $\FV(\Gamma_0) \cup \vec x$. The typing condition is a subtype
+because metavariables are introduced with the most general type and can be
+instantiated by an object of a more specific type.
 
 
 
@@ -271,7 +285,7 @@ backtracking which we want to avoid.
 Gérard Huet's higher order unification algorithm gives a general procedure to
 solve constraints of the form
 $$
-    \Gamma_1, \Gamma_2
+    \Gamma_0, \Gamma_1
     \vdash
     \meta m \vec a \equiv h \vec b
 $$
@@ -327,7 +341,7 @@ variable from an inner context.
 The constraint in the imitation case has the rigid-rigid form and immediately
 results in the simpler problems
 $$
-    \Gamma_1, \Gamma_2 \vdash \meta h_i \vec a \equiv b_i
+    \Gamma_0, \Gamma_1 \vdash \meta h_i \vec a \equiv b_i
 $$
 whilst the projection case might introduce new redexes therefore might lead to
 more complex problems. The projection case is the reason why Huet's algorithm
@@ -358,8 +372,8 @@ $$
     }
 $$
 where
-$\Gamma_0 \vdash \meta m : \Pi \vec y^{\vec A}$, $\Gamma_0,
-\Gamma_1 \vdash h \vec b : T$
+$\Gamma_0 \vdash \meta m : \Pi \vec y^{\vec A}. R$, $\Gamma_0,
+\Gamma_1 \vdash \text{\emph{right hand side}} : T$
 and
 $\vec x \in \Gamma_0, \Gamma_1$
 are different variables (multiple occurrences of the same variable would be a
@@ -407,7 +421,9 @@ unique.
 
         We introduce fresh metavariables $\meta h_1, \ldots \meta h_n$ with the
         types $\Gamma_0 \vdash \meta h_i : \Pi \vec y^{\vec A} : B_i$ where $n$
-        is the arity of $h$ and $B_i$ is the type of $b_i$.
+        is the arity of $h$ and $B_i$ is the type of $b_i$. This requires that
+        $B_i$ is a valid type in the context $\Gamma_0, \Delta$ where $\Delta$
+        is $\Gamma_1$ restricted to the variables $\vec x$.
 
         The constraint can be solved by
         %
@@ -424,10 +440,69 @@ unique.
             h \vec b
         $$
         %
-        which is rigid-rigid now and can be simplified. Note that simplification
+        which is rigid-rigid and can be simplified. Note that simplification
         leads to new constraints of the form $\meta h_i \vec x \equiv b_i$ which
         are in pattern form.
 
+    \item $\meta m \vec x \equiv \Pi z^C. D$:
+
+        We introduce fresh metavariables
+        %
+        $\meta h_1: \Pi \vec y^{\vec A}. \Top$
+        %
+        and
+        %
+        $\meta h_2: \Pi \vec y^{\vec A} z^{\meta h_1 \vec y} . \Top$.
+        %
+        Then the constraint can be solved by the instantiation
+        $$
+            \meta m
+            :=
+            \lambda \vec y^{\vec A}
+            . \Pi z^{\meta h_1 \vec y}. \meta h_2 \vec y z
+        $$
+
+        This immediately generates the constraint
+        $$
+            \Gamma_0, \Gamma_1
+            \vdash
+            \Pi z^{\meta h_1 \vec x} . \meta h_2 \vec x z
+            \equiv
+            \Pi z^C . D
+        $$
+        which can be simplified.
+
+    \item $\meta m \vec x \equiv \lambda z^C. e$:
+
+        We introduce fresh metavariables
+        %
+        $\meta h_1: \Pi \vec y^{\vec A}. \Top$,
+        %
+        $\meta h_2: \Pi \vec y^{\vec A} z^{\meta h_1 \vec y} . \Top$
+        %
+        and
+        %
+        $\meta h_3
+        : \Pi \vec y^{\vec A} z^{\meta h_1 \vec y}
+          . \meta h_2 \vec y z
+        $.
+        Then the constraint can be solved by the instantiation
+        $$
+            \meta m
+            :=
+            \lambda \vec y^{\vec A} z^{\meta h_2 \vec y}
+            . \meta h_3 \vec y z
+        $$
+
+        This immediately generates the constraint
+        $$
+            \Gamma_0, \Gamma_1
+            \vdash
+            \lambda z^{\meta h_1 \vec x} . \meta h_3 \vec x z
+            \equiv
+            \lambda z^C . e
+        $$
+        which can be simplified.
 \end{enumerate}
 
 
