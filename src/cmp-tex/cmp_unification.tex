@@ -382,7 +382,22 @@ unique.
 
 \begin{enumerate}
 
-    \item $\meta m \vec x \equiv x_i$ where $x_i \in \Gamma_0$: This is the
+    \item $\meta m \equiv \text{\emph{right hand side}}$:
+        % Trivial case
+        %----------------------------------------
+
+        This is the trivial case which has (provided the type
+        condition is satisfied and the right hand side has no variables from the
+        inner context $\Gamma_1$) the solution
+        $$
+            \meta m := \text{\emph{right hand side}}
+        $$
+
+
+    \item $\meta m \vec x \equiv x_i$ where $x_i \in \Gamma_0$:
+        % Ambiguos case
+        %----------------------------------------
+        This is the
         only case which creates an ambiguity. It has the solutions
         $$
             \meta m := \cases{
@@ -508,9 +523,10 @@ unique.
 
 
 
-\subsubsection{Code Example} Suppose we have the code
+\subsubsection{Code Example}
 %----------------------------------------
 
+Suppose we have the code
 \begin{alba}
     type (=) (A: Any): A -> A -> Prop :=
         same {x}: x = x
@@ -524,7 +540,7 @@ unique.
     (,) {A: Any} {a b c: A} (ab: a = b) (bc: b = c): a = c :=
         adapt {A} {b} {a} {?F} (flip ab) bc
 \end{alba}
-
+%
 and we want to instantiate ?F by unification.
 
 \begin{alba}
@@ -548,6 +564,11 @@ and we want to instantiate ?F by unification.
     ?h1 a  ~  a             -- now only projection is possible
                             -- ambiguity resolved
     ?h1 := (\ x := x)
+
+    -- instantiation of ?F
+    ?F x := (\ x := x) x = (\ x := c) x
+
+    ?F x := x = c   -- reduced
 \end{alba}
 
 
