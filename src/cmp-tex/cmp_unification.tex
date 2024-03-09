@@ -576,28 +576,65 @@ and we want to instantiate ?F by unification.
 
 
 
-\subsection{Unify Products}
+
+
+
+\subsection{Rigid-Rigid Constraints}
+%================================================================================
+
+Rigid-rigid constraints have one of the forms
+$$
+    \vertlist {
+        h_a \vec a &\le& h_b \vec b
+        & \text{base terms}
+        \\
+        \Pi x^{A_1}. B_1 &\le& \Pi x^{A_2}. B_2
+        & \text{products}
+        \\
+        \lambda x^{A_1}. e_1 &\equiv& \lambda x^{A_2}. e_2
+        & \text{abstractions}
+    }
+$$
+
+A rigid-rigid constraint can be resolved only if the left and the right side
+have the same structure. A lambda abstraction can never be a type, therefore a
+subtype constraint is not meaningful.
+
+
+
+
+
+
+
+
+\subsubsection{Base Terms}
 %--------------------------------------------------------------------------------
 
+
 $$
-    \Gamma \vdash \Pi x^{A_1}. B_1 \le \Pi x^{A_2}. B_2
+    \Gamma \vdash h_1 \vec a_1 \le h_2 \vec a_2
 $$
 
-Requirements to satisfy:
+MISSING!!!!
+
+
+\subsubsection{Products}
+%------------------------------------------------------------
+
+The constraint $\Gamma \vdash \Pi x^{A_1}. B_1 \le \Pi x^{A_2}. B_2$ can be
+simplified to
 $$
-\begin{array}{llll}
-    \Gamma &\vdash&
-    A_2 \le A_1
-    &\text{arguments contravariant}
-    \\
-    \Gamma, x^{A_2} &\vdash&
-    B_1 \le B_2
-    &\text{results covariant}
-\end{array}
+    \vertlist{
+        \Gamma          & \vdash & A_2 \le A_1
+        &\text{arguments contravariant}
+        \\
+        \Gamma, x^{A_2} & \vdash & B_1 \le B_2
+        &\text{results covariant}
+    }
 $$
-The first requirement has to be satisfied before the second one is checked,
-otherwise we have no valid type for the variable $x$ which is valid for both
-result types.
+%
+The constraint $A_2 \le A_1$ has to be resolved before the second one,
+otherwise $B_1$ would not be welltyped in the context $\Gamma, x^{A_2}$.
 
 Why do we use $A_2$ as the type of $x$? We have the general typing rule
 specialized for variables
@@ -618,52 +655,18 @@ to use the stronger (subtype) of the types $A_1$ and $A_2$.
 
 
 
+\subsubsection{Abstractions}
+%------------------------------------------------------------
 
-
-\subsection{Unify Abstractions}
-%--------------------------------------------------------------------------------
-
-Lambda terms are never types. Therefore they have to be equivalent.
-
+The constraint $\Gamma \vdash \lambda x^{A_1}. e_1 \equiv \lambda x^{A_2}. e_2$
+can be simplified to
 $$
-    \Gamma \vdash \lambda x^{A_1}. e_1 \equiv \lambda x^{A_2}. e_2
+    \vertlist{
+        \Gamma          & \vdash & A_1 \equiv A_2
+        \\
+        \Gamma, x^{A_1} & \vdash & e_1 \equiv e_2
+    }
 $$
-
-Requirements to satisfy:
-$$
-\begin{array}{lll}
-    \Gamma &\vdash&
-    A_1 \equiv A_2
-    \\
-    \Gamma, x^{A_1} &\vdash&
-    e_1 \equiv e_2
-\end{array}
-$$
-The first requirement has to be satisfied before the second one is checked,
-otherwise we have no valid type for the variable $x$ which is valid for both
-bodies. Since $A_1$ and $A_2$ are equivalent after the first check we can choose
-either one as the type for the variable $x$.
-
-
-
-
-
-
-\subsection{Unify Base Term with Other Term}
-%--------------------------------------------------------------------------------
-
-
-$$
-    \Gamma \vdash h \vec a \le t
-$$
-
-
-
-
-\subsection{Unify two Base Terms}
-%--------------------------------------------------------------------------------
-
-
-$$
-    \Gamma \vdash h_1 \vec a_1 \le h_2 \vec a_2
-$$
+%
+The constraint $A_1 \equiv A_2$ has to be resolved before the second one,
+otherwise $e_2$ would not be welltyped in the context $\Gamma, x^{A_1}$.
