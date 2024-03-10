@@ -593,12 +593,15 @@ $$
         \\
         \lambda x^{A_1}. e_1 &\equiv& \lambda x^{A_2}. e_2
         & \text{abstractions}
+        \\
+        \lambda x^A. e & \equiv & h \vec b
+        & \text{abstraction and base term}
     }
 $$
 
 A rigid-rigid constraint can be resolved only if the left and the right side
 have the same structure. A lambda abstraction can never be a type, therefore a
-subtype constraint is not meaningful.
+subtype constraint is not meaningful for lambda abstractions.
 
 
 
@@ -670,3 +673,16 @@ $$
 %
 The constraint $A_1 \equiv A_2$ has to be resolved before the second one,
 otherwise $e_2$ would not be welltyped in the context $\Gamma, x^{A_1}$.
+
+
+
+
+\subsubsection{Abstractions and Base Terms}
+%------------------------------------------------------------
+
+The constraing $\Gamma \vdash \lambda x^A.e \equiv h \vec b$ can be simplified
+to
+$$
+    \Gamma, x^A \vdash e \equiv h \vec b x
+$$
+provided that the left and right hand side of the contraint have the same type.
