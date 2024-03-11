@@ -76,8 +76,18 @@ where $A$ and $R$ are welltyped in the context $\Gamma$.
 
 
 
+\subsection{Normalization}
+%================================================================================
+
+
+MISSING!!!
+
+
+
+
+
 \subsection{Metavariables}
-%--------------------------------------------------------------------------------
+%================================================================================
 
 
 Metavariables are introduced when there is something unknown in a certain
@@ -121,90 +131,13 @@ There are the following reasons to introduce metavariables:
 
     \item Constructor arguments in pattern of case expressions.
 
-    \item The unifier might introduce metavariables.
+    \item The unification might introduce metavariables.
 \end{enumerate}
 
 
 
 
 
-\paragraph{Instantiation}
-%------------------------------------------------------------
-Metavariables can be \emph{instantiated} during unification.
-
-Suppose we have
-$$
-\begin{array}{lllll}
-    \Gamma &\vdash& \meta m: \Pi \vec x^{\vec A}. M
-    \\
-    \Gamma, \Delta & \vdash & \meta m \vec x \le t^T
-    \text{ or }
-    t^T \le \meta m \vec x
-\end{array}
-$$
-the variables $\vec x$ are pairwise distinct, $t$ does not contain metavariables
-and the conditions
-$$
-\vertlist{
-    \FV(t) \subseteq \FV(\Gamma) \cup \set{\vec x}
-    \\
-    \vec x^{\vec A} \subseteq \Delta
-    \\
-    \Gamma,\Delta \vdash T \le M
-}
-$$
-are satisfied. In that case we can do the instantiation
-$$
-\meta m := \lambda \vec x^{\vec A}. t
-$$
-
-Why are the conditions necessary?
-\begin{enumerate}
-    \item $\FV(t) \subseteq \FV(\Gamma) \cup \set{\vec x}$: The metavariable
-        $\meta m$ has to be valid in the context $\Gamma$. In the substitution
-        term $\lambda \vec x^{\vec A}. t$ the variables $\vec x$ are bound. However
-        if $t$ contained more free variables outside of $\Gamma$, then these
-        variables are not bound making $\meta m$ invalid in the context
-        $\Gamma$.
-
-    \item $\vec x^{\vec A} \subseteq \Delta$ and $\vec x$ are pairwise distinct:
-        This guarantees that the variables $\vec x$ can be abstracted over. It
-        is possible to permute the variables in $\Delta$ into the form $\vec
-        x^{\vec A}, \Delta'$ where $t$ does not contain free variables of
-        $\Delta'$.
-
-    \item $\Gamma, \Delta \vdash T \le M$: The instantiation term satisfies
-        $\Gamma \vdash \lambda \vec x^{\vec A}. t : \Pi \vec x^{\vec A}. T$.
-        Its type has to be a subtype of $\Pi \vec x^{\vec A}. M$.
-
-    \item $t$ does not contain metavariables: This strong condition guarantees
-        that metavariables are instantiated bottoms up and there is no
-        circularity in the instantiations.
-\end{enumerate}
-
-
-
-
-
-\paragraph{Push to Lower Context} A metavariables lives only in its context and
-in higher contexts. It cannot be used in lower contexts. In order to use a
-metavariable $\meta m_h$ living in the context $\Gamma, x^A$ in the lower
-context $\Gamma$ we have to create a metavariable $\meta m_l$ in the lower
-context $\Gamma$ and instantiate $\meta m_h$ by using $\meta m_l$ in the
-following manner
-$$
-\vertlist{
-    \Gamma, x^A &\vdash& \meta m_h: M_h
-    \\
-    \Gamma &\vdash& \meta m_l: \Pi x^A.M_h
-    &\text{new meta in lower context}
-    \\
-    \Gamma, x^A &\vdash& \meta m_l x : M_h
-    &\text{welltyped}
-    \\
-    \meta m_h &:=& \meta m_l x &\text{instantiation}
-}
-$$
 
 
 
@@ -613,8 +546,9 @@ $$
 $$
 
 A rigid-rigid constraint can be resolved only if the left and the right side
-have the same structure. A lambda abstraction can never be a type, therefore a
-subtype constraint is not meaningful for lambda abstractions.
+have the same structure (except the last one which can be valid only if
+$\eta$-reduction is allowed). A lambda abstraction can never be a type,
+therefore a subtype constraint is not meaningful for lambda abstractions.
 
 
 
