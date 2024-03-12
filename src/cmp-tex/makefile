@@ -1,4 +1,5 @@
 build-dir    = ../../_build/cmp-tex/
+gh-pages-dir = ../../gh-pages
 
 
 source-files = \
@@ -43,3 +44,14 @@ bib: mk-build-dir
 .PHONY: mk-build-dir
 mk-build-dir:
 	test -d "$(build-dir)" || mkdir -p $(build-dir)
+
+
+
+
+# Github Pages
+#======================================================================
+
+.PHONY: gh-pages
+gh-pages:
+	cp $(build-dir)/cmp.pdf $(gh-pages-dir); \
+	(cd $(gh-pages-dir); git commit -a --amend --no-edit; git push -f)
