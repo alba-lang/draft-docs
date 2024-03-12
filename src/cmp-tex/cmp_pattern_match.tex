@@ -412,6 +412,59 @@ A pattern match expression is a function. It can be applied to arguments.
 $$
     \case [f^F, \vec c, t]\; \vec a
 $$
+%
+where $|\vec a|$ is the number of arguments needed by the pattern match
+expression.
+
+We define the \emph{spine-tree} form $s$ of the arguments $\vec a$ by the
+grammar
+$$
+    \vertlist{
+        s & ::= &
+        \empty & \text{no arguments}
+        \\
+        & \mid &
+        [\Make_\ell \vec q \vec a, s, s] & \text{constructor term}
+        \\
+        & \mid &
+        [x, s] & \text{non constructor term}
+    }
+$$
+%
+and generate the spine-tree form of an argument list $\vec a$ by
+$\fspinetree(\vec a, \empty)$ using the recursive
+function
+$$
+    \vertlist {
+        \fspinetree(t,s) & := &
+        \cases{
+            \fspinetree(\Make_\ell \vec q \vec a, s) & := &
+            [\Make_\ell \vec q \vec a, \fspinetree(\vec a, s), s]
+            %
+            \\
+            %
+            \fspinetree(x, s) & := & [x, s]
+        }
+        %
+        \\
+        %
+        \fspinetree(\vec a, s) & := &
+        \cases{
+            \fspinetree(\empty, s) & := & \empty
+            %
+            \\
+            %
+            \fspinetree(\vec a t, s) & := &
+            \fspinetree(\vec a, \fspinetree(t, s))
+        }
+    }
+$$
+
+REWORK REWORK REWORK!!
+
+The following needs rework using spine trees of arguments.
+
+REWORK REWORK REWORK!!
 
 A pattern match expression applied to the arguments $\vec a \vec b$ where $\vec
 a$ are the arguments needed by the case expression can be reduced to a case tree
@@ -507,31 +560,26 @@ $$ [\Delta \mid \vec p \mid e] $$.
     pattern $p$ where $t$ is a partially constructed case tree is defined
     recursively
     $$
-    \ct(p, t) := \left\{
-        \begin{array}{lll}
-            \ct(x,t)
-            &:=&
-            [\empty \mid \empty \mid t]
+        \vertlist{
+            \ct(p, t) &:= & \cases{
+                \ct(x, t)      & := & [\empty, \empty, t]
+                \\
+                \ct(x := c, t) & := & [c t, \empty, \empty]
+                \\
+                \ct(x := \Make^\Ind_\ell \vec q \vec p, t)
+                & :=
+                & [\empty, \ell \ct(\vec p, t), \empty]
+            }
+            %
             \\
-            \ct(x := c, t)
-            &:=&
-            [c t \mid \empty \mid \empty]
-            \\
-            \ct(x := \Make^\Ind_\ell \vec q \vec p, t)
-            &:=&
-            [\empty \mid \ell \ct(\vec p, t) \mid \empty]
-        \end{array}
-    \right.
+            %
+            \ct(\vec p, t) &:= & \cases{
+                \ct(\empty, t) &:=& t
+                \\
+                \ct(\vec p q, t) &:= & \ct(\vec p, \ct(q, t))
+            }
+        }
     $$
-    %
-    where $\ct(\vec p, t)$ on a sequence of pattern is threaded from behind
-    %
-    $$
-    \ct(p_1 \ldots p_{n-1} p_n, t)
-    :=
-    \ct(p_1, (\ldots \ct(p_{n-1}, \ct(p_n, t))\ldots))
-    $$
-    with the corner case $\ct(\empty, t) = t$.
     %
     The case tree of a case clause $[\Delta \mid \vec p \mid e]$ is defined as
     $\ct(\vec p, e)$.
