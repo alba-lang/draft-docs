@@ -514,6 +514,51 @@ by unification. Note that the only 2 explicit arguments are
 
 
 
+\subsubsection{Code Example}
+%----------------------------------------
+
+
+This example shows that ambiguity between imitation and projection can occur and
+that multiple constraints have to be collected to disambiguate the situation.
+Basic idea there is an equality {\tt a = b} and the variable {\tt a} occurs not
+exactly once in the predicate to be transformed. In this case it is not
+immediately evident which occurrences of the variable {\tt a} have to be
+replaced by the variable {\tt b} in the predicate.
+
+Suppose we want to prove {\tt a + a = a + a -> a + b = a + a} and we have a
+proof of {\tt a = b}.
+
+\begin{alba}
+    xxx {a b: Nat} (eq: a = b):  a + a = a + a -> a + b = a + a
+    :=
+        adapt {Nat} {?F} eq
+\end{alba}
+
+
+\begin{alba}
+    ?F a = a + a = a + a
+    ?F b = a + b = a + a
+
+    ?F x := ?h1 x = ?h2 x
+
+    ?h1 a = a + a       ~> ?h1 x := ?h11 x + ?h12 x
+                        ~> ?h11 a = a       -- ambigous
+                        ~> ?h12 a = a       -- ambigous
+
+    ?h2 a = a + a       ~> ?h2 x := ?h21 x + ?h22 x
+
+    ?h1 b = a + b       ~> ?h11 b = a           ~> ?h11 x := a  -- now unique
+                        ~> ?h12 b = b           ~> ?h12 x := x  -- now unique
+
+    ?h2 b = a + a       ~> ?h21 b = a           ~> ?h21 x := a
+                        ~> ?h22 b = a           ~> ?h22 x := a
+
+\end{alba}
+
+
+
+
+
 
 
 
