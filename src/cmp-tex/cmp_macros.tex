@@ -9,6 +9,7 @@
 
 \def\case{{\text{case}}}
 \def\cta {{\text{cta}}}
+\def\fix {{\text{fix}}}
 \def\fspinetree{{f_\text{st}}}
 \def\llet{{\text{let}}}
 \def\type{{\text{type}}}
@@ -29,7 +30,8 @@
 
 
 \def\impl{\rightarrow}
-\def\vec#1{{\mathbf #1}}
+%\def\vec#1{{\mathbf #1}}
+\def\vec#1{{\overrightarrow {#1}}}
 \def\fargs#1#2{{\vec {#1}^{\vec {#2}}}}
 
 \def\set#1{{\{#1\}}}
@@ -37,15 +39,15 @@
 \def\betaeq{{\stackrel \beta \sim}}
 
 
+\def\brackets#1{\left[ {#1} \right]}
+
 \def\vertlist#1{
     \begin{array}{lllll}
     #1
     \end{array}
 }
 
-\def\bracklist#1{
-    \left[ \vertlist{#1} \right]
-}
+\def\bracklist#1{\brackets{ \vertlist{#1} }}
 
 
 \def\cases#1{

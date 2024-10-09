@@ -168,7 +168,7 @@ $$
     }
 $$
 
-where $\Gamma_1$ is the context where the metavariable $\meta m$ has been
+where $\Gamma_0$ is the context where the metavariable $\meta m$ has been
 introduced and the typing conditions
 $\Gamma_0 \vdash \meta m : \Pi \vec y^{\vec A}. R$
 and
@@ -182,14 +182,14 @@ its structure cannot be changed by substitutions and reductions.
 The left and right hand side are in head normal form.
 
 
-The constraint is satisfiable when the typing condition
+The constraint is satisfiable only when the typing condition
 $$
-    \Gamma_0, \Gamma_1 \vdash T \le R[\vec x / \vec y]
+    \Gamma_0, \Gamma_1 \vdash T \le R[\vec a / \vec y]
 $$
-is valid which implies that all free variables of the type of the right hand side
-$T$ are within $\FV(\Gamma_0) \cup \vec x$. The typing condition is a subtype
-because metavariables are introduced with the most general type and can be
-instantiated by an object of a more specific type.
+is valid which implies that all free variables of $T$ (the type of the right
+hand side) are within $\FV(\Gamma_0) \cup \FV(\vec a)$. The typing constraint is a
+subtype constraint because metavariables are introduced with the most general
+type and can be instantiated by an object of a more specific type.
 
 
 
@@ -222,9 +222,9 @@ $$
     \vdash
     \meta m \vec a \equiv h \vec b
 $$
-where $h$ is either a constant of a bound variable. In our setting all variables
-$x_i \in \Gamma_1$ and all global variables correspond to constants and all $x_j
-\in \Gamma_2$ correspond to bound variables.
+where $h$ is either a constant or a bound variable. In our setting all variables
+$x_i \in \Gamma_0$ are global and correspond to constants and all $x_j
+\in \Gamma_1$ correspond to bound variables.
 
 Any valid instantiation of $\meta m$ must have the form $\lambda \vec y^{\vec
 B}. e$ such that $\meta m \vec a = e[\vec a/\vec y] \reduce h \vec b$. This is
@@ -363,8 +363,8 @@ unique.
         $$
 
 
-    \item $\meta m \vec x \equiv h \vec b$ where $h \in \vec x \impl (h \in
-        \Gamma_0 \land |b| > 0)$:
+    \item $\meta m \vec x \equiv h \vec b$ where $h \in \vec x$ which implies  $h \in
+        \Gamma_0 \land |b| > 0$:
         The only solution is imitation.
 
         We introduce fresh metavariables $\meta h_1, \ldots \meta h_n$ with the
@@ -461,23 +461,28 @@ unique.
 
 Suppose we have the code
 \begin{alba}
-    type (=) (A: Any): A -> A -> Prop :=
+    type (=) {A: Any}: A -> A -> Prop :=
         same {x}: x = x
 
     flip {A: Any} {a b: A}: a = b -> b = a :=
         ...
 
-    adapt {A B: Any} {a b: A} {F: A -> B}: F a -> F b :=
+    adapt {A: Any} {x y: A} {F: A -> Any}: x = y -> F x -> F y :=
         ...
 
     (,) {A: Any} {a b c: A} (ab: a = b) (bc: b = c): a = c :=
         adapt {A} {b} {a} {?F} (flip ab) bc
 \end{alba}
 %
-and we want to instantiate ?F by unification.
+and we want to instantiate {\tt ?F} in the function call
+{\tt adapt \{A\} \{b\} \{a\} \{?F\} (flip ab) bc}
+by unification. Note that the only 2 explicit arguments are
+{\tt flip ab: b = a} and {\tt bc: b = c}.
 
 \begin{alba}
     -- unification constraints
+    --    bc: b = c,      bc: ?F b
+    --    result: a = c,  result: ?F a
     ?F b   ~   b = c
     ?F a   ~   a = c
 

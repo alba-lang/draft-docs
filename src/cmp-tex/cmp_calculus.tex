@@ -35,7 +35,11 @@ $$
     &\text{metavariables}
     \\
     &\mid&
-    \Make
+    \type_i\brackets{\Gamma \mid \vec {I^K := \vec C}}
+    & \text{inductive types}
+    \\
+    &\mid&
+    \Make^{\mathcal I}_{\ell_i}
     &\text{constructors}
     \\
     &\mid&
@@ -43,20 +47,20 @@ $$
     & \text{application}
     \\
     &\mid&
-    \lambda \vec x^{\vec A}. e
+    \lambda \vec {x^A}. e
     & \text{abstractions}
     \\
     &\mid&
-    \Pi \vec x^{\vec A}. B
+    \Pi \vec {x^A}. R
     & \text{products}
     \\
     &\mid&
-    \llet[\vec x := \vec a \mid e]
-    & \text{let expressions}
+    \fix_i\brackets{\Gamma \mid \vec{ f^F := e}}
+    & \text{fixpoints}
     \\
     &\mid&
-    \type[\Gamma \mid I^K \mid \vec C]
-    & \text{inductive types}
+    \llet\brackets{\vec{ x^A := \vec a} \mid e}
+    & \text{let expressions}
     \\
     &\mid&
     \case[f^F \mid \vec c \mid t]
