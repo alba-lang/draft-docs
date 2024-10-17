@@ -224,6 +224,15 @@ $$
 \end{array}
 $$
 
+\begin{alba}
+    type List {u: Univ} (A: Any u): Any u :=
+        []: List
+
+        (::): A -> List -> List
+\end{alba}
+
+
+
 Having that we can construct a list of natural numbers $L\,0\,N: \Any_0$ living
 in the universe level $0$. However it is possible to construct list of types
 $L\,(i+1)\,\Any_i$ which might live in the universe level $i$. The types as
@@ -248,6 +257,13 @@ $$
 \end{array}
 $$
 
+\begin{alba}
+    type DL {u: Univ} {A: Any u} (P: A -> Any i): List A -> Any i :=
+        [] : DL []
+
+        (::) {x: A} {xs: List A}: P x -> DL xs -> DL (x :: xs)
+\end{alba}
+
 A dependent list might contain objects of type $A$, $LiA$, $Pa$ and
 $T\text{as}$. All these object live in the universe level $i$. Therefore the
 whole dependent list can live in the universe level $i$.
@@ -267,6 +283,17 @@ $$
     ]
 \end{array}
 $$
+
+\begin{alba}
+    type HL {u: Univ}: List {u + 1} (Any u) -> Any (u + 1) :=
+        [] : HL []
+
+        (::) {T: Any u} {Ts: List {u + 1} (Any u)}:
+            T -> HL Ts -> HL (T :: Ts)
+\end{alba}
+
+
+
 A heterogeneous list contains objects $A$ and $\text{As}$ with the typing
 judgements $A : \Any_i : \Any_{i+1}$, $\text{As}: L(i+1)\Any_i : \Any_{i+1}$.
 These objects live in the universe level $i+1$. Therefore the whole
@@ -289,6 +316,11 @@ $$
 \end{array}
 $$
 
+\begin{alba}
+    type Ex {u} (P: Any u -> Prop): Any (u + 1) :=
+        ex {X: Any u}: P X -> Ex
+\end{alba}
+
 
 
 
@@ -308,5 +340,47 @@ polymorphism. Only heterogeneous lists $\text{HL}$ and the strange type
 $\text{Ex}$ are not possible without universe polymorphism.
 
 Without universe polymorphism we are basically in the calculus of constructions
-with inductive types. All construction which require an infinite set of
+with inductive types. All constructions which require an infinite set of
 stratified universes with cumulativity are not possible.
+
+
+
+
+
+\subsection{Existential Types}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Without universe polymorphism existential types are not possible.
+This can be show by using an example from Peyton Jones:
+
+\begin{alba}
+    abstract type Show (A: Any): Any :=
+        show: A -> String
+
+    type T: Any :=
+        make {A: Any} {_: Show A}: A -> T
+\end{alba}
+
+If all {\tt Any}s were at the same level we would have
+\begin{alba}
+    type T {u}: Any u :=
+        make {A: Any u} {_: Show A}: A -> T
+
+    -- with the following type levels
+    T:                                      Any u
+    (all {A: Any u} {_: Show A}: A -> T):   Any (u + 1)
+
+    -- because of
+    Any u: Any (u + 1)
+\end{alba}
+%
+This is not welltyped, because the constructor type lives in a higher universe
+than the inductive type.
+
+We have to put the inductive type one level up in order to become a valid
+definition.
+
+\begin{alba}
+    type T {u} : Any (u + 1) :=
+        make {A: Any u} {_: Show A}: A -> T
+\end{alba}
