@@ -133,38 +133,29 @@ The following head reductions are possible:
 \begin{enumerate}
     \item Beta reduction:
         $$
-        \vertlist{
-            \Gamma \vdash (\lambda \vec{ x^A}. e) \vec a \vec b
-            \\
-            \hreduce
-            \\
-            \Gamma, \vec{x^A := a} \vdash e \vec b
-        }
+        (\lambda x^A . e) a \ldots
+        \hreduce
+        e[a/x]
         $$
 
 
 
     \item Let reduction:
         $$
-        \vertlist{
-            \Gamma \vdash \llet\brackets{\vec {x^A := a}, e} \vec b
-            \\
+            \llet\brackets{x^A := a, e} \ldots
             \hreduce
-            \\
-            \Gamma, \vec{x^A:=a} \vdash e \vec b
-        }
+            e[a/x] \ldots
         $$
 
 
 
     \item Definition expansion:
         $$
-        \vertlist{
-            \Gamma, x^A:=a, \Delta \vdash x \vec b
-            \\
-            \hreduce
-            \\
-            \Gamma, x^A:=a, \Delta \vdash a \vec b
+        \rulev{
+            (x^A := a) \in \Gamma
+        }
+        {
+            x \ldots \hreduce a \ldots
         }
         $$
         Definition expansion for metavariables is the same.
@@ -172,43 +163,34 @@ The following head reductions are possible:
 
 
     \item Pattern match:
-        We have to distinguish 4 cases:
+        We have to distinguish 5 cases:
         \begin{enumerate}
             \item There is nothing more to do, a leaf node of the case tree has
                 been reached.
                 $$
-                \vertlist{
-                    \Gamma \vdash \ctreebr e \vec b
-                    \\
-                    \hreduce
-                    \\
-                    \Gamma \vdash e \vec b
-                }
+                \ctreebr e \ldots
+                \hreduce
+                e \ldots
                 $$
 
             \item The tree has no labels but has a default tree.
                 $$
-                \vertlist{
-                    \Gamma \vdash \ctreebr{x^A, \empty, \ct D} a \vec b
-                    \\
-                    \hreduce
-                    \\
-                    \Gamma,x^A := a \vdash \ct D \vec b
-                }
+                \ctreebr{x^A, \empty, \ct D} a \ldots
+                \hreduce
+                \ct D[a/x] \ldots
                 $$
 
             \item The first argument is a constructed term and the constructor
                 matches one of the labels of the case tree.
                 $$
                 \vertlist{
-                    \Gamma \vdash
                     \ctreebr{x^T, [\ldots, \ell \ct T, \ldots], *}
-                    (\Make^T_\ell \vec q \vec a) \vec b
-                    \\
-                    \hreduce
-                    \\
-                    \Gamma, x^T := \Make^T_\ell \vec q \vec a \vdash
-                    \ct T \vec a \vec b
+                        (\Make^T_\ell \vec q \vec a)
+                        \ldots
+                    \\ \hreduce \\
+                    \ct T[\Make^T_\ell \vec q \vec a / x]
+                        \vec a
+                        \ldots
                 }
                 $$
                 Since the first argument is a constructed term the type $T$ of
@@ -216,7 +198,7 @@ The following head reductions are possible:
                 $$
                 \type_i \brackets \ldots \vec q \ldots
                 $$
-                The parameter argument
+                The parameter arguments
                 $\vec q$ of the inductive type and the constructor are the same.
                 This is enforced by the typing rules.
 
@@ -225,19 +207,27 @@ The following head reductions are possible:
                 case tree and the case tree has a default tree.
                 $$
                 \vertlist{
-                    \Gamma \vdash
                     \ctreebr{x^T, *, \ct D}
-                    (\Make^T_\ell \vec q \vec a)
-                    \vec b
-                    \\
-                    \hreduce
-                    \\
-                    \Gamma, x^T := \Make^T_\ell \vec q \vec a \vdash
-                    \ct D \vec b
+                        (\Make^T_\ell \vec q \vec a)
+                        \ldots
+                    \\ \hreduce \\
+                    \ct D[\Make^T_\ell \vec q \vec a / x]
+                        \ldots
                 }
                 $$
                 The type $T$ is an inductive type as explained in the previous
                 case.
+
+            \item The case tree has labels and the first argument is not yet in
+                head normal form:
+                $$
+                \rulev{
+                    a \hreduce b
+                }
+                {
+                    \ct T a \ldots \hreduce \ct T b \ldots
+                }
+                $$
         \end{enumerate}
 
 
@@ -247,52 +237,7 @@ The following head reductions are possible:
         MISSING
 \end{enumerate}
 
-$$
-\vertlist{
-    \Gamma \vdash (\lambda \vec{ x^A}. e) \vec a \vec b
-    &\hreduce&
-    \Gamma, \vec{x^A := a} \vdash e \vec b
-    \\
-    %
-    %
-    \Gamma \vdash \llet\brackets{\vec {x^A := a}, e} \vec b
-    &\hreduce&
-    \Gamma, \vec{x^A:=a} \vdash e \vec b
-    \\
-    %
-    %
-    \Gamma, x^A:=a, \Delta \vdash x \vec b
-    &\hreduce&
-    \Gamma, x^A:=a, \Delta \vdash a \vec b
-    \\
-    %
-    %
-    \Gamma \vdash \ctree e \vec a
-    &\hreduce&
-    \Gamma \vdash e \vec a
-    \\
-    %
-    %
-    \Gamma \vdash
-        \ctree\brackets{x^A, [\ldots, \ell \ct T, \ldots], *}
-            (\Make^T_\ell \vec q \vec a) \vec b
-    &\hreduce&
-    \Gamma \vdash
-        \ct T \vec a \vec b
-    \\
-    %
-    %
-    \Gamma \vdash
-        \ctree\brackets{x^A, [\ldots \text{\it no match}], \ct D}
-            a \vec b
-    &\hreduce&
-    \Gamma, \vdash
-        \ct D a \vec b
-}
-$$
 
-Note that the head reductions only make substitutions of head terms. Instead of
-substitutions variables with definitions are introduced.
 
 
 
