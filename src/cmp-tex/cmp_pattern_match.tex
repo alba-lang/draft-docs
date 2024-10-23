@@ -867,17 +867,43 @@ the required types and the actual type would be unifiable.
 \end{alba}
 
 \begin{alba}
-    map {A B C} (f: A -> B -> C)
+    fzip {A B C} (f: A -> B -> C)
         : all {n}
           : Vec A n -> Vec B n -> Vec C n
     := case
         \ {zero},   [],            [] :=
             []
         \ {succ n}, (::) {n} x xs, (::) {n} y ys :=
-            (::) {n} (f x y) (map {n} xs ys)
+            (::) {n} (f x y) (fzip {n} xs ys)
         -- without implicits
         \ [] []            := []
-        \ x :: xs, y :: ys := (f x y) (map xs ys)
+        \ x :: xs, y :: ys := (f x y) (fzip xs ys)
+\end{alba}
+
+
+\begin{alba}
+    map {A B} (f: A -> B): all {n}: Vec A n -> Vec B n
+    := case
+        [] := []
+        (x :: xs) :=
+            f x :: map xs
+
+    tail {A}: all {n}: Vec A (succ n) -> Vec A n
+    := case
+        (_ :: xs) := xs
+\end{alba}
+
+\begin{alba}
+    -- A matrix is a vector of rows.
+    -- The following function computes the diagonal of
+    -- a matrix.
+
+    diag {A}: all {n}: Vec (Vec A n) n -> Vec A n
+    := case
+        [] :=
+            []
+        (x :: _) rows :=
+            diag (map tail rows)
 \end{alba}
 
 
