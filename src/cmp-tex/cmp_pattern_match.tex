@@ -864,6 +864,17 @@ the required types and the actual type would be unifiable.
     := case
         \ nil,     nil     := nil
         \ x :: xs, y :: ys := (x, y) :: zip xs ys
+
+
+    unzip {A B}
+    : all {n}: Vec (A,B) n -> (Vec A n, Vec B n)
+    := case
+        [] :=
+            ([], [])
+        ((a,b) :: pairs) :=
+            match unzip pairs case
+                (as, bs) :=
+                    (a :: as, b :: bs)
 \end{alba}
 
 \begin{alba}
