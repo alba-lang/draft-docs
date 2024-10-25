@@ -913,8 +913,11 @@ the required types and the actual type would be unifiable.
     := case
         [] :=
             []
-        (x :: _) rows :=
-            diag (map tail rows)
+        {succ n} (x :: _) rows :=
+                -- Implicit pattern needed to guarantee
+                -- termination.
+                -- No computational relevance!
+            diag {n} A(map tail rows)
 \end{alba}
 
 
