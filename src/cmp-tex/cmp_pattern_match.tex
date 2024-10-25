@@ -913,11 +913,29 @@ the required types and the actual type would be unifiable.
     := case
         [] :=
             []
-        {succ n} (x :: _) rows :=
+        {succ n} ((x :: _) :: rows) :=
                 -- Implicit pattern needed to guarantee
                 -- termination.
                 -- No computational relevance!
-            diag {n} A(map tail rows)
+            diag {n} (map tail rows)
+
+    diag2 {A}: all {n}: Finite n -> Vec (Vec A n) n -> Vec A n
+    := case
+        _ [] :=
+            []
+        {?n} (finite f) ((x :: _) :: rows) :=
+            diag {?m} (f leNSuccN) (map tail rows)
+
+        {- Needs a proof of succ ?m <= ?n. There is another
+           implicit ?k which is the size of rows.
+           Instantiations: ?m := ?k, ?n := succ ?k.
+           I.e. we need a proof of ?k <= succ ?k which is
+           leNSuccN.
+
+           We have
+
+                diag v := diag2 natFinite v
+        -}
 \end{alba}
 
 
@@ -939,6 +957,10 @@ the required types and the actual type would be unifiable.
         -- without implicits
         \ {zero}   := start
         \ {succ n} := next leRefl
+
+    leNSuccN: all {n}: n <= succ n := case
+        {zero}   := start
+        {succ n) := next (leNSuccN {n})
 \end{alba}
 
 Pattern match on implicits is allowed in this case, because the result type is a
