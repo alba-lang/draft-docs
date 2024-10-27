@@ -465,9 +465,67 @@ $$
 \subsubsection{Inductive Types}
 %------------------------------------------------------------
 
+An inductive type has the form
+$$
+\type \brackets{
+    \Delta,
+    [
+        X_1^{K_1} := \vec {C_1},
+        \ldots,
+        X_n^{K_n} := \vec {C_n},
+    ]
+}
+$$
+where $n > 0$. Usually $n = 1$. If $n > 1$ then the inductive type represents
+$n$ mutually dependent inductive types.
 
+The term
+$$
+    \type_i [\ldots]
+$$
+selects the $i$-th type of the mutually dependent types. Each type has a type
+variable $X_i$ and kind $K_i$ and a list of constructor types $\vec C_i$ which
+has the form
+$$
+    [
+        C_{i \ell_1},
+        \ldots,
+        C_{i \ell_{m_i}}
+    ]
+$$
+where each constructor type has a label.
 
+In order to be welltyped i.e. to satisfy
+$$
+    \Gamma
+    \vdash
+    \type \brackets {
+        \Delta,
+        \vec {
+            X^K := \vec C
+        }
+    }
+    :
+    \Indsort
+$$
+the following conditions have to be satisfied:
 
+\begin{enumerate}
+
+    \item The context $\Gamma$ has to be a global context i.e. it has to contain
+        only definitions.
+
+    \item The context of parameters $\Delta$ has only universal variables.
+
+    \item All kinds $K_i$ have the form $\Pi \Delta'. s$ where $s$ is either
+        $\Prop$ or $\Any_u$ such that
+        $$
+            \Gamma, \Delta \vdash \Pi \Delta'. s
+        $$
+        is valid.
+
+    \item MISSING ... MISSING
+\end{enumerate}
 
 
 \subsubsection{Case Trees}
