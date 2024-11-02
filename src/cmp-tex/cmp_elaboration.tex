@@ -5,6 +5,155 @@
 
 
 
+
+
+\subsection{Basics}
+%--------------------------------------------------------------------------------
+
+After parsing we get an abstract syntax tree (AST) of the source file. Each
+subterm of the AST gets a source based metavariable, a goal and a task which
+elaborates the source term. Source based metavariables are never instantiated by
+constraint solving. Source based metavariable are instantiated at the end of the
+corresponding task.
+
+The elaborator can create more metavariables for the following reasons:
+
+\begin{enumerate}
+    \item Missing type information in the source code.
+
+    \item Implicit function arguments not explicitly provided in the source code.
+
+    \item Wild cards in the source code (the wild card {\tt \_} is a request of
+        the programmer to the compiler to fill in the information).
+
+    \item Intermediate metavariables introduce during unification for subterms
+        in an imitation step where the pattern on flex side include variables
+        regarded as constants.
+
+    \item Pattern variables in case trees.
+\end{enumerate}
+
+The instantiation of metavariables is used to synchronize the tasks in the
+elaborator. A task can be blocked because it is waiting for one or more
+metavariables to be instantiated (e.g. when the metavariable is the head term
+and head normal form is required). A task which instantiates a metavariable
+unblocks all tasks which wait for the instantiation of the metavariable.
+
+Finally either all metavariables are instantiated or a deadlock is reached
+because the wait-for graph has become cyclic.
+
+The wait-for graph for source based metavariables can never become cyclic
+because source based metavariables have a clear hierarchy given by the AST.
+Therefore if the programmer provides all type information and all implicit
+arguments explicitly a dead lock can never
+appear. A deadlock appears if the compiler cannot elaborate the missing
+information.
+
+Metavariables representing missing information must have enough source code
+information to generate a useful error message. If a deadlock occurs, the
+elaborator searches for the first metavariable representing missing
+information and prints an error message.
+
+
+
+
+
+
+\subsection{Definitions}
+%--------------------------------------------------------------------------------
+
+$$
+\Gamma
+\vdash
+f
+    \underbrace{
+        x_0^{A_0} \ldots x_{n-1}^{A_{n-1}}
+        }_{\text{parameter args}}
+    :
+    \Pi
+        \underbrace{
+            x_n^{A_n} \ldots x_{n+m-1}^{A_{n+m-1}}
+        }_{\text{index args}}
+    .
+    R
+    := e
+$$
+with $n$ parameter arguments and $m$ index arguments.
+
+
+\begin{enumerate}
+
+    \item
+        Introduce the metavariables
+        $$
+        \vertlist{
+            \meta A_0 &:& \Top
+            \\
+            \meta A_1 &:& \Pi x_0^{\meta A_0}. \, \Top
+            \\
+            \meta A_2 &:& \Pi x_0^{\meta A_0} x_1^{\meta A_1 x_0}. \, \Top
+            \\
+            \ldots
+            \\
+            \meta R
+            &:&
+            \Pi
+                x_0^{\meta A_0}
+                \ldots
+                x_{n+m-1}^{\meta A_{n+m-1} x_0 x_1 \ldots x_{n+m-2}}
+            . \, \Top
+            \\
+            \meta e
+            &:&
+            \meta R x_0 x_1 \ldots x_{n+m-1}
+        }
+        $$
+        and the contexts
+        $$
+        \vertlist{
+            \Gamma_0 &=& \Gamma
+            \\
+            \Gamma_1 &=&
+                \Gamma, x_0^{\meta A_0}
+            \\
+            \Gamma_2 &=&
+                \Gamma, x_0^{\meta A_0}, x_1^{\meta A_1 x_0}
+            \\
+            \ldots
+            \\
+            \Gamma_{n+m-1} &=&
+                \Gamma,
+                    x_0^{\meta A_0},
+                    x_1^{\meta A_1 x_0},
+                    x_2^{\meta A_2 x_0 x_1}
+                    \ldots
+        }
+        $$
+        For each type which has source code the metavariables are source based.
+        The remaining metavariables have to be resolved by constraint solving.
+
+        All metavariables for the types are introduced in the context $\Gamma$.
+        Therefore it is possible to assign to the variable $f$ a type before
+        doing any elaboration (
+        $\Gamma \vdash f : \Pi \vec {x^A}. R$
+        where
+        $A_i = \meta A_i x_0 x_1 \ldots x_{i-1}$
+        and
+        $R = \meta R x_0 x_1 \ldots x_{n+m-1}$).
+
+    \item Spawn tasks to elaborate the source based metavariables $\meta A_i$
+        and $\meta R$ in their
+        appropriate contexts with the goal $[\empty, G]$ where $G$ is the type
+        of the metavariable.
+
+    \item Elaborate $e$ in the context
+        $$
+        \Gamma, \vec {x^{A'}}, f^{\Pi \vec x^{A''}}. R, \vec {x^{A''}}
+        $$
+        with the goal $[\empty, R]$.
+\end{enumerate}
+
+
 \subsection{Abstractions}
 %--------------------------------------------------------------------------------
 
