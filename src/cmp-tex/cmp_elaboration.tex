@@ -23,10 +23,10 @@ The elaborator can create more metavariables for the following reasons:
 
     \item Implicit function arguments not explicitly provided in the source code.
 
-    \item Wild cards in the source code (the wild card {\tt \_} is a request of
-        the programmer to the compiler to fill in the information).
+    \item Wild cards in the source code (the wild card {\tt \_} is a request
+        from the programmer to the compiler to fill in the information).
 
-    \item Intermediate metavariables introduce during unification for subterms
+    \item Intermediate metavariables introduced during unification for subterms
         in an imitation step where the pattern on flex side include variables
         regarded as constants.
 
@@ -87,11 +87,14 @@ with $n$ parameter arguments and $m$ index arguments.
         Introduce the metavariables
         $$
         \vertlist{
-            \meta A_0 &:& \Top
+            \meta u &:& \Univ
             \\
-            \meta A_1 &:& \Pi x_0^{\meta A_0}. \, \Top
+            \meta A_0 &:& \Any_{\meta u}
             \\
-            \meta A_2 &:& \Pi x_0^{\meta A_0} x_1^{\meta A_1 x_0}. \, \Top
+            \meta A_1 &:& \Pi x_0^{\meta A_0}. \, \Any_{\meta u}
+            \\
+            \meta A_2 &:& \Pi x_0^{\meta A_0} x_1^{\meta A_1 x_0}. \,
+            \Any_{\meta u}
             \\
             \ldots
             \\
@@ -101,9 +104,13 @@ with $n$ parameter arguments and $m$ index arguments.
                 x_0^{\meta A_0}
                 \ldots
                 x_{n+m-1}^{\meta A_{n+m-1} x_0 x_1 \ldots x_{n+m-2}}
-            . \, \Top
+            . \, \Any_{\meta u}
             \\
-            \meta e
+            \meta e_0
+            &:&
+            \Pi \vec {x^A}. R
+            \\
+            \meta e_1
             &:&
             \meta R x_0 x_1 \ldots x_{n+m-1}
         }
@@ -146,11 +153,35 @@ with $n$ parameter arguments and $m$ index arguments.
         appropriate contexts with the goal $[\empty, G]$ where $G$ is the type
         of the metavariable.
 
-    \item Elaborate $e$ in the context
+    \item Spawn a task to elaborate $e_1$ in the context
         $$
-        \Gamma, \vec {x^{A'}}, f^{\Pi \vec x^{A''}}. R, \vec {x^{A''}}
+        \Gamma, \vec {x^{A'}}, f^{\Pi \vec {x^{A''}}. R}, \vec {x^{A''}}
         $$
-        with the goal $[\empty, R]$.
+        with the goal
+            $[\empty, R]$
+        where
+            $\vec A'$
+        are the types of the parameter arguments and
+            $\vec A''$
+        are the types of the index arguments.
+
+    \item Spawn a task to elaborate $e_0$. This task has to wait for the
+        elaboration of $e_1$. It has to check, if the bound variable $f$ has
+        been used in the elaborated term.
+
+        If yes then then elaborated term is a fixpoint and the termination
+        condition has to be checked. MISSING fixpoint instantiation!!!
+
+        If no then the elaborated term is not a fixpoint and $\meta e_0$ is
+        instantiated.
+        $$
+            \meta e_0 := \lambda \vec{x^A}. \meta e_1^R
+        $$
+
+    \item Return the context with the additional definition
+            $$
+                \Gamma, f: \Pi \vec {x^A}. R := \meta e_0
+            $$
 \end{enumerate}
 
 

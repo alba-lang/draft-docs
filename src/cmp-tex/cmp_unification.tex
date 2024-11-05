@@ -167,13 +167,21 @@ $$
         \lambda x^A. e
     }
 $$
-
+%
 where $\Gamma_0$ is the context where the metavariable $\meta m$ has been
-introduced and the typing conditions
-$\Gamma_0 \vdash \meta m : \Pi \vec y^{\vec A}. R$
-and
-$\Gamma_0, \Gamma_1 \vdash \text{\emph{right hand side}}: T$
-are valid.
+introduced with
+$$
+    \Gamma_0 \vdash \meta m : \Pi \vec {y^A}. R
+$$
+
+Any valid instantiation of $\meta m$ must have the form
+$$
+    \meta m := \lambda \vec{y^A}. e
+$$
+
+In order to unify the left and the right hand side, the type of the left hand
+side $R[\vec a/ \vec y]$ and the type of the right hand side $T$ must be the same
+(i.e. unifiable as well).
 
 The left hand side is called flexible because its structure can be changed by
 substitutions and reductions, the right hand side is called \emph{rigid} because
@@ -226,11 +234,17 @@ where $h$ is either a constant or a bound variable. In our setting all variables
 $x_i \in \Gamma_0$ are global and correspond to constants and all $x_j
 \in \Gamma_1$ correspond to bound variables.
 
-Any valid instantiation of $\meta m$ must have the form $\lambda \vec y^{\vec
-B}. e$ such that $\meta m \vec a = e[\vec a/\vec y] \reduce h \vec b$. This is
-possible only if $e = h \ldots$ (\emph{imitation}) or $e = y_i \ldots$
-(\emph{projection}) i.e. either $e$ has $h$ is its head term or $a_i \ldots
-\reduce h \ldots$.
+Any valid instantiation of $\meta m$ must have the form
+    $\lambda \vec y^{\vec B}. e$
+such that
+    $\meta m \vec a \reduce e[\vec a/\vec y] \reduce h \vec b$.
+%
+This is possible only if
+    $e = h \ldots$ (\emph{imitation}) or
+    $e = y_i \ldots$ (\emph{projection})
+i.e. either $e$ has $h$ is its head term or
+    $a_i \ldots \reduce h \ldots$.
+
 
 In order to get the most general instantiation some fresh metavariables $\meta
 h_1, \meta h_2, \ldots$ valid in the context $\Gamma_1$ are introduced
@@ -247,7 +261,7 @@ $$
         & \text{projection}
     }
 $$
-
+%
 where $n$ is the arity of $h$ and $m$ is the arity of $y_i$,
 giving one of the constraints
 
@@ -305,13 +319,11 @@ $$
     }
 $$
 where
-$\Gamma_0 \vdash \meta m : \Pi \vec y^{\vec A}. R$, $\Gamma_0,
-\Gamma_1 \vdash \text{\emph{right hand side}} : T$
+$$
+    \Gamma_0 \vdash \meta m : \Pi \vec y^{\vec A}. R
+$$
 and
-$\vec x \in \Gamma_0, \Gamma_1$
-are different variables (multiple occurrences of the same variable would be a
-quasi pattern form). This has the advantage that most of the solutions are
-unique.
+$\vec x \in \Gamma_0, \Gamma_1$.
 
 \begin{enumerate}
 
@@ -319,9 +331,10 @@ unique.
         % Trivial case
         %----------------------------------------
 
-        This is the trivial case which has (provided the type
+        This is the trivial case which has the solution
+        (provided the type
         condition is satisfied and the right hand side has no variables from the
-        inner context $\Gamma_1$) the solution
+        inner context $\Gamma_1$)
         $$
             \meta m := \text{\emph{right hand side}}
         $$
@@ -363,7 +376,8 @@ unique.
         $$
 
 
-    \item $\meta m \vec x \equiv h \vec b$ where $h \in \vec x$ which implies  $h \in
+    \item $\meta m \vec x \equiv h \vec b$ where $h \in \vec x$ which implies
+        $h \in
         \Gamma_0 \land |b| > 0$:
         The only solution is imitation.
 
@@ -395,12 +409,17 @@ unique.
     \item $\meta m \vec x \equiv \Pi z^C. D$:
 
         We introduce fresh metavariables
-        %
-        $\meta h_1: \Pi \vec y^{\vec A}. \Top$
-        %
-        and
-        %
-        $\meta h_2: \Pi \vec y^{\vec A} z^{\meta h_1 \vec y} . \Top$.
+        $$
+            \vertlist{
+                \Gamma_0
+                \vdash
+                \meta h_1: \Pi \vec y^{\vec A}. \Top
+                \\
+                \Gamma_0
+                \vdash
+                \meta h_2: \Pi \vec y^{\vec A} z^{\meta h_1 \vec y} . \Top
+            }
+        $$
         %
         Then the constraint can be solved by the instantiation
         $$
