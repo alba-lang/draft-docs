@@ -853,6 +853,15 @@ Next functions:
         \ zero  ,      n      :=  succ n
         \ succ m,      zero   :=  ack m (succ zero)
         \ k := succ m, succ n :=  ack m (ack k n)
+        -- ^ syntax ambiguous if used in the last argument!!
+\end{alba}
+
+\begin{alba}
+    -- with unique syntax
+    ack: Nat -> Nat -> Nat := case
+        zero           n        := succ n
+        (succ m)       zero     := acc m (succ zero)
+        (k := succ m)  (succ n) := ack m (ack k n)
 \end{alba}
 
 
@@ -870,11 +879,11 @@ Next functions:
         node: A -> List (Tree A) -> Tree A
 
     preT: Tree A -> List A := case
-        \ node a ts := a :: preF ts
+        (node a ts) := a :: preF ts
 
     preF: List (Tree A) -> List A := case
-        \ []         :=  []
-        \ t :: ts    :=  preT t + preF ts
+        []         :=  []
+        (t :: ts)  :=  preT t + preF ts
 \end{alba}
 
 
@@ -892,8 +901,8 @@ Next functions:
     zip {A B: Any}
     : all {n}: Vec A n -> Vec B n -> Vec (A,B) n
     := case
-        \ nil,     nil     := nil
-        \ x :: xs, y :: ys := (x, y) :: zip xs ys
+        nil       nil       := nil
+        (x :: xs) (y :: ys) := (x, y) :: zip xs ys
 
 
     unzip {A B}
