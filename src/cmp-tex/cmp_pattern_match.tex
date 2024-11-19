@@ -996,14 +996,29 @@ Next functions:
 Pattern match on implicits is allowed in this case, because the result type is a
 proposition!
 
+\begin{alba}
+    leRec
+        {P: Nat -> Nat -> Prop}:
+        (base: all {n}: P zero n)
+        (step: all {n m}: n <= m -> P n m -> P (succ n) (succ m))
+        : all {n m}: n <= m -> P n m
+    :=
+        case
+            start :=
+                base
+            next le :=
+                step le (leRec le)
+\end{alba}
+
+
 
 
 
 \paragraph{Equality}
 
 \ \begin{alba}
-    type (=) (A: Any): A -> A -> Prop :=
-        same {x}: x = x
+    type (=) {A: Any}: A -> A -> Prop :=
+        refl {x}: x = x
 
     zeroNeSucc: all {n: Nat}: zero = succ n -> False :=
         case
@@ -1014,9 +1029,26 @@ The compiler has to verify that no match is possible. The pattern match
 expression is the two argument function with type $\Pi n^N. 0 = 1 + n \to
 \text{False}$.
 
+\begin{alba}
+    flip {A: Any}: all {a b: A}: a = b -> b = a
+        -- Equality is symmetric.
+    := case
+        refl := refl
+
+    adaptType {A: Any} {F: A -> Any}:
+        all {a b: A}: a = b -> F a -> F b
+    := case
+        refl v := v
+
+    (,) {A: Any}: all {a b c: A}: a = b -> b = c -> a = c
+        -- Equality is transitive.
+    := case
+        refl refl := refl
+\end{alba}
 
 
-\paragraph{$<=?$}
+
+\paragraph{Decidable less equal for natural numbers}
 \ \begin{alba}
     type Nat := [zero, succ: Nat -> Nat]
 
