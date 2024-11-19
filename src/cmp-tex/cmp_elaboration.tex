@@ -256,6 +256,103 @@ The elaboration has the following steps:
 
 
 
+\subsection{Example: Local Definition}
+%--------------------------------------------------------------------------------
+
+\begin{alba}
+    let
+        f x y := x + y      -- ambiguous: Nat, Int, String
+    :=
+        f a b
+        -- or
+        f a
+        -- or
+        f
+\end{alba}
+
+Possible disambiguations:
+\begin{alba}
+    let
+        f x y: Nat := x + y
+    :=
+        f a b: Nat
+        f (a: Nat) b
+        f a (b: Nat)
+        f a: _ -> Nat
+        f: _ -> _ -> Nat
+
+    -- One of the 'Nat's is sufficient!
+\end{alba}
+
+The most general definition of metavariables (which leads to ambiguities, see
+below)
+$$
+\vertlist{
+    M_x &:& \Top
+    \\
+    M_y &:& \Pi x^{M_x}. \Top
+    \\
+    M_R &:& \Pi x^{M_x} y^{M_y x}. \Top
+    \\
+    x &:& M_x
+    \\
+    y &:& M_y x
+    \\
+    m_a &:& M_A: \Top
+    \\
+    m_b &:& M_B: \Top
+}
+$$
+
+Having these metavariables we get the following unification problem for
+{\tt f a b: Nat}
+$$
+    M_R m_a m_b \sim \text{Nat}
+$$
+Imitation is possible, because {\tt Nat} is a constant.
+
+Since the arguments $m_a$ and $m_b$ have a metavariable at its head, projection
+might be possible depending on the instantiation of the metavariables. If the
+metavariables cannot be instantiated, then the decision between imitation and
+the two projections cannot be made (Problem: $m_a$ or $m_b$ might be
+instantiated by {\tt Nat} which makes projection possible).
+
+The problem is undecidable e.g. for {\tt f 1 2: Nat}. $m_a$ and $m_b$ cannot be
+instantiated, because the numbers could be naturals, integers or any sized
+variant of these.
+
+\paragraph{Solution}: If arguments in a local definition are untyped, then their
+types are \emph{not} dependent. I.e. dependent types must be given explicitly
+in definitions. This leads to the following metavariables:
+$$
+\vertlist{
+    M_x &:& \Top
+    \\
+    M_y &:& \Top
+    \\
+    M_R &:& \Top
+    \\
+    x &:& M_x
+    \\
+    y &:& M_y
+    \\
+    m_a &:& M_A: \Top
+    \\
+    m_b &:& M_B: \Top
+}
+$$
+and we get the following unification problem for {\tt f 1 2: Nat}:
+$$
+    M_R \sim \text{Nat}
+$$
+which immediately leads to the instantiation $M_R := \text{Nat}$.
+
+
+
+
+
+
+
 \subsection{Abstractions}
 %--------------------------------------------------------------------------------
 

@@ -361,8 +361,9 @@ $$
 Case analysis of the possibilities:
 \begin{enumerate}
 
-    \item Imitation is possible only if $h \in \Gamma_0$. A bound variable $h
-        \in \Gamma_1$ is not possible because it cannot escape its scope.
+    \item Imitation is possible if $h \in \Gamma_0$. For a bound variable $h \in
+        \Gamma_1$ imitation is not possible because the variable cannot escape
+        its scope.
 
     \item Some head normal forms of $\vec a$ have $h$ as a rigid head term:
 
@@ -377,8 +378,9 @@ Case analysis of the possibilities:
     \item If the head term of the head normal form of $a_i$ is neither a
         metavariable nor $h$ then the corresponding projection is not possible.
 
-    \item If imitation and at least one projection is possible, then the
-        situation cannot be decided without more information.
+    \item If imitation and at least one projection or more than one projection
+        is possible, then the situation cannot be decided without more
+        information.
 \end{enumerate}
 
 
