@@ -62,127 +62,198 @@ information and prints an error message.
 \subsection{Definitions}
 %--------------------------------------------------------------------------------
 
-$$
-\Gamma
-\vdash
-f
-    \underbrace{
-        x_0^{A_0} \ldots x_{n-1}^{A_{n-1}}
-        }_{\text{parameter args}}
-    :
-    \Pi
-        \underbrace{
-            x_n^{A_n} \ldots x_{n+m-1}^{A_{n+m-1}}
-        }_{\text{index args}}
-    .
-    R
-    := e
-$$
-with $n$ parameter arguments and $m$ index arguments.
 
+A definition has the form
+$$
+    \Gamma \vdash f \vec {x^A}. R := e
+$$
+
+There are local and global definitions. For a local definition we have to find a
+definition term of the form $\lambda \vec {x^A}. e: \Pi \vec{x^A}. R$ which
+contains only metavariables defined in the context $\Gamma$ in order to be
+entered into the context $\Gamma$ and to proceed with the rest of the term.
+A local definition is part of a let expression
+$$
+    \letbr{z^C := c, b}
+$$
+and we need the definition term $c$ and its type $C$ to elaborate the body $b$.
+
+For a local definition we want the definition of the form (details see below)
+$$
+    f
+    :
+    \Pi \vec {w^C}. M_R \vec w
+    :=
+    \lambda \vec{w^C}. m_{\hat e} \vec w
+$$
+where all metavariables are valid in the outer context $\Gamma$.
+
+For a global definition the definition is needed in the form
+$$
+    f: \Pi \vec{x^A} . R := \lambda \vec {x^A}. e
+$$
+which does not contain any metavariables.
+
+
+
+The elaboration has the following steps:
 
 \begin{enumerate}
 
-    \item
-        Introduce the metavariables
-        $$
-        \vertlist{
-            \meta u &:& \Univ
-            \\
-            \meta A_0 &:& \Any_{\meta u}
-            \\
-            \meta A_1 &:& \Pi x_0^{\meta A_0}. \, \Any_{\meta u}
-            \\
-            \meta A_2 &:& \Pi x_0^{\meta A_0} x_1^{\meta A_1 x_0}. \,
-            \Any_{\meta u}
-            \\
-            \ldots
-            \\
-            \meta R
-            &:&
-            \Pi
-                x_0^{\meta A_0}
-                \ldots
-                x_{n+m-1}^{\meta A_{n+m-1} x_0 x_1 \ldots x_{n+m-2}}
-            . \, \Any_{\meta u}
-            \\
-            \meta e_0
-            &:&
-            \Pi \vec {x^A}. R
-            \\
-            \meta e_1
-            &:&
-            \meta R x_0 x_1 \ldots x_{n+m-1}
-        }
-        $$
-        and the contexts
-        $$
-        \vertlist{
-            \Gamma_0 &=& \Gamma
-            \\
-            \Gamma_1 &=&
-                \Gamma, x_0^{\meta A_0}
-            \\
-            \Gamma_2 &=&
-                \Gamma, x_0^{\meta A_0}, x_1^{\meta A_1 x_0}
-            \\
-            \ldots
-            \\
-            \Gamma_{n+m-1} &=&
-                \Gamma,
-                    x_0^{\meta A_0},
-                    x_1^{\meta A_1 x_0},
-                    x_2^{\meta A_2 x_0 x_1}
-                    \ldots
-        }
-        $$
-        For each type which has source code the metavariables are source based.
-        The remaining metavariables have to be resolved by constraint solving.
+    \item Elaborate the formal arguments:
 
-        All metavariables for the types are introduced in the context $\Gamma$.
-        Therefore it is possible to assign to the variable $f$ a type before
-        doing any elaboration (
-        $\Gamma \vdash f : \Pi \vec {x^A}. R$
-        where
-        $A_i = \meta A_i x_0 x_1 \ldots x_{i-1}$
-        and
-        $R = \meta R x_0 x_1 \ldots x_{n+m-1}$).
-
-    \item Spawn tasks to elaborate the source based metavariables $\meta A_i$
-        and $\meta R$ in their
-        appropriate contexts with the goal $[\empty, G]$ where $G$ is the type
-        of the metavariable.
-
-    \item Spawn a task to elaborate $e_1$ in the context
+        We elaborate the formal arguments left to right and use the following
+        abbreviations
         $$
-        \Gamma, \vec {x^{A'}}, f^{\Pi \vec {x^{A''}}. R}, \vec {x^{A''}}
+            \vertlist{
+                \vec a &=&
+                [x_i^{A_i}, \ldots]
+                \\
+                \vec {v^B} &=& [x_0^{B_0}, \ldots, x_{i-1}^{B_{i-1}}]
+                \\
+                \vec {v^C} &=& [x_0^{C_0}, \ldots, x_{i-1}^{C_{i-1}}]
+            }
         $$
-        with the goal
-            $[\empty, R]$
-        where
-            $\vec A'$
-        are the types of the parameter arguments and
-            $\vec A''$
-        are the types of the index arguments.
+        where $\vec a$ is the list of not yet elaborated formal arguments,
+        $\vec { v^B}$ is the list of elaborated formal arguments which contain
+        local metavariables and $\vec {w^C}$ is the optional list of formal
+        arguments which do not contain local metavariables (they contain only
+        metavariables valid in the outer context $\Gamma$. For local defintions
+        the list $\vec {w^C}$ is needed.
 
-    \item Spawn a task to elaborate $e_0$. This task has to wait for the
-        elaboration of $e_1$. It has to check, if the bound variable $f$ has
-        been used in the elaborated term.
-
-        If yes then then elaborated term is a fixpoint and the termination
-        condition has to be checked. MISSING fixpoint instantiation!!!
-
-        If no then the elaborated term is not a fixpoint and $\meta e_0$ is
-        instantiated.
+        The elaboration starts with
         $$
-            \meta e_0 := \lambda \vec{x^A}. \meta e_1^R
+            \vertlist{
+                \vec a &=& \vec {x^A}
+                \\
+                \vec {v^B} &=&  []
+                \\
+                \vec {v^C} &=&  []
+            }
         $$
 
-    \item Return the context with the additional definition
-            $$
-                \Gamma, f: \Pi \vec {x^A}. R := \meta e_0
-            $$
+        Now we iterate over all formal arguments. On each step where the list of
+        not yet elaborated formal arguments is
+        $$
+            x^A \vec a
+        $$
+        we do the following steps:
+
+        \begin{enumerate}
+            \item We create the metavariable $N_A$ with
+                $$
+                \Gamma, \vec {v^B} \vdash N_A : \Box_0
+                $$
+                and spawn a task to elaborate $A$ into $N_A$ in case $A$ is
+                present in the source code.
+
+            \item Optionally we create the metavariable $M_A$ with
+                $$
+                    \Gamma \vdash M_A: \Pi \vec {w^C}. \Box_0
+                $$
+                and spawn a task to unify $N_A$ with $M_A \vec{v}$ in the inner
+                context $\Gamma, \vec{v^B}$.
+
+            \item Return $\vec {v^B} x^{N_A}$ and optionally
+                $\vec {w^C} x^{M_A \vec w}$.
+
+        \end{enumerate}
+
+        After processing all formal arguments we get $\vec{v^B}$ and optionally
+        $\vec {w^C}$.
+
+
+
+    \item Elaborate the result type:
+
+        \begin{enumerate}
+
+            \item Create the metavariable $N_R$ with
+                $$
+                    \Gamma, \vec{v^B} \vdash N_R : \Box_0
+                $$
+                and spawn a task to elaborate the result type $R$ into $N_R$ in
+                case $R$ is present in the source code.
+
+            \item Optionally create the metavariable $M_R$ with
+                $$
+                    \Gamma \vdash M_R : \Pi \vec{v^C}. \Box_0
+                $$
+                and spawn a task to unify $N_R$ with $M_R \vec v$ in the inner
+                context.
+        \end{enumerate}
+
+
+
+    \item Elaborate the body:
+
+        We have reached the state where we have the formal arguments and a
+        metavariable representing the result type
+        $$
+            \vertlist{
+                \vec {v^B}
+                \\
+                \vec {w^C} & &
+                & \text {local def}
+                \\
+                \Gamma, \vec {v^B} &\vdash & N_R : \Box_0
+                \\
+                \Gamma &\vdash& M_R : \Pi \vec{w^C}. \Box_0
+                &\text{local def}
+            }
+        $$
+
+        \begin{enumerate}
+            \item Define the metavariable $m_e$ with
+                $$
+                    \Gamma, \vec{v^B}, f^{N_R}
+                    \vdash
+                    m_e : N_R
+                $$
+                and spawn a task to elaborate the body $e$ into $m_e$.
+
+            \item Optionally define the metavariable $m_{\hat e}$ with
+                $$
+                    \Gamma \vdash m_{\hat e}: \Pi \vec {w^C}. M_R \vec x
+                $$
+
+            \item Spawn a task which:
+                \begin{itemize}
+                    \item waits for $m_e$.
+
+                    \item checks if $f$ is only legally used in the body (i.e.
+                        only calls with structurally smaller arguments).
+
+                    \item if $f$ is used in the body then it returns
+                        $$
+                            \fixbr{f^{N_R}, m_e}
+                        $$
+                        otherwise it returns $m_e$.
+
+                    \item optionally waits for all local
+                        metavariables in the result to be filled and then fills
+                        $m_{\hat e}$ with
+                        $$
+                            \lambda \vec {w^C}. r
+                        $$
+                        where $r$ is the result.
+                \end{itemize}
+        \end{enumerate}
+
+
+    \item Enter a local definition:
+
+
+    \item Enter a global definition:
+
+
 \end{enumerate}
+
+
+
+
+
+
 
 
 \subsection{Abstractions}
