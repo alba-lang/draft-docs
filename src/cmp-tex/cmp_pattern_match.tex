@@ -730,7 +730,7 @@ inductive type which cannot be constructed (e.g. $\text{False}$ or $\text{zero}
                         :=
                             aux (succ n) lbSN (d (succ n)) (f ltWmSN)
             :=
-                aux zero zeroLB (d zero) natFinite where
+                aux zero zeroLB (d zero) natFinite
 \end{alba}
 
 
@@ -757,15 +757,45 @@ inductive type which cannot be constructed (e.g. $\text{False}$ or $\text{zero}
 This function does not typecheck. Let's look into the cases:
 \begin{alba}
     --  Required types                          Actual types
-        Half (succ (succ (h + h)))              Half (succ (h + succ h))
-        Half (succ (succ (succ (h + h))))       Half (succ (succ (h + succ h))
+        Half (succ (succ (h + h)))              Half (succ h + succ h)
+        Half (succ (succ (succ (h + h))))       Half (succ (succ h + succ h))
 \end{alba}
 We have to pull out the successor constructor of the second argument out of the
 parenthesis. With a proof of
 \begin{alba}
-    succ (h + h) = h + succ h
+    succ (succ (h + h)) = succ h + succ h
 \end{alba}
 the required types and the actual type would be unifiable.
+
+\begin{alba}
+    pullSucc: all {n m: Nat}: n + succ m = succ n + m
+    := ...
+
+    pull2Succ {n m: Nat}: succ n + such m = succ (succ (n + m))
+    :=
+        pullSucc {succ n} {m}: succ n + succ m = succ (succ n) + m
+        -- rhs normalizes to 'succ (succ (n + m))'
+
+
+    half: all n: Half n := case
+        \ zero          :=   even zero
+        \ succ zero     :=   odd zero
+        \ succ (succ n) :=
+            (match half n case
+                \ even h :=
+                    even (succ h)
+                    |> adapt (pull2Succ {h} {h})
+
+                \ odd  h :=
+                    odd  (succ h)
+                    |> adapt (pull3Succ {h} {h} |> inject succ)
+            ): Half (succ (succ n))
+\end{alba}
+
+
+
+
+Next functions:
 
 \begin{alba}
     value {n}: Half n -> Nat := case
