@@ -138,6 +138,125 @@ There are the following reasons to introduce metavariables:
 
 
 
+\subsubsection{Variables without Type}
+%--------------------------------------------------------------------------------
+\ \begin{alba}
+    f x : R := e
+
+    \ x : R := e
+
+    all x : R
+\end{alba}
+
+
+If there is a variable $x$ without explicit type in the source code we introduce
+a metavariable $M_x$ for its type with the typing $x : M_x : \Top_0$. Since
+$M_x$ represents a type its type is a sort. The sort $\Box_0$ cannot appear in
+the source code. Therefore the sort of all types derived from the source code
+are proper subtypes of $\Box_0$ except other type variables representing types
+of other variables without explicit type.
+
+If the variable $x$ is used in a function position, then the elaborator has to
+wait for the instantiation of $M_x$.
+
+Instantiation of $M_x$ is possible only if $x$ is used as an argument. In a
+usages as an argument we get the unification constraint
+$$
+    M_x \sim T
+$$
+where $T$ is the type of the formal argument.
+
+$T$ might be valid in an inner context. If $T$ contains variables from an inner
+context, then the unification fails because a variable cannot escape its inner
+context. If $T$ contains metavariables from an inner context, then it has to be
+waited for its instantiation. The instantiation might be from a context valid
+for instantiation of $M_x$. As long as the head term of $T$ is not from an inner
+context $M_x$ can be instantiated by imitation.
+
+The metavariable $M_x$ cannot be used in the source code and is only
+instantiated by a unification constraint of the form $M_x \sim T$. Therefore $T$
+cannot contain directly or indirectly any references to $M_x$. Circularity is
+not possible!
+
+
+
+
+
+\subsubsection{Missing Result Type}
+%--------------------------------------------------------------------------------
+
+\ \begin{alba}
+    f (x: A)  := e
+
+    \ (x: A)  := e
+\end{alba}
+
+A metavariable $M_R: \Box_0$ is introduced to represent the missing result type.
+The type $M_R$ is the goal type for the elaborator of $e$. Before leaving the
+context $M_R$ has to be instantiated by the unification constraint
+$$
+    T_e \sim M_R
+$$
+where $T_e$ is the type of $e$. $T_e$ is definitely a type of a source
+expression. Therefore its sort $s$ satisfies $s \le \Box_0$.
+
+Since the source code does not know $M_R$, the metavariable cannot be contained
+neither directly nor indirectly in the type $T_e$. Circularity is not possible!
+
+
+
+\subsubsection{Implicit Arguments}
+%--------------------------------------------------------------------------------
+
+\ \begin{alba}
+    -- Function with implicit arguments
+    adaptType {A: Any} {F: A -> Any} {x y: A}: x = y -> F x -> F y := ...
+
+    -- Context
+    eq: a = b
+    v:  Vec Nat a
+
+    -- Usage of the function
+    adaptType eq v
+\end{alba}
+
+Each actual implicit argument gets a metavariable:
+$$
+\vertlist{
+    M_A  &:&  \Any
+    \\
+    M_F  &:&  M_A \to \Any
+    \\
+    m_x  &:&  M_A
+    \\
+    m_y  &:&  M_A
+}
+$$
+and we get the unification constraints
+$$
+\vertlist{
+    a = b              &\sim&    m_x = m_y
+    \\
+    \text{Vec Nat } a  &\sim&    M_F m_x
+    \\
+    M_F m_y            &\sim&    R
+}
+$$
+where $R$ is the required result type of the function call.
+
+If there is an actual argument and the metavariable appears in that type, it
+appears in the right hand side of the unification constraint.
+
+If a metavariable appears within the actual result type, then it appears in the
+left hand side of the unification constraint.
+
+
+
+\subsubsection{Elaboration Variables}
+%--------------------------------------------------------------------------------
+
+Every soruce term (including subterms) gets a metavariable. The elaborator
+\emph{elaborates} the source term into the metavariable.
 
 
 
