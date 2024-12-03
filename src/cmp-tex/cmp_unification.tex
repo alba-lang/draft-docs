@@ -529,181 +529,6 @@ $$
 
 
 
-
-\subsubsection{Algorithm with Restriction}
-%----------------------------------------
-In order to avoid backtracking we try to instantiate the metavariable $\meta m$
-only if the constraint is in pattern form
-$$
-    \Gamma_0, \Gamma_1
-    \vdash
-    \meta m \vec x
-    \equiv
-    \cases{
-        h \vec b
-        \\
-        \Pi z^C . D
-        \\
-        \lambda z^C . e
-    }
-$$
-where
-$$
-    \Gamma_0 \vdash \meta m : \Pi \vec y^{\vec A}. R
-$$
-and
-$\vec x \in \Gamma_0, \Gamma_1$.
-
-\begin{enumerate}
-
-    \item $\meta m \equiv \text{\emph{right hand side}}$:
-        % Trivial case
-        %----------------------------------------
-
-        This is the trivial case which has the solution
-        (provided the type
-        condition is satisfied and the right hand side has no variables from the
-        inner context $\Gamma_1$)
-        $$
-            \meta m := \text{\emph{right hand side}}
-        $$
-
-
-    \item $\meta m \vec x \equiv x_i$ where $x_i \in \Gamma_0$:
-        % Ambiguos case
-        %----------------------------------------
-        This is the
-        only case which creates an ambiguity. It has the solutions
-        $$
-            \meta m := \cases{
-                \lambda \vec y. x_i & \text{imitation}
-                \\
-                \lambda \vec y. y_i & \text{projection}
-            }
-        $$
-
-        This disambiguity can be resolved if we encounter another constraint of
-        one of the two forms
-        $$
-            \meta m \vec z \equiv
-            \cases{
-                x_i &\text{where } z_i \ne x_i
-                \\
-                z_i &\text{where } z_i \ne x_i
-            }
-        $$
-        The first form requires imitation i.e. $\meta m \vec z$ ignores the
-        arguments and always returns $x_i$. The second form requires projection
-        i.e. $\meta m \vec z$ always projects onto the $i$th argument.
-
-
-    \item $\meta m \vec x \equiv x_i$ where $x_i \in \Gamma_1$: The only
-        possible solution is projection, because any solution must not contain
-        variables from inner contexts
-        $$
-            \meta m := \lambda \vec y . y_i
-        $$
-
-
-    \item $\meta m \vec x \equiv h \vec b$ where $h \in \vec x$ which implies
-        $h \in
-        \Gamma_0 \land |b| > 0$:
-        The only solution is imitation.
-
-        We introduce fresh metavariables $\meta h_1, \ldots \meta h_n$ with the
-        types $\Gamma_0 \vdash \meta h_i : \Pi \vec y^{\vec A} : B_i$ where $n$
-        is the arity of $h$ and $B_i$ is the type of $b_i$. This requires that
-        $B_i$ is a valid type in the context $\Gamma_0, \Delta$ where $\Delta$
-        is $\Gamma_1$ restricted to the variables $\vec x$.
-
-        The constraint can be solved by
-        %
-        $$
-            \meta m :=
-            \lambda \vec y^{\vec A} .
-            h (\meta h_1 \vec y) \ldots (\meta h_n \vec y)
-        $$
-        %
-        which converts the constraint into
-        $$
-            h (\meta h_1 \vec x) \ldots (\meta h_n \vec x)
-            \equiv
-            h \vec b
-        $$
-        %
-        which is rigid-rigid and can be simplified. Note that simplification
-        leads to new constraints of the form $\meta h_i \vec x \equiv b_i$ which
-        are in pattern form.
-
-    \item $\meta m \vec x \equiv \Pi z^C. D$:
-
-        We introduce fresh metavariables
-        $$
-            \vertlist{
-                \Gamma_0
-                \vdash
-                \meta h_1: \Pi \vec y^{\vec A}. \Top
-                \\
-                \Gamma_0
-                \vdash
-                \meta h_2: \Pi \vec y^{\vec A} z^{\meta h_1 \vec y} . \Top
-            }
-        $$
-        %
-        Then the constraint can be solved by the instantiation
-        $$
-            \meta m
-            :=
-            \lambda \vec y^{\vec A}
-            . \Pi z^{\meta h_1 \vec y}. \meta h_2 \vec y z
-        $$
-
-        This immediately generates the constraint
-        $$
-            \Gamma_0, \Gamma_1
-            \vdash
-            \Pi z^{\meta h_1 \vec x} . \meta h_2 \vec x z
-            \equiv
-            \Pi z^C . D
-        $$
-        which can be simplified.
-
-    \item $\meta m \vec x \equiv \lambda z^C. e$:
-
-        We introduce fresh metavariables
-        %
-        $\meta h_1: \Pi \vec y^{\vec A}. \Top$,
-        %
-        $\meta h_2: \Pi \vec y^{\vec A} z^{\meta h_1 \vec y} . \Top$
-        %
-        and
-        %
-        $\meta h_3
-        : \Pi \vec y^{\vec A} z^{\meta h_1 \vec y}
-          . \meta h_2 \vec y z
-        $.
-        Then the constraint can be solved by the instantiation
-        $$
-            \meta m
-            :=
-            \lambda \vec y^{\vec A} z^{\meta h_2 \vec y}
-            . \meta h_3 \vec y z
-        $$
-
-        This immediately generates the constraint
-        $$
-            \Gamma_0, \Gamma_1
-            \vdash
-            \lambda z^{\meta h_1 \vec x} . \meta h_3 \vec x z
-            \equiv
-            \lambda z^C . e
-        $$
-        which can be simplified.
-\end{enumerate}
-
-
-
-
 \subsubsection{Code Example}
 %----------------------------------------
 
@@ -810,9 +635,149 @@ proof of {\tt a = b}.
 
 
 
-\subsection{Quasipattern Constraints}
+\subsection{Imitation of Base Terms}
 %================================================================================
 
+We have the flex rigid constraint
+$$
+    \Gamma_0, \Gamma_1 \vdash m \vec a \lesssim h \vec b
+$$
+where $m$ is a metavariable and $h \vec b$ a rigid base term with the following
+typings:
+$$
+\vertlist{
+    \Gamma_0 &\vdash& m &:& \Pi \vec{y^B}. R_m
+    \\
+    \Gamma_0 &\vdash& h &:& \Pi \vec{z^C}. R_h
+    \\
+    \Gamma_0, \Gamma_1 &\vdash& m \vec a &:& R_m[\vec a / \vec y]
+    \\
+    \Gamma_0, \Gamma_1 &\vdash& h \vec b &:& R_h[\vec b / \vec z]
+}
+$$
+
+The preconditions for imitation are given:
+\begin{itemize}
+
+    \item $h \in \Gamma_0$
+
+    \item The head normal forms of all $a_i$ have neither a metavariable nor $h$
+        as the head term. Therefore projection is not possible.
+
+\end{itemize}
+
+Both forms $m \vec a \lesssim h \vec b$ and $h \vec b \lesssim m \vec a$ are
+equivalent.
+
+We introduce the metavariables $m_i$ with
+$$
+\vertlist{
+    \Gamma_0 &\vdash&
+    m_0
+    &:&
+    \Pi \vec{y^B}. C_0
+    \\
+    \Gamma_0 &\vdash&
+    m_0
+    m_{i + 1}
+    &:&
+    \Pi \vec{y^B}. C_{i + 1}[m_j \vec y / z_j \mid j < i]
+}
+$$
+and try the instantiation
+$$
+    m := \lambda \vec{y^B}. h [m_0 \vec y, m_1 \vec y, \ldots]
+$$
+where the abstraction has the type
+$$
+    \Pi \vec{y^B}. R_h[m_i \vec y / z_i]
+$$
+I.e. in the context $\Gamma, \vec{y^B}$ we have to solve the unification problem
+$$
+    R_h[m_i \vec y / z_i] \lesssim R_m
+$$
+before instantiating the metavariable $m$.
+
+The remaining unification problems are
+$$
+    m_i \vec a \lesssim b_i
+$$
+
+
+
+
+
+
+
+
+\subsection{Imitation of Products}
+%================================================================================
+
+We have the unification constraint
+$$
+    \Gamma_0, \Gamma_1 \vdash M \vec a \lesssim \Pi z^C. R
+$$
+with the metavariable $M$ and
+$$
+\vertlist{
+    \Gamma_0
+    &\vdash&
+    M
+    &:&
+    \Pi \vec{y^B}. R_M
+    \\
+    \Gamma_0, \Gamma_1
+    &\vdash&
+    \Pi z^{C^{s_C}}. R^{s_R}
+    &:&
+    s_2
+}
+$$
+
+The constraint requires that the headnormal form of $R_M$ is a sort compatible
+with $s_2$ i.e.
+$$
+    R_M \reduce s_1 \gtrsim s_2
+$$
+if the term $R_M$ cannot be normalized because of metavars without instantiation
+we have to wait for their instantiation.
+
+
+Introduce the metavariables $M_C$ and $M_R$.
+$$
+\vertlist{
+    M_C
+    &:&
+    \Pi \vec{y^B}. s_C
+    \\
+    M_R
+    &:&
+    \Pi \vec{y^B} z^{M_C \vec y}. s_R
+}
+$$
+
+We try the imitation with
+$$
+    M := \lambda \vec {y^B}. (\Pi z^{M_C \vec y}. M_R \vec y z)^{s_2}
+$$
+because of $s_2 \lesssim s_1$ the instantiation is typesafe.
+
+With this instantiation the unification constraint becomes the rigid-rigid
+constraint
+$$
+    \Pi z^{M_C \vec a}. M_R \vec a z
+    \lesssim
+    \Pi z^C. R
+$$
+
+
+
+
+
+
+
+\subsection{Flex-Flex Constraints}
+%================================================================================
 
 MISSING!!!
 
