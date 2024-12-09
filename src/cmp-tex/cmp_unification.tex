@@ -422,113 +422,6 @@ $\meta m$.
 
 
 
-
-
-\subsubsection{Decide Imitation vs. Projection}
-
-Suppose we have a flex-rigid constraint of the form
-$$
-    \Gamma_0, \Gamma_1
-    \vdash
-    m \vec a \sim h \vec b
-$$
-where $m$ is a metavariable with
-$\Gamma_0 \vdash m : \Pi \vec {y^B}. R$,
-$h \vec b$ is in head normal form and $h$ is a
-rigid head term (i.e. not a metavariable).
-
-The following instantiations of $m$ are possible.
-$$
-\vertlist{
-    m &:=&
-    \lambda \vec {y^B}. h [m_0 \vec y, \ldots, m_n \vec y]
-    & \text{imitation}
-    \\
-    m &:=&
-    \lambda \vec {y^B}. y_0 [m_0 \vec y, \ldots, m_k \vec y]
-    & \text{projection}
-    \\
-    \ldots
-    \\
-    m &:=&
-    \lambda \vec {y^B}. y_l [m_0 \vec y, \ldots, m_k \vec y]
-    & \text{projection}
-}
-$$
-where $n$ is the aritiy of $h$, $k$ is the arity of $B_i$, $l$ is the arity
-of $m$ and $m_j$ are fresh metavariables. There are $l$ projection cases i.e. in
-total $1+l$ possibilities. The instantiation result in the following values for
-$m \vec a$:
-$$
-\vertlist{
-    m \vec a &=&
-    h [m_0 \vec a, \ldots, m_n \vec a]
-    & \text{imitation}
-    \\
-    m \vec a &=&
-    a_0 [m_0 \vec a, \ldots, m_k \vec a]
-    & \text{projection}
-    \\
-    \ldots
-    \\
-    m \vec a &=&
-    a_l [m_0 \vec a, \ldots, m_k \vec a]
-    & \text{projection}
-}
-$$
-
-Case analysis of the possibilities:
-\begin{enumerate}
-
-    \item Imitation is possible if $h \in \Gamma_0$. For a bound variable $h \in
-        \Gamma_1$ imitation is not possible because the variable cannot escape
-        its scope.
-
-    \item Some head normal forms of $\vec a$ have $h$ as a rigid head term:
-
-        Projection is possible.
-
-    \item If a head normal form of an $a_i$ has a metavariable is its head term
-        then the possibility of the $i$th projection depends on the
-        instantiation of this metavariable.
-
-    \item $h \in \Gamma_1$ rules out imitation.
-
-    \item If the head term of the head normal form of $a_i$ is neither a
-        metavariable nor $h$ then the corresponding projection is not possible.
-
-    \item If imitation and at least one projection or more than one projection
-        is possible, then the situation cannot be decided without more
-        information.
-\end{enumerate}
-
-
-If the situation is ambiguous the following additional information can help to
-make a decision:
-
-Suppose we have 2 unifications problems
-$$
-\vertlist{
-    m \vec {a_1} &\sim& h_1 \vec {b_1}
-    \\
-    m \vec {a_2} &\sim& h_2 \vec {b_2}
-}
-$$
-
-\begin{enumerate}
-
-    \item If $h_1 \ne h_2$, then imitation is no longer possible.
-
-    \item The $j$th projection is possible only if the head normal form of
-        $a_{ij}$ has $h_i$ as its rigid head term for $i=1$ and $i=2$.
-\end{enumerate}
-
-
-
-
-
-
-
 \subsubsection{Code Example}
 %----------------------------------------
 
@@ -593,7 +486,7 @@ by unification. Note that the only 2 explicit arguments are
 
 This example shows that ambiguity between imitation and projection can occur and
 that multiple constraints have to be collected to disambiguate the situation.
-Basic idea there is an equality {\tt a = b} and the variable {\tt a} occurs not
+Basic idea: There is an equality {\tt a = b} and the variable {\tt a} occurs not
 exactly once in the predicate to be transformed. In this case it is not
 immediately evident which occurrences of the variable {\tt a} have to be
 replaced by the variable {\tt b} in the predicate.
@@ -627,6 +520,119 @@ proof of {\tt a = b}.
                         ~> ?h22 b = a           ~> ?h22 x := a
 
 \end{alba}
+
+
+
+
+
+
+
+
+\subsection{Decide Imitation vs. Projection}
+
+Suppose we have a flex-rigid constraint of the form
+$$
+    \Gamma_0, \Gamma_1
+    \vdash
+    m \vec a \sim h \vec b
+$$
+where $m$ is a metavariable with
+$\Gamma_0 \vdash m : \Pi \vec {y^B}. R$,
+$h \vec b$ is in head normal form and $h$ is a
+rigid head term (i.e. not a metavariable).
+
+The following instantiations of $m$ are possible.
+$$
+\vertlist{
+    m &:=&
+    \lambda \vec {y^B}. h [m_0 \vec y, \ldots, m_n \vec y]
+    & \text{imitation}
+    \\
+    m &:=&
+    \lambda \vec {y^B}. y_0 [m_0 \vec y, \ldots, m_{k_0} \vec y]
+    & \text{projection}
+    \\
+    \ldots
+    \\
+    m &:=&
+    \lambda \vec {y^B}. y_l [m_0 \vec y, \ldots, m_{k_l} \vec y]
+    & \text{projection}
+}
+$$
+where $n$ is the aritiy of $h$, $k_i$ is the arity of $B_i$, $l$ is the arity
+of $m$ and $m_j$ are fresh metavariables. There are $l$ projection cases i.e. in
+total $1+l$ possibilities. The instantiation results in the following values for
+$m \vec a$:
+$$
+\vertlist{
+    m \vec a &=&
+    h [m_0 \vec a, \ldots, m_n \vec a]
+    & \text{imitation}
+    \\
+    m \vec a &=&
+    a_0 [m_0 \vec a, \ldots, m_{k_0} \vec a]
+    & \text{projection}
+    \\
+    \ldots
+    \\
+    m \vec a &=&
+    a_l [m_0 \vec a, \ldots, m_{k_l} \vec a]
+    & \text{projection}
+}
+$$
+
+Case analysis of the possibilities:
+\begin{enumerate}
+
+    \item Imitation is possible if $h \in \Gamma_0$. For a bound variable $h \in
+        \Gamma_1$ imitation is not possible because the variable cannot escape
+        its scope.
+
+    \item If some head normal forms of $\vec a$ have $h$ as a rigid head term,
+        then
+        projection is possible.
+
+    \item If a head normal form of an $a_i$ has a metavariable is its head term
+        then the possibility of the $i$th projection depends on the
+        instantiation of this metavariable.
+
+        The instantiation of the head metavariable of an $a_i$ might be blocked
+        because of some ambiguity. But the alternatives might be known. The
+        alternatives might say that $h$ cannot be a head term. In that case
+        projection is not possible even if the metavariable has not yet been
+        instantiated.
+
+    \item $h \in \Gamma_1$ rules out imitation.
+
+    \item If the head term of the head normal form of $a_i$ is neither a
+        metavariable nor $h$ then the corresponding projection is not possible.
+
+    \item If imitation and at least one projection or more than one projection
+        is possible, then the situation cannot be decided without more
+        information.
+\end{enumerate}
+
+
+If the situation is ambiguous the following additional information can help to
+make a decision:
+
+Suppose we have 2 unifications problems
+$$
+\vertlist{
+    m \vec {a_1} &\sim& h_1 \vec {b_1}
+    \\
+    m \vec {a_2} &\sim& h_2 \vec {b_2}
+}
+$$
+
+\begin{enumerate}
+
+    \item If $h_1 \ne h_2$, then imitation is no longer possible.
+
+    \item The $j$th projection is possible only if the head normal form of
+        $a_{ij}$ has $h_i$ as its rigid head term for $i=1$ and $i=2$.
+\end{enumerate}
+
 
 
 
