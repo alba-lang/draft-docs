@@ -8,6 +8,362 @@
 \subsection{Description of the Problem}
 %--------------------------------------------------------------------------------
 
+In this chapter we investigate the unification problem which arises when a
+function is applied to an argument. The type of the formal argument (the
+required type) is $T_2$, the type of the actual argument is $T_1$. The application
+happens in a certain context $\Gamma$. I.e. the unification constraint can be
+expressed as
+
+$$
+    \Gamma \vdash T_1 \le T_2
+$$
+
+i.e. the type of the actual argument must be a subtype of the required type. We
+transform the types into headnormal form. Because both are welltyped, the
+headnormal form is one of:
+
+\begin{enumerate}
+    \item A flexible base term of the form $M \vec a$ where $M$ is a
+        metavariable.
+
+    \item A rigid base term of the form $H \vec a$ where the head term is either a
+        local or a global variable.
+
+    \item A sort.
+
+    \item A product $\Pi x^A. B$.
+
+    \item An abstraction $\lambda x^A. e$. Note that an abstraction can never be
+        a type because its type has the form $\Pi x^A.B$ which can neither be a
+        sort or reduce to a sort.
+\end{enumerate}
+
+
+All terms except the flexible base term are rigid terms, because further
+reduction cannot change the structure of the term.
+
+
+The metavariables are introduced because of the reasons:
+
+\begin{enumerate}
+    \item Variables introduced without explicit type: We introduce a
+        metavariable whose type is a sort $M: s$. The sort must be big enough to
+        represent the type of any legal type $M$. I.e. $s = \Any_1$ or $s =
+        \Any_u$ where $u$ is a universe variable which can be arbitrarily high.
+
+    \item Implicit arguments: For each implicit argument which is not present in
+        the source code we introduce a metavariable. The type of the
+        metavariable is given, but the type might contain other implicit
+        arguments which are represented by metavariables.
+\end{enumerate}
+
+
+\paragraph{Rigid-Rigid Constraints}
+%--------------------------------------------------
+In case that $T_1$ and $T_2$ are rigid terms, they can be unified only if both are
+the same kind of rigid term. Unification succeeds only in one of the cases:
+
+\begin{enumerate}
+    \item Both are rigid base terms $\Gamma \vdash H \vec a_1 \le H \vec a_2$.
+        Conditions:
+
+        \begin{enumerate}
+            \item The head terms are identical.
+
+            \item $|\vec {a_1}| = |\vec {a_2}|$: There are the same number of
+                arguments on both sides.
+
+            \item $\Gamma \vdash a_{1i} \equiv a_{2i}$: All arguments can be
+                unified.
+        \end{enumerate}
+
+        If the conditions are satisfied we get $H \vec {a_1} \equiv H \vec {a_2}$.
+
+        Note: A soon as co- and contravariant argument types are possible the
+        situation becomes a little bit more complex. Covariant arguments have to
+        satisfy $a_{1i} \le a_{2i}$ and contravariant arguments have to satisfy
+        $a_{2i} \le a_{1i}$. In theses cases $a_{1i}$ and $a_{2i}$ are type
+        arguments.
+
+    \item Both are sorts $s_1 \le s_2 $:
+
+        This can be satisfied only by
+        $\Prop \le \Any_i$
+        and
+        $\Any_i \le \Any_j$ for all $i \le j$.
+
+    \item Both are function types
+        $\Gamma \vdash \Pi x^{A_1}. B_1
+                       \le
+                       \Pi x^{A_2}. B_2$:
+
+        \begin{enumerate}
+            \item $\Gamma \vdash A_2 \le A_1$: The actual function has
+                to accept more general arguments than the required
+                function argument.
+
+            \item $\Gamma, x^{A_2} \vdash B_1 \le B_2$: The actual function has
+                to return a more specific result type than the required
+                function.
+        \end{enumerate}
+
+    \item Both are abstractions
+        $ \Gamma \vdash \lambda x^{A_1}. e_1
+                        \le
+                        \lambda x^{A_2}. e_2$:
+
+        \begin{enumerate}
+            \item Abstractions are never types. Therefore no subtyping is
+                possible.
+
+            \item $\Gamma \vdash A_1 \equiv A_2$
+
+            \item $\Gamma, x^{A_1} \vdash e_1 \equiv e_2$
+        \end{enumerate}
+\end{enumerate}
+
+
+
+
+
+
+
+\paragraph{Flex-Rigid Constraints}
+%--------------------------------------------------
+
+A \emph{flex-rigid} constraint looks like $\Gamma \vdash M \vec a \le r$ or
+$\Gamma \vdash r \le  H \vec a$ with the metavariable $M$ and a rigid term $r$.
+In the following we look at the first alternative since the second is only a
+mirror image.
+
+I.e. the flex-rigid unification constraint looks like
+$$
+%
+    \Gamma_0, \Gamma_1
+%
+    \vdash
+%
+    M \vec a
+%
+    \le
+%
+    \cases {
+        H \vec b
+        \\
+        s
+        \\
+        \Pi x^A. B
+        \\
+        \lambda x^A. e
+    }
+$$
+%
+where $\Gamma_0$ is the context where the metavariable $M$ has been
+introduced with
+$$
+    \Gamma_0 \vdash M : \Pi \vec {y^A}. R
+$$
+
+A possible instantiation of the metavariable $M$ must have the form
+$$
+    M := \lambda \vec{y^B}. e
+$$
+and the flex rigid constraint has to satisfy
+$$
+    e[\vec a / \vec y] \le r
+$$
+There are only two possibilities to satisfy the constraint.
+\begin{itemize}
+    \item Imitation: $e$ has the structure of the rigid term $r$
+
+    \item Projection: $e$ has the form $y_i \vec c$ and $a_i \vec{c[\vec a/\vec
+        y]}$ reduces to the structure of the rigid term $r$.
+\end{itemize}
+
+
+
+
+
+\paragraph{Flex-Flex Constraints}
+%--------------------------------------------------
+
+MISSING
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Imitation}
+%================================================================================
+
+
+
+
+\subsubsection {First Order}
+%--------------------------------------------------
+
+
+
+A first order constraint has the form
+$$
+    \Gamma_1, \Gamma_2 \vdash M \ule r
+$$
+with the first order metavariable $M$ and the rigid term $r$. The only possible
+solution to this constraint is
+$$
+    M := r
+$$
+which trivially satisfies the stronger contraint $r \ueq r$. This solution is
+valid only if all free variables in $r$ are in $\Gamma_1$
+$$
+    \FV(r) \in \Gamma_1
+$$
+because the metavariable $M$ has been introduced in $\Gamma_1$ and therefore its
+instantiation cannot contain variables from inner contexts.
+
+Furthermore clearly the type of $r$ must conform to (i.e. be a subtype of) the
+type of $M$.
+
+
+
+
+
+
+
+\subsubsection {Base Terms}
+%--------------------------------------------------
+
+We have to solve the constraint
+$$
+    \Gamma_1, \Gamma_2 \vdash M \vec a \ule H \vec b
+$$
+
+It can be solved by the instantiation
+$$
+    M \vec y := H [M_1 \vec y, \ldots, M_n \vec y]
+$$
+where $n = |\vec b|$ and $M_1, \ldots M_n$ are $n$ new metavariables. With the
+types
+$$
+    \vertlist{
+        \Gamma_1 &\vdash& M_i &:& \Pi \vec{y^A}. R_i \vec y
+    }
+$$
+
+This leads to the rigid rigid constraint
+$$
+    H [M_1 \vec a, \ldots M_n \vec a] \ule H \vec b
+$$
+and creates $n$ new unification constraints
+$$
+    M_ i \vec a \ueq b_i
+$$
+In the presence of co- or contravariant argument types of the head term $H$ the
+equivalence $\equiv$ has to be replaced by the corresponding subtype constraint.
+
+\paragraph{Decision} There are two possibilities which make imitation impossible:
+\begin{enumerate}
+    \item $H \in \Gamma_2$: Any instantiation of the metavariable $M$ must be
+        valid in the context $\Gamma_1$ and is therefore not allowed to contain
+        local variables from an inner context.
+
+    \item There are other flex rigid constraints of the form $M \vec {a'} \le r$
+        where the rigid term $r$ is not compatible with $H \vec b$ (different
+        head term or different kind of rigid term).
+\end{enumerate}
+
+
+
+
+
+\subsubsection {Sorts}
+%--------------------------------------------------
+
+
+
+
+
+\subsubsection {Products}
+%--------------------------------------------------
+
+
+
+
+
+\subsubsection {Abstractions}
+%--------------------------------------------------
+
+
+
+
+
+\subsection{Projection}
+%================================================================================
+
+
+\subsubsection{First Order}
+%--------------------------------------------------
+
+There is no possibility to solve a first order constraint
+$$
+    \Gamma_1, \Gamma_2 \vdash M \ule r
+$$
+by projection because the first order metavariable $M$ has no arguments.
+
+
+
+
+\subsubsection{Higher Order}
+%--------------------------------------------------
+
+We have to solve the higher order constraint
+$$
+    \Gamma_1, \Gamma_2
+    \vdash
+    %
+    M \vec a   \ule  r
+$$
+by projection. A projection on the $i$th argument in the most general form looks
+like
+$$
+    M \vec y := y_i [M_1 \vec y, \ldots M_m \vec y]
+$$
+where $m$ is the arity of the $i$th argument type $A_i$.
+
+This leads to the new constraint
+$$
+    a_i [M_1 \vec a, \ldots, M_n \vec a] \ule r
+$$
+
+This makes sense only if the headnormal form of $a_i$ has the same shape as the
+rigid term $r$, i.e. a rigid base term, a sort, a product or an abstraction.
+
+
+
+
+\subsection{Decision between Imitation and Projection}
+%================================================================================
+
+
+
+
+
+
+
+
+
+\subsection{OLD MATERIAL!!!}
+%================================================================================
+
 Whenever a function is applied to an actual argument then the type of the actual
 argument $A$ has to be a subtype of the type of the formal argument $R$ i.e. $A
 \le R$ has to be valid. Otherwise the actual argument is not a legal argument to
@@ -98,9 +454,9 @@ welltyped.
 The type $M$ of a metavariable is a required type. The actual type used in
 instantiations can be a subtype of $M$.
 
-If we have two metavariables $\meta m_1$ and $\meta m_2$ and both are separated
+If we have two metavariables $\meta {m_1}$ and $\meta {m_2}$ and both are separated
 in the context by a free variable (i.e. variable without definition $\Gamma = [
-    \ldots, \meta m_1^{M_1}, \ldots x^A, \ldots, \meta m_2^{M_2}, \ldots]$) then
+    \ldots, \meta {m_1}^{M_1}, \ldots x^A, \ldots, \meta {m_2}^{M_2}, \ldots]$) then
 the meta variable $m_2$ is an \emph{inner metavariable} with respect to $\meta
 m_1$. Metavariables which are not separated by free variables are in the same
 group.
@@ -366,17 +722,17 @@ i.e. either $e$ has $h$ is its head term or
 
 
 In order to get the most general instantiation some fresh metavariables $\meta
-h_1, \meta h_2, \ldots$ valid in the context $\Gamma_1$ are introduced
+{h_1}, \meta {h_2}, \ldots$ valid in the context $\Gamma_1$ are introduced
 $$
     \meta m
     := \lambda \vec y^{\vec B}.
     \cases {
-        h (\meta h_1 \vec y) \ldots (\meta h_n \vec y)
+        h (\meta {h_1} \vec y) \ldots (\meta {h_n} \vec y)
         & \text{imitation}
         %
         \\
         %
-        y_i (\meta h_1 \vec y) \ldots (\meta h_m \vec y)
+        y_i (\meta {h_1} \vec y) \ldots (\meta {h_m} \vec y)
         & \text{projection}
     }
 $$
@@ -387,13 +743,13 @@ giving one of the constraints
 $$
 \vertlist{
     %
-    h (\meta h_1 \vec a) \ldots (\meta h_n \vec a)
+    h (\meta {h_1} \vec a) \ldots (\meta {h_n} \vec a)
     &\equiv&
     h \vec b
     & \text{imitation}
     %
     \\
-    a_i (\meta h_1 \vec a) \ldots (\meta h_m \vec a)
+    a_i (\meta {h_1} \vec a) \ldots (\meta {h_m} \vec a)
     &\equiv&
     h \vec b
     & \text{projection}
@@ -407,7 +763,7 @@ variable from an inner context.
 The constraint in the imitation case has the rigid-rigid form and immediately
 results in the simpler problems
 $$
-    \Gamma_0, \Gamma_1 \vdash \meta h_i \vec a \equiv b_i
+    \Gamma_0, \Gamma_1 \vdash \meta {h_i} \vec a \equiv b_i
 $$
 whilst the projection case might introduce new redexes therefore might lead to
 more complex problems. The projection case is the reason why Huet's algorithm
@@ -902,3 +1258,149 @@ $$
     \Gamma, x^A \vdash e \equiv h \vec b x
 $$
 provided that the left and right hand side of the contraint have the same type.
+
+
+
+
+
+
+\subsection{Code Examples}
+%================================================================================
+
+
+
+\subsubsection{Equality Recursor to Cast and Congruence}
+%------------------------------------------------------------
+
+
+Assume that we have a recursor for equality
+
+\begin{alba}
+    recurse {A: Any} {R: A -> A -> Any}
+        : (all x: R x x) -> all x y: x = y -> R x y)
+    :=
+        ...
+\end{alba}
+
+and we want to prove the cast function.
+
+\begin{alba}
+    cast {A: Any} {a b: A} {F: A -> Any}: a = b -> F a -> F b
+    :=
+        ...
+\end{alba}
+
+The recursor returns an object of type {\tt x = y -> R x y} and the cast
+function shall return an object of type {\tt a = b -> (F a -> F b)}. The
+following proof shows how the unifier can instantiate the metavariable {\tt R}
+by {\tt R x y := F x -> F y}.
+
+\begin{alba}
+    cast {A: Any} {a b: A} {F: A -> Any}: a = b -> F a -> F b
+    :=
+        recurse (\ x (e: F x):= e) a b
+
+        -- First argument has type
+
+            (\ x (e: F x) := e): all x: F x -> F x
+
+        -- Higher order unification
+
+            R x x       ~       F x -> F x
+
+            R a b       ~       F a -> F b
+
+                R x y := R1 x y -> R2 x y       -- Imitation
+
+                R1 x x      ~       F x
+                R2 x x      ~       F x
+                R1 a b      ~       F a
+                R2 a b      ~       F b
+
+                    R1 x y := F (R11 x y)
+                    R2 x y := F (R21 x y)
+
+                    R11 x x     ~   x           -- Projection, but which one?
+                    R21 x x     ~   x           -- Projection, but which one?
+                    R11 a b     ~   a
+                    R21 a b     ~   b
+
+                        R11 x y := x
+                        R21 x y := y
+                        R1 x y  := F x
+                        R2 x y  := F y
+
+                        R  x y := F x -> F y
+\end{alba}
+
+
+In the same manner the function congruence can be proved.
+
+\begin{alba}
+    congruence {A B: Any} {a b: A} {f: A -> B}: a = b -> f a = f b
+    :=
+        recurse (\ x: f x = f x := refl) a b
+
+        -- The function argument has type
+
+            all x: f x = f x
+
+        -- The rest similar as above.
+\end{alba}
+
+
+
+
+
+
+
+\subsubsection{Transitivity of Equality}
+%------------------------------------------------------------
+
+
+Assume we have already a proof of the flip and the cast function and want to
+prove the transitivity of equality
+
+\begin{alba}
+    flip {A: Any}: all {a b: Any}: a = b -> b = a
+    :=
+        ...
+
+    cast {A: Any} {a b: Any} {F: A -> Any}: a = b -> F a -> F b
+    :=
+        ...
+
+    (,) {A: Any} {a b c: Any}: a = b -> b = c -> a = c
+    :=
+        \ eq := cast (flip eq)
+\end{alba}
+
+The application of the function {\tt flip} converts {\tt a = b} to {\tt b = a}
+which is then fed into the function {\tt cast} which returns {\tt F b -> F a}
+with the metavariable {\tt F}.
+
+\begin{alba}
+    -- typing for the inner function
+
+        \ (eq: a = b): b = c -> a = c := cast (flip eq)
+
+    -- higher order metavariable for the cast function: F
+
+    -- unification constraints
+
+        F b -> F a    ~  b = c -> a = c
+
+        F b     ~       b = c
+        F a     ~       a = c
+
+            F x := F1 x = F2 x
+
+            F1 b ~ b
+            F1 a ~ a
+            F2 b ~ c
+            F2 a ~ c
+
+                F1 x := x
+                F2 x := c
+                F x := x = c
+\end{alba}
