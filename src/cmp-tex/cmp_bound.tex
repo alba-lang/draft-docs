@@ -17,13 +17,17 @@ A bound variable has the following attributes.
         If the bound variable is implicit, then the compiler is instructed to
         infer the argument $a$ from the context in case it is missing.
 
-    \item Dependent: A variable is dependent if the result type depends on it.
+        Implicit arguments are always ghost arguments. No runtime decisions and
+        not runtime objects can be constructed by using implicit arguments.
+
+    \item Type relevant: A variable is type relevant if the result type depends
+        on it.
 
         Open point: What happens in
         $$
             \Pi P^{A \to \Any} x^A. P x
         $$
-        if $P = \lambda x^A . N$? Is $x$ dependent?
+        if $P = \lambda x^A . N$? Is $x$ type relevant?
 
     \item Ghost: A ghost variable means that its value cannot be used in the
         runtime code. It can be
@@ -42,10 +46,34 @@ A bound variable has the following attributes.
         \end{itemize}
 \end{enumerate}
 
-A term which is not a type (i.e. its type is not a sort) are propositional or
-non-propositional. A term is propositional if its type is a proposition.
-Otherwise it is non-propositional. Non-propositional terms represent potential
-runtime objects.
+A type is a proposition or a propositional type if its type is $\Prop$. All
+other types are non propositional types. Any term whose type is a proposition is
+a proof of the proposition. All terms whose type is a proposition are ghost
+terms because they are never runtime objects.
+
+
+There are the following rules:
+
+\begin{enumerate}
+    \item All type relevant arguments in a global function whose type is a
+        proposition are mandatory implicit. If the function is not global, then
+        the argument can be implicit or not.
+
+    \item All type relevant arguments whose type is not a
+        proposition can be declared implicit or not.
+
+        If declared implicit, then they are ghost variables. This implies that
+        the function is not allowed to make any runtime decisions or construct
+        any runtime objects using the ghost argument. Ghost arguments are only
+        available at compile time.
+
+    \item If a non-ghost function is fed with a ghost argument where it expects
+        a non-ghost argument (i.e. an explicit argument), then the result is
+        infected i.e. the result is converted to a ghost object.
+
+    \item An argument which is not type relevant is not allowed to be implicit.
+\end{enumerate}
+
 
 If a constructor for a proposition uses non-propositional bound variables, then the
 non-propositonal bound variable is a ghost variable. A pattern match uncovering
