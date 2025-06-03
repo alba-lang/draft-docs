@@ -64,7 +64,7 @@ In case that $T_1$ and $T_2$ are rigid terms, they can be unified only if both a
 the same kind of rigid term. Unification succeeds only in one of the cases:
 
 \begin{enumerate}
-    \item Both are rigid base terms $\Gamma \vdash H \vec a_1 \le H \vec a_2$.
+    \item Both are rigid base terms $\Gamma \vdash h_1 \vec a_1 \le h_2 \vec a_2$.
         Conditions:
 
         \begin{enumerate}
@@ -77,7 +77,7 @@ the same kind of rigid term. Unification succeeds only in one of the cases:
                 unified.
         \end{enumerate}
 
-        If the conditions are satisfied we get $H \vec {a_1} \equiv H \vec {a_2}$.
+        If the conditions are satisfied we get $h \vec {a_1} \equiv h \vec {a_2}$.
 
         Note: A soon as co- and contravariant argument types are possible the
         situation becomes a little bit more complex. Covariant arguments have to
@@ -132,14 +132,14 @@ the same kind of rigid term. Unification succeeds only in one of the cases:
 %--------------------------------------------------
 
 A \emph{flex-rigid} constraint looks like $\Gamma \vdash M \vec a \le r$ or
-$\Gamma \vdash r \le  H \vec a$ with the metavariable $M$ and a rigid term $r$.
+$\Gamma \vdash r \le  M \vec a$ with the metavariable $M$ and a rigid term $r$.
 In the following we look at the first alternative since the second is only a
 mirror image.
 
 I.e. the flex-rigid unification constraint looks like
 $$
 %
-    \Gamma_0, \Gamma_1
+    \Gamma_1, \Gamma_2
 %
     \vdash
 %
@@ -148,7 +148,7 @@ $$
     \le
 %
     \cases {
-        H \vec b
+        h \vec b
         \\
         s
         \\
@@ -158,10 +158,10 @@ $$
     }
 $$
 %
-where $\Gamma_0$ is the context where the metavariable $M$ has been
+where $\Gamma_1$ is the context where the metavariable $M$ has been
 introduced with
 $$
-    \Gamma_0 \vdash M : \Pi \vec {y^A}. R
+    \Gamma_1 \vdash M : \Pi \vec {y^B}. R
 $$
 
 A possible instantiation of the metavariable $M$ must have the form
@@ -222,7 +222,7 @@ solution to this constraint is
 $$
     M := r
 $$
-which trivially satisfies the stronger contraint $r \ueq r$. This solution is
+which trivially satisfies the stronger contraint $M \ueq r$. This solution is
 valid only if all free variables in $r$ are in $\Gamma_1$
 $$
     \FV(r) \in \Gamma_1
@@ -244,12 +244,13 @@ type of $M$.
 
 We have to solve the constraint
 $$
-    \Gamma_1, \Gamma_2 \vdash M \vec a \ule H \vec b
+    \Gamma_1, \Gamma_2 \vdash M \vec a \ule h \vec b
 $$
+by imitation.
 
 It can be solved by the instantiation
 $$
-    M \vec y := H [M_1 \vec y, \ldots, M_n \vec y]
+    M \vec y := h [M_1 \vec y, \ldots, M_n \vec y]
 $$
 where $n = |\vec b|$ and $M_1, \ldots M_n$ are $n$ new metavariables. With the
 types
@@ -261,7 +262,7 @@ $$
 
 This leads to the rigid rigid constraint
 $$
-    H [M_1 \vec a, \ldots M_n \vec a] \ule H \vec b
+    h [M_1 \vec a, \ldots M_n \vec a] \ule h \vec b
 $$
 and creates $n$ new unification constraints
 $$
@@ -272,14 +273,16 @@ equivalence $\equiv$ has to be replaced by the corresponding subtype constraint.
 
 \paragraph{Decision} There are two possibilities which make imitation impossible:
 \begin{enumerate}
-    \item $H \in \Gamma_2$: Any instantiation of the metavariable $M$ must be
+    \item $h \in \Gamma_2$: Any instantiation of the metavariable $M$ must be
         valid in the context $\Gamma_1$ and is therefore not allowed to contain
         local variables from an inner context.
 
     \item There are other flex rigid constraints of the form $M \vec {a'} \le r$
-        where the rigid term $r$ is not compatible with $H \vec b$ (different
+        where the rigid term $r$ is not compatible with $h \vec b$ (different
         head term or different kind of rigid term).
 \end{enumerate}
+
+
 
 
 
@@ -288,6 +291,22 @@ equivalence $\equiv$ has to be replaced by the corresponding subtype constraint.
 \subsubsection {Sorts}
 %--------------------------------------------------
 
+
+We have to resolve the constraint
+
+$$
+    \Gamma_1, \Gamma_2
+    \vdash
+    M \vec a \ule s
+$$
+by imitation.
+
+It can be solved by the instantiation
+$$
+    M \vec y := s
+$$
+
+This instantiation satisfies the stronger constraint $M \vec a \ueq s$.
 
 
 
@@ -298,9 +317,70 @@ equivalence $\equiv$ has to be replaced by the corresponding subtype constraint.
 
 
 
+We have to resolve the constraint
+
+$$
+    \Gamma_1, \Gamma_2
+    \vdash
+    M \vec a \ule \Pi x^A. C
+$$
+by imitation.
+
+We introduce 4 fresh metavariables $M_1$, $T_1$, $M_2$, $T_2$ with
+$$
+    \vertlist{
+        \Gamma_1 &\vdash& T_1: \Top
+        \\
+        \Gamma_1 &\vdash& T_2: \Top
+        \\
+        \Gamma_1 &\vdash& \Pi \vec{y^B}. T_1
+        \\
+        \Gamma_1 &\vdash& \Pi \vec{y^B} x^A. T_2
+    }
+$$
+and instantiate $M$ by
+$$
+    M \vec y := \Pi x^{M_1 \vec y}. M_2 \vec y x
+$$
+
+This instantiation creates the rigid-rigid constraint
+$$
+    \Pi x^{M_1 \vec a}. M_2 \vec a x
+    \ule
+    \Pi x^A. C
+$$
+which can be resolved as described previously.
+
+
+
+
+
+
+
 
 \subsubsection {Abstractions}
 %--------------------------------------------------
+
+
+
+
+We have to resolve the constraint
+
+$$
+    \Gamma_1, \Gamma_2
+    \vdash
+    M \vec a \ueq \lambda x^A. e
+$$
+by imitation.
+
+Since an abstraction can never be a type the constraint must be an equivalence
+constraint.
+
+
+MISSING!!!
+
+
+
 
 
 
