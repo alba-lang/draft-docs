@@ -63,6 +63,28 @@ information and prints an error message.
 
 
 
+\subsection{Types}
+%--------------------------------------------------------------------------------
+
+Types are present in the source code usually preceeded by a colon.
+\begin{itemize}
+    \item Type of a local variable ($x^A$)
+
+    \item Result type of a function
+
+    \item Result type of a function type ($\Pi x^A.R$ or $A \to B$)
+
+    \item Type annotation (ascription)
+\end{itemize}
+
+We create an e-hole with the metavariable $M: \Top$ and elaborate the type in
+source code with the requirement $(\empty, \Top)$.
+
+
+
+
+
+
 \subsection{Sorts}
 %--------------------------------------------------------------------------------
 
@@ -80,7 +102,7 @@ insertion of metavariables can happen.
 
 
 
-\subsection{Local Variable}
+\subsection{Local Variables}
 %--------------------------------------------------------------------------------
 
 
