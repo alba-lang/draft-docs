@@ -11,10 +11,14 @@
 %--------------------------------------------------------------------------------
 
 After parsing we get an abstract syntax tree (AST) of the source file. Each
-subterm of the AST gets a source based metavariable, a goal and a task which
-elaborates the source term. Source based metavariables are never instantiated by
-constraint solving. Source based metavariable are instantiated at the end of the
-corresponding task.
+subterm of the AST gets a source based metavariable, a requirement and a task
+which elaborates the source term. Source based metavariables are never
+instantiated by constraint solving. Source based metavariables are instantiated
+at the end of the corresponding task.
+
+The requirement of a term looks like $[\vec a, R]$ where $\vec a$ is the list of
+actual arguments present in the source code (some of them might be implicit) and
+$R$ is the required type of term applied to the actual arguments $\vec a$.
 
 The elaborator can create more metavariables for the following reasons:
 
@@ -55,6 +59,35 @@ elaborator searches for the first metavariable representing missing
 information and prints an error message.
 
 
+
+
+
+
+\subsection{Sorts}
+%--------------------------------------------------------------------------------
+
+We have the two sorts $\Prop$ and $\Any$ which can occur in the source code. We
+elaborate $\Prop$ as $\Prop : \Any_0$ and $\Any$ as $\Any_0 : \Any_1$.
+
+We have an e-hole $M: T$. We unify the actual type ($\Any_0$ or $\Any_1$) with
+$T$. If the unification succeeds we fill the term into the hole.
+
+Since the actual type of the term in both cases is not a function type, no
+insertion of metavariables can happen.
+
+
+
+
+
+
+\subsection{Local Variable}
+%--------------------------------------------------------------------------------
+
+
+The local variable $x^A$ is in the local context. The e-hole is $M: T$.
+
+Insertion of implicit arguments might apply, because the type $A$ can be a
+function type with implicit arguments.
 
 
 
