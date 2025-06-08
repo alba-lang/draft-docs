@@ -3,37 +3,109 @@
 
 \subsection{Form of an inductive type:}
 %--------------------------------------------------------------------------------
+
+
 $$
-    \type[\Gamma \mid T^K \mid C_{\ell_1}, \ldots, C_{\ell_n}] : \Pi \Gamma. K
+    \type_i[\Gamma, \vec {X^K := \vec C}]
 $$
 
 \begin{description}
     \item [Parameters $\Gamma$] Context of parameters. It binds all free
-        variables in $K$ and $C_{\ell_i}$.
+        variables in the kinds and the constructurs.
 
-    \item [Kind $K$] It reduces to $\Pi \vec x^{\vec A}. s$. It is a function
-        type. It has an arity which is possibly zero and a sort $s$ as its
+    \item [Kinds $K_i$] The have the form $\Pi \vec {x^A}. s$ of a function
+        type.
+        Kinds have an arity which is possibly zero and a sort $s$ as its
         result type.
 
-    \item [Constructor types $C_{\ell_i}$] Each constructor type has a label.
-        All labels must be different. The constructor types have the form
+    \item [Constructor types $C_{i \ell_j}$] Each constructor type has a label.
+        All labels for the same $i$ must be different. The constructor types
+        have the form
         $$
-            \Pi \Delta. T \vec a
+            \Pi \Delta. X_i \vec a
         $$
-        where the context $\Delta$ might be empty and $T$ can occur in $\Delta$
-        only positively i.e. $\Delta$ has the structure
+        where the context $\Delta$ might be empty and all $X_j$ can occur in
+        $\Delta$ only positively i.e. $\Delta$ has the structure
         $$
             [y_1^{\Pi B_1. R_1}, \ldots, y_n^{\Pi B_m. R_m}]
         $$
-        and $T$ can occur only in $R_i$ and if it occurs in $R_i$, then $R_i$
-        has the form $T \vec a$. I.e. the arguments of constructors are
-        functions (arity zero included) where $T$ occurs only in the result type
+        and $X_j$ can occur only in $R_i$ and if it occurs in $R_i$, then $R_i$
+        has the form $X_j \vec a$. I.e. the arguments of constructors are
+        functions (arity zero included) where $X_j$ occurs only in the result type
         and not in the argument types.
 
     \item [Recursive]
-        An inductive type is recursively defined if $T$ occurs in the result
+        An inductive type is recursively defined if $X_j$ occurs in the result
         type of any constructor argument.
 \end{description}
+
+
+\begin{alba}
+    type Nat: Any :=
+        zero: Nat
+        succ: Nat -> Nat
+
+
+    type (<=): Nat -> Nat -> Prop
+    :=
+        z<=n {n}: zero <= n
+        s<=s {n m}: n <= m -> succ n <= succ m
+
+
+    mutual (A: Any)
+        type Tree: Any :=
+            node: A -> Forest -> Tree
+
+        type Forest: Any :=
+            []: Forest
+            (::): Tree -> Forest -> Forest
+
+
+    type Acc {A: Any} (R: A -> A -> Prop): A -> Acc
+    :=
+        acc {x}: (all {y}: R y x -> Acc y) -> Acc x
+
+
+    type (=) {A: Any}: A -> A -> Prop
+    :=
+        refl {x}: x = x
+\end{alba}
+
+
+\paragraph{Implementation Hints}
+\begin{enumerate}
+    \item Since the result type of a constructor must always have the form $X
+        \vec a$ it is not necessary to store the whole expression. It is
+        sufficient to store the index arguments $\vec a$.
+
+        \begin{alba}
+            type Nat: Any :=
+                zero: _
+                succ: Nat -> _
+
+            type (<=): Nat -> Nat -> Prop
+            :=
+                z<=n {n}: _ zero n
+                s<=s {n m}: n <= m -> _ (succ n) (succ n)
+        \end{alba}
+
+    \item The kinds must have the form $\Pi \vec{x^A}. s$. It is sufficient to
+        store the array of the index arguments $\vec {x^A}$ and the sort.
+
+    \item The constructor types have the form $\Pi \vec{y^D}. X_i \vec a$. The
+        constructor arguments $\vec {y^D}$ can be stored as an array (i.e. a
+        context). If any $X_j$ occurs in a type of a constructor argument
+        (recursive case), then
+        it can occur only as a result type. The non recursive argument types can
+        be stored just as a normal term. The recursive argument types can be
+        stored as an array plus the result type.
+
+    \item Parameters of type $\Prop$ or $\Any$ can generate nested inductive
+        types (e.g. {\tt List (Tree A)}). Therefore it might be interesting to
+        check, if a type variable occurs only positively in constructor
+        arguments.
+\end{enumerate}
+
 
 
 
