@@ -63,6 +63,31 @@ information and prints an error message.
 
 
 
+\subsection{Holes and Requirements}
+%--------------------------------------------------------------------------------
+
+Each metavariable represents a hole which has to be filled (i.e. instantiated)
+either be elaboration of source code or by constraint solving. Each metavariable
+or hole has a requirement. A requirement consists of
+%
+\begin{enumerate}
+    \item a list of actual arguments
+
+    \item a result type after application to the actual arguments
+
+    \item a list of signatures for the result type in case of ambiguities for
+        the e-metavariable
+
+    \item a list imitation or projection possibilities to instantiate the
+        metavariable by constraint solving
+\end{enumerate}
+
+
+
+
+
+
+
 \subsection{Types}
 %--------------------------------------------------------------------------------
 
