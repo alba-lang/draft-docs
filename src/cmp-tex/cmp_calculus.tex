@@ -689,18 +689,59 @@ MISSING!!!!
 \subsubsection{Shift Definition}
 %------------------------------------------------------------
 
+\emph{Shift up $n$ from $i$}:
 
+$\up n i t$ is the term $t$ where all indices from $i$ on are shifted up by
+$n$. The formal definition is straightforward. The interesting case is when a
+shift enters a binder. Since a binder has one local variable more than outside
+the binder (the variable $0$ and all variables $j > 0$ refer to the variable $j
+- 1$ outside the binder), the shift starts from $i + 1$ instead from $i$.
+
+
+\noindent Graphical illustration
+$$
+\vertlist{
+    \text{before}
+    &
+    0, 1, \ldots, i - 1,
+    &
+    i, i + 1, \ldots
+    \\
+    %
+    \text{after}
+    &
+    0, 1, \ldots, i - 1,
+    &
+    \text{gap}
+    &
+    i + n, i + 1 + n, \ldots
+}
+$$
+
+After the shift the variables $k$ with $i \le k < i + n$ are no longer present.
+The shift leaves a gap.
+
+
+Formal definition:
 $$
 \vertlist{
     \up n i j &:=& j &  j < i
     \\
+    %
     \up n i j &:=& j + n & \text i \le j
     \\
+    %
     \up n i (a b) &:=& (\up n i a) (\up n i b)
     \\
-    \up n i (\lambda e)
+    %
+    \up n i (\lambda^A e)
     &:=&
-    \lambda \up n {i + 1} e
+    \lambda^{\up n i A} \up n {i + 1} e
+    \\
+    %
+    \up n i (\Pi^A B)
+    &:=&
+    \Pi^{\up n i A} \up n {i + 1} B
 }
 $$
 
@@ -786,7 +827,7 @@ $$
     \item Join shifts
         $$
             \ruleh {
-                i \le j < i + n
+                i \le j \le i + n
             }
             {
                 \up m j \circ \up n i
@@ -801,7 +842,7 @@ $$
             \rulev{
                 i \le j
                 \\
-                j + m < i + n
+                j + m \le i + n
             }
             {
                 \up n i \;=\; \up m j \circ \up {n  - m} i
@@ -829,7 +870,7 @@ $$
         \ruleh {
             \text{max}(i_1, i_2) \le j
             \\
-            j + m < \text{min}(i_1 + n_1, i_2 + n_2)
+            j + m \le \text{min}(i_1 + n_1, i_2 + n_2)
         }
         {
             [\up {n_1} {i_1}, \up {n_2} {i_2}]
@@ -858,3 +899,85 @@ $$
         }
         $$
 \end{enumerate}
+
+
+
+
+
+\subsubsection{Factor Out}
+%------------------------------------------------------------
+
+
+\paragraph{General Remarks}
+
+We can use the \emph{split shifts} rule to factor out a shift.
+$$
+    \up n i \quad\to\quad \up m j \circ \up {n - m} i
+$$
+provided $i \le j$ and $j + m \le i + n$ are valid.
+
+The rule is easy to understand for $i = j$. In this case we split the shift by $n$
+into first a shift by $n - m$ ($m \le n$!) and then do the remaining shift by
+$m$ all from the same start value $i$.
+
+It gets more complicated if the start values $i$ and $j$ are different. In this
+case we have to distinguish two cases.
+\begin{itemize}
+    \item The start index $j$ for the second shift is strictly below the start
+        index $i$ of the first shift $j < i$.
+
+        Then the second shift would shift all
+        indices $k$ with $j \le k < i$ which is not allowed. This can be avoided
+        only if the second shift does nothing $m = 0$. However this case is
+        already covered by the \emph{neutral} rule.
+
+    \item The start index $j$ of the second shift is strictly above the start
+        index $i$ of the first shift.
+
+        In this case the second shift does not do the remaining shift of $m$ to
+        all indices $k$ with $i < k \le j$. This is no problem if either the
+        second shift does nothint ($m = 0$) or the first shift by $n - m$ has
+        shifted all variables $k$ at least by $j - i$ such that such variable
+        $k$ are no longer present and therefore need no shift. This conditioin
+        is formally
+        $$
+            j - i \le n - m
+        $$
+        which is equivalent to
+        $$
+            j + m \le i + n
+        $$
+\end{itemize}
+
+So we consider the shift rule applicable only under the conditions
+$$
+\vertlist{
+    i \le j
+    \\
+    j + m \le i + n
+}
+$$
+
+
+\paragraph{Same Level}
+
+Suppose we have
+$$
+    (\up {n_1} {i_1} f) (\up {n_2} {i_2} a)
+$$
+and we want to factor out a common shift $\up m j$. We get
+$$
+    (\up {n_1} {i_1} f) (\up {n_2} {i_2} a)
+    %
+    \quad \to \quad
+    %
+    \up m j (\up {n_1 - m} {i_1} f) (\up {n_2 - m} {i_2})
+$$
+where
+$$
+\vertlist{
+    j &:=& \text{max}(i_1, i_2)
+    \\
+    m &:=& \text{max}(0, \text{min}(i_1 + n_1, i_2 + n_2) - j)
+}
+$$
