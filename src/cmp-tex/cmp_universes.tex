@@ -4,6 +4,158 @@
 
 
 
+\subsection{Basics}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Every term {\tt Any} in the source code is treated as {\tt Any u} where $u$ is a
+metavariable representing the universe level of {\tt Any}.
+
+\paragraph{Constraints} Universe levels can be constrained by $u \le v$ or $u <
+v$.
+\begin{itemize}
+    \item Actual $A$ and required $R$ argument types: Constraint $A \le R$. If
+        the constraint is $\Any_u \le \Any_v$ then the universe constraint is $u
+        \le v$. In case of $\Any_{u + 1} \le \Any_v$ we get $u < v$.
+
+        The second form can appear, if the actual argument is $\Any_u$ which has
+        the type $\Any_{u + 1}$.
+
+    \item Constructor argument types: A constructor of an inductive type always
+        constructs an object of the inductive type whose sort is either $\Prop$
+        or $\Any_v$. The latter one requires that all argument types of the
+        constructor live in a sort $s$ which satisfies $s \le \Any_v$.
+
+        For polymorphic constructors i.e. constructors with argument types
+        $\Any_u$ living in the universe level $u + 1$ this generates the
+        constraint $u < v$.
+\end{itemize}
+
+As long as there are no universe annotations in the source code i.e. the only
+allowed sorts are $\Prop$ and $\Any$, these are the only constraints which can
+appear. However in general constraints of the form
+$$
+    u + i \le v + j
+$$
+might appear where $u$ and $v$ are universe variables and $i$ and $j$ are
+constants to be added to the variables. In order to be welltyped
+$$
+    i \ge j
+$$
+has to be satisfied. I.e. we want the constraint to be stronger than $u \le v$.
+Otherwise it is considered a type error. Then the constraint can be normalized
+to
+$$
+    u + (i - j) \le v
+$$
+
+
+If the source code does not have annotations of universe levels then there shall
+never be type errors because of level constraints. Reason: All source
+expressions {\tt Any} gets its own level variable $u$ and is interpreted as
+$\Any_u$. Every type expression gets a required sort $\Any_v$  where $v$ is free
+floating upwards.
+
+The constraint can be resolve by putting instantiating all universe variable
+which appear only on the left hand side of constraints $u + i \le v$ to zero.
+The instantiating all variables recursively on the right hand side which have
+only instantiated variable on the left hand side by using the maximum of all $u
++ i$ values.
+
+\paragraph{Universe Polymorphism} All global definitions  can be made universe
+polymorphic by adding as a first argument {\tt u: Level} and replacing all terms
+$\Any_i$ by $\Any_{u + i}$. This is needed only for definitions where $\Any_i$
+appears not only as the result type.
+
+When $\Any_i$ appears only as a result type, it must be $\Any_0$ and therefore
+an object of this type can be fed to any universe polymorphic function because
+$$
+    \Any_0 \le \Any_u
+$$
+for all possible universe levels $u$.
+
+
+
+
+
+
+\subsection{Examples}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+Inductive types without type parameters reside at the universe level $0$.
+
+\begin{alba}
+    type Unit: Any := ()
+
+    type Bool: Any := [true: _, false: _]
+
+    type Nat:  Any := [zero: _, succ: _ -> _]
+\end{alba}
+where {\tt Any} in the above examples is interpreted as {\tt Any 0}.
+
+Types with type parameters are universe polymorphic
+\begin{alba}
+    type List (A: Any): Any := [[]: _, (::): A -> _ -> _]
+
+    -- is interpreted as
+
+    type List {u: Level} (A: Any u): Any u := ...
+\end{alba}
+
+All type parameters can live in a arbitrary universe level. The result type
+lives at the maximum universe level of its constructors.
+\begin{alba}
+    []:   List : Any v
+    (::): A -> List -> List: Any (max u v)
+\end{alba}
+This constraint can be satisfied with $u = v$.
+
+Polymorphic constructors require higher universe levels. Examples
+
+\begin{alba}
+    -- Example: Existential Type
+
+    abstract type Show (A: Any): Any :=
+        show: A -> String
+
+    type T: Any v :=
+        make {A: Any u}: A -> Show A -> T
+
+    -- constructor type
+    (all {A: Any u}: A -> Show A -> T): Any (max (u + 1) v)
+
+    -- result:
+    type T {u}: Any (u + 1) :=
+        make {A: Any u}: A -> Show A -> T
+
+\end{alba}
+An object of type $T$ can contain an object of any type and its show function.
+The universe of the constructor is at least at level $u + 1$. Since the level of
+the inductive type is in all constructors (they must construct an object of the
+type), this level is irrelevant $v \le v$. However the other level poses a real
+constraint $u + 1 \le v$. I.e. the universe level must be higher that an
+arbitrary level $u$
+
+\begin{alba}
+    -- Example: Heterogeneous Lists
+
+    type HList: List (Any u) -> Any v :=
+        []:  HList []
+
+        (::) {T: Any u} {Ts: List (Any u)}: T -> HList Ts -> Hlist (T :: Ts)
+        --         |             |          |      |             : Any v
+        --         |             |          |      \ : Any v
+        --         |             |          \ : Any u
+        --         |             \ : Any (u + 1)
+        --         \: Any (u + 1)
+
+    -- Result
+    u + 1 <= v
+\end{alba}
+
+
+
+
 \subsection{Universes and Sorts}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
